@@ -97,6 +97,20 @@ pdfjsLib.getDocument(url).promise.then(pdf => {
 
 });
 </script>
+<script>
+const slider = document.getElementById('slider');
 
+document.addEventListener('keydown', function(e) {
+
+  if (e.key === "ArrowRight") {
+    slider.scrollBy({ left: window.innerWidth, behavior: 'smooth' });
+  }
+
+  if (e.key === "ArrowLeft") {
+    slider.scrollBy({ left: -window.innerWidth, behavior: 'smooth' });
+  }
+
+});
+</script>
 </body>
 </html>
