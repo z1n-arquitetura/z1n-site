@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Z1N Arquiteturas</title>
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html, body {
+  overflow: hidden;
+  background: #000;
+}
+
+.slider {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+}
+
+.slide {
+  flex: none;
+  width: 100vw;
+  height: 100vh;
+  scroll-snap-align: start;
+  position: relative;
+}
+
+canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.link {
+  position: absolute;
+  z-index: 10;
+}
+</style>
+</head>
+
+<body>
+
+<div class="slider" id="slider"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+<script>
+const url = 'portfolio.pdf';
+
+const slider = document.getElementById('slider');
+
+pdfjsLib.getDocument(url).promise.then(pdf => {
+
+  for (let i = 1; i <= pdf.numPages; i++) {
+
+    pdf.getPage(i).then(page => {
+
+      const viewport = page.getViewport({ scale: 2 });
+
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+
+      const slide = document.createElement('div');
+      slide.className = 'slide';
+
+      slide.appendChild(canvas);
+      slider.appendChild(slide);
+
+      page.render({ canvasContext: ctx, viewport });
+
+      // WhatsApp clicável
+      const wpp = document.createElement('a');
+      wpp.href = "https://wa.me/5516991128533";
+      wpp.className = "link";
+
+      wpp.style.bottom = "8%";
+      wpp.style.left = "50%";
+      wpp.style.transform = "translateX(-50%)";
+      wpp.style.width = "260px";
+      wpp.style.height = "70px";
+
+      slide.appendChild(wpp);
+
+    });
+
+  }
+
+});
+</script>
+
+</body>
+</html>
