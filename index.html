@@ -55,6 +55,7 @@ canvas {
 .link {
   position: absolute;
   z-index: 10;
+  background: rgba(255,0,0,0.2);
 }
 </style>
 </head>
@@ -92,18 +93,99 @@ pdfjsLib.getDocument(url).promise.then(pdf => {
 
       page.render({ canvasContext: ctx, viewport });
 
-      // WhatsApp clicável
-      const wpp = document.createElement('a');
-      wpp.href = "https://wa.me/5516991128533";
-      wpp.className = "link";
+Perfeito — agora sim, revisão completa feita.
 
-      wpp.style.bottom = "8%";
-      wpp.style.left = "50%";
-      wpp.style.transform = "translateX(-50%)";
-      wpp.style.width = "260px";
-      wpp.style.height = "70px";
+👉 Seu código está 95% correto.
+👉 Falta apenas organizar os links por página (hoje está errado: aparece em todas).
 
-      slide.appendChild(wpp);
+❌ PROBLEMA ATUAL (único)
+
+Este bloco ainda está ativo:
+
+// WhatsApp clicável
+const wpp = document.createElement('a');
+
+👉 Ele roda em TODAS as páginas
+👉 Por isso o comportamento inconsistente
+
+✅ CORREÇÃO FINAL (copiar e colar)
+🔴 SUBSTITUA ESTE TRECHO:
+// WhatsApp clicável
+const wpp = document.createElement('a');
+wpp.href = "https://wa.me/5516991128533";
+wpp.className = "link";
+
+wpp.style.bottom = "8%";
+wpp.style.left = "50%";
+wpp.style.transform = "translateX(-50%)";
+wpp.style.width = "260px";
+wpp.style.height = "70px";
+
+slide.appendChild(wpp);
+🟢 POR ESTE BLOCO COMPLETO:
+// LINKS POR PÁGINA
+
+// 📞 Página 1
+if (i === 1) {
+
+  // TELEFONE
+  const tel = document.createElement('a');
+  tel.href = "tel:+5516991128533";
+  tel.className = "link";
+
+  tel.style.top = "75%";
+  tel.style.left = "50%";
+  tel.style.transform = "translateX(-50%)";
+  tel.style.width = "220px";
+  tel.style.height = "50px";
+
+  slide.appendChild(tel);
+
+  // WHATSAPP (se houver na página)
+  const wpp1 = document.createElement('a');
+  wpp1.href = "https://wa.me/5516991128533";
+  wpp1.className = "link";
+
+  wpp1.style.top = "85%";
+  wpp1.style.left = "50%";
+  wpp1.style.transform = "translateX(-50%)";
+  wpp1.style.width = "220px";
+  wpp1.style.height = "50px";
+
+  slide.appendChild(wpp1);
+}
+
+
+// 📲 Página 6
+if (i === 6) {
+  const wpp = document.createElement('a');
+  wpp.href = "https://wa.me/5516991128533";
+  wpp.className = "link";
+
+  wpp.style.bottom = "8%";
+  wpp.style.left = "50%";
+  wpp.style.transform = "translateX(-50%)";
+  wpp.style.width = "260px";
+  wpp.style.height = "70px";
+
+  slide.appendChild(wpp);
+}
+
+
+// 📞 Página 8
+if (i === 8) {
+  const tel2 = document.createElement('a');
+  tel2.href = "tel:+5516991128533";
+  tel2.className = "link";
+
+  tel2.style.top = "80%";
+  tel2.style.left = "50%";
+  tel2.style.transform = "translateX(-50%)";
+  tel2.style.width = "220px";
+  tel2.style.height = "50px";
+
+  slide.appendChild(tel2);
+}
 
     });
 
