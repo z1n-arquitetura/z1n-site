@@ -43,7 +43,7 @@ canvas {
   object-fit: contain;
 }
 
-/* MODO VISUAL ATIVO */
+/* MODO VISUAL */
 .link {
   position: absolute;
   z-index: 10;
@@ -52,6 +52,7 @@ canvas {
   resize: both;
   overflow: auto;
   cursor: move;
+  user-select: none;
 }
 </style>
 </head>
@@ -63,6 +64,43 @@ canvas {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
 <script>
+// FUNÇÃO DRAG (APLICADA EM TODOS)
+function ativarDrag(el) {
+
+  let isDragging = false;
+  let offsetX, offsetY;
+
+  el.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    isDragging = true;
+    offsetX = e.offsetX;
+    offsetY = e.offsetY;
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+
+    const parent = el.parentElement.getBoundingClientRect();
+
+    let x = ((e.clientX - parent.left - offsetX) / parent.width) * 100;
+    let y = ((e.clientY - parent.top - offsetY) / parent.height) * 100;
+
+    el.style.left = x + "%";
+    el.style.top = y + "%";
+    el.style.transform = "none";
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!isDragging) return;
+    isDragging = false;
+
+    console.log("TOP:", el.style.top);
+    console.log("LEFT:", el.style.left);
+    console.log("WIDTH:", el.offsetWidth + "px");
+    console.log("HEIGHT:", el.offsetHeight + "px");
+  });
+}
+
 const url = 'portfolio.pdf';
 const slider = document.getElementById('slider');
 
@@ -88,7 +126,7 @@ pdfjsLib.getDocument(url).promise.then(pdf => {
 
       page.render({ canvasContext: ctx, viewport });
 
-      // LINKS
+      // ===== LINKS =====
 
       if (i === 1) {
 
@@ -101,6 +139,7 @@ pdfjsLib.getDocument(url).promise.then(pdf => {
         tel.style.width = "280px";
         tel.style.height = "60px";
         slide.appendChild(tel);
+        ativarDrag(tel);
 
         const wpp1 = document.createElement('a');
         wpp1.href = "https://wa.me/5516991128533";
@@ -111,9 +150,11 @@ pdfjsLib.getDocument(url).promise.then(pdf => {
         wpp1.style.width = "80px";
         wpp1.style.height = "80px";
         slide.appendChild(wpp1);
+        ativarDrag(wpp1);
       }
 
       if (i === 6) {
+
         const wpp = document.createElement('a');
         wpp.href = "https://wa.me/5516991128533";
         wpp.className = "link";
@@ -123,6 +164,7 @@ pdfjsLib.getDocument(url).promise.then(pdf => {
         wpp.style.width = "320px";
         wpp.style.height = "90px";
         slide.appendChild(wpp);
+        ativarDrag(wpp);
       }
 
       if (i === 8) {
@@ -136,6 +178,7 @@ pdfjsLib.getDocument(url).promise.then(pdf => {
         tel2.style.width = "320px";
         tel2.style.height = "60px";
         slide.appendChild(tel2);
+        ativarDrag(tel2);
 
         const wpp2 = document.createElement('a');
         wpp2.href = "https://wa.me/5516991128533";
@@ -146,6 +189,7 @@ pdfjsLib.getDocument(url).promise.then(pdf => {
         wpp2.style.width = "80px";
         wpp2.style.height = "80px";
         slide.appendChild(wpp2);
+        ativarDrag(wpp2);
       }
 
     });
@@ -183,48 +227,6 @@ slider.addEventListener('mousemove', (e) => {
   const walk = (e.pageX - startX) * 0.8;
   slider.scrollLeft = scrollLeft - walk;
 });
-</script>
-
-<!-- MODO ARRASTAR -->
-<script>
-setTimeout(() => {
-
-  document.querySelectorAll('.link').forEach(el => {
-
-    let isDragging = false;
-    let offsetX, offsetY;
-
-    el.addEventListener('mousedown', (e) => {
-      isDragging = true;
-      offsetX = e.offsetX;
-      offsetY = e.offsetY;
-    });
-
-    document.addEventListener('mousemove', (e) => {
-      if (!isDragging) return;
-
-      const parent = el.parentElement.getBoundingClientRect();
-
-      let x = ((e.clientX - parent.left - offsetX) / parent.width) * 100;
-      let y = ((e.clientY - parent.top - offsetY) / parent.height) * 100;
-
-      el.style.left = x + "%";
-      el.style.top = y + "%";
-      el.style.transform = "none";
-    });
-
-    document.addEventListener('mouseup', () => {
-      isDragging = false;
-
-      console.log("TOP:", el.style.top);
-      console.log("LEFT:", el.style.left);
-      console.log("WIDTH:", el.offsetWidth + "px");
-      console.log("HEIGHT:", el.offsetHeight + "px");
-    });
-
-  });
-
-}, 1000);
 </script>
 
 </body>
