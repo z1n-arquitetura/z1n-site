@@ -9,8 +9,6 @@
 * { margin:0; padding:0; box-sizing:border-box; }
 
 html, body {
-  margin: 0;
-  padding: 0;
   width: 100%;
   height: 100%;
   overflow: hidden;
@@ -22,27 +20,20 @@ html, body {
   width: 100vw;
   height: 100dvh;
   overflow-x: auto;
-
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
-
   -webkit-overflow-scrolling: touch;
 }
-  
+
 .slide {
   flex: none;
   width: 100vw;
   height: 100dvh;
-
   display: flex;
   justify-content: center;
   align-items: center;
-
   scroll-snap-align: start;
-  scroll-snap-stop: always;
-
   position: relative;
-  overflow: hidden;
   background: #000;
 }
 
@@ -55,7 +46,6 @@ canvas {
 .link {
   position: absolute;
   z-index: 10;
-  background: rgba(255,0,0,0.2);
 }
 </style>
 </head>
@@ -68,7 +58,6 @@ canvas {
 
 <script>
 const url = 'portfolio.pdf';
-
 const slider = document.getElementById('slider');
 
 pdfjsLib.getDocument(url).promise.then(pdf => {
@@ -92,147 +81,50 @@ pdfjsLib.getDocument(url).promise.then(pdf => {
       slider.appendChild(slide);
 
       page.render({ canvasContext: ctx, viewport });
-// LINKS POR PÁGINA
 
-// Página 1
-if (i === 1) {
+      // LINKS POR PÁGINA
 
-  const tel = document.createElement('a');
-  tel.href = "tel:+5516991128533";
-  tel.className = "link";
+      if (i === 1) {
+        const tel = document.createElement('a');
+        tel.href = "tel:+5516991128533";
+        tel.className = "link";
 
-  tel.style.top = "75%";
-  tel.style.left = "50%";
-  tel.style.transform = "translateX(-50%)";
-  tel.style.width = "220px";
-  tel.style.height = "50px";
+        tel.style.top = "75%";
+        tel.style.left = "50%";
+        tel.style.transform = "translateX(-50%)";
+        tel.style.width = "220px";
+        tel.style.height = "50px";
 
-  slide.appendChild(tel);
-}
+        slide.appendChild(tel);
+      }
 
+      if (i === 6) {
+        const wpp = document.createElement('a');
+        wpp.href = "https://wa.me/5516991128533";
+        wpp.className = "link";
 
-// Página 6
-if (i === 6) {
-  const wpp = document.createElement('a');
-  wpp.href = "https://wa.me/5516991128533";
-  wpp.className = "link";
+        wpp.style.bottom = "8%";
+        wpp.style.left = "50%";
+        wpp.style.transform = "translateX(-50%)";
+        wpp.style.width = "260px";
+        wpp.style.height = "70px";
 
-  wpp.style.bottom = "8%";
-  wpp.style.left = "50%";
-  wpp.style.transform = "translateX(-50%)";
-  wpp.style.width = "260px";
-  wpp.style.height = "70px";
+        slide.appendChild(wpp);
+      }
 
-  slide.appendChild(wpp);
-}
+      if (i === 8) {
+        const tel2 = document.createElement('a');
+        tel2.href = "tel:+5516991128533";
+        tel2.className = "link";
 
+        tel2.style.top = "80%";
+        tel2.style.left = "50%";
+        tel2.style.transform = "translateX(-50%)";
+        tel2.style.width = "220px";
+        tel2.style.height = "50px";
 
-// Página 8
-if (i === 8) {
-  const tel2 = document.createElement('a');
-  tel2.href = "tel:+5516991128533";
-  tel2.className = "link";
-
-  tel2.style.top = "80%";
-  tel2.style.left = "50%";
-  tel2.style.transform = "translateX(-50%)";
-  tel2.style.width = "220px";
-  tel2.style.height = "50px";
-
-  slide.appendChild(tel2);
-}
-Perfeito — agora sim, revisão completa feita.
-
-👉 Seu código está 95% correto.
-👉 Falta apenas organizar os links por página (hoje está errado: aparece em todas).
-
-❌ PROBLEMA ATUAL (único)
-
-Este bloco ainda está ativo:
-
-// WhatsApp clicável
-const wpp = document.createElement('a');
-
-👉 Ele roda em TODAS as páginas
-👉 Por isso o comportamento inconsistente
-
-✅ CORREÇÃO FINAL (copiar e colar)
-🔴 SUBSTITUA ESTE TRECHO:
-// WhatsApp clicável
-wpp.href = "https://wa.me/5516991128533";
-wpp.className = "link";
-
-wpp.style.bottom = "8%";
-wpp.style.left = "50%";
-wpp.style.transform = "translateX(-50%)";
-wpp.style.width = "260px";
-wpp.style.height = "70px";
-
-slide.appendChild(wpp);
-🟢 POR ESTE BLOCO COMPLETO:
-// LINKS POR PÁGINA
-
-// 📞 Página 1
-if (i === 1) {
-
-  // TELEFONE
-  const tel = document.createElement('a');
-  tel.href = "tel:+5516991128533";
-  tel.className = "link";
-
-  tel.style.top = "75%";
-  tel.style.left = "50%";
-  tel.style.transform = "translateX(-50%)";
-  tel.style.width = "220px";
-  tel.style.height = "50px";
-
-  slide.appendChild(tel);
-
-  // WHATSAPP (se houver na página)
-  const wpp1 = document.createElement('a');
-  wpp1.href = "https://wa.me/5516991128533";
-  wpp1.className = "link";
-
-  wpp1.style.top = "85%";
-  wpp1.style.left = "50%";
-  wpp1.style.transform = "translateX(-50%)";
-  wpp1.style.width = "220px";
-  wpp1.style.height = "50px";
-
-  slide.appendChild(wpp1);
-}
-
-
-// 📲 Página 6
-if (i === 6) {
-  const wpp = document.createElement('a');
-  wpp.href = "https://wa.me/5516991128533";
-  wpp.className = "link";
-
-  wpp.style.bottom = "8%";
-  wpp.style.left = "50%";
-  wpp.style.transform = "translateX(-50%)";
-  wpp.style.width = "260px";
-  wpp.style.height = "70px";
-
-  slide.appendChild(wpp);
-}
-
-
-// 📞 Página 8
-if (i === 8) {
-  const tel2 = document.createElement('a');
-  tel2.href = "tel:+5516991128533";
-  tel2.className = "link";
-
-  tel2.style.top = "80%";
-  tel2.style.left = "50%";
-  tel2.style.transform = "translateX(-50%)";
-  tel2.style.width = "220px";
-  tel2.style.height = "50px";
-
-  slide.appendChild(tel2);
-}
+        slide.appendChild(tel2);
+      }
 
     });
 
@@ -240,49 +132,6 @@ if (i === 8) {
 
 });
 </script>
-<script>
-const slider = document.getElementById('slider');
 
-document.addEventListener('keydown', function(e) {
-
-  if (e.key === "ArrowRight") {
-    slider.scrollBy({ left: window.innerWidth, behavior: 'smooth' });
-  }
-
-  if (e.key === "ArrowLeft") {
-    slider.scrollBy({ left: -window.innerWidth, behavior: 'smooth' });
-  }
-
-});
-</script>
-  <script>
-const slider = document.getElementById('slider');
-
-let isDown = false;
-let startX;
-let scrollLeft;
-
-slider.addEventListener('mousedown', (e) => {
-  isDown = true;
-  startX = e.pageX - slider.offsetLeft;
-  scrollLeft = slider.scrollLeft;
-});
-
-slider.addEventListener('mouseleave', () => {
-  isDown = false;
-});
-
-slider.addEventListener('mouseup', () => {
-  isDown = false;
-});
-
-slider.addEventListener('mousemove', (e) => {
-  if (!isDown) return;
-  e.preventDefault();
-  const x = e.pageX - slider.offsetLeft;
-  const walk = (x - startX) * 1.5;
-  slider.scrollLeft = scrollLeft - walk;
-});
-</script>
 </body>
 </html>
