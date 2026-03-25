@@ -92,7 +92,55 @@ pdfjsLib.getDocument(url).promise.then(pdf => {
       slider.appendChild(slide);
 
       page.render({ canvasContext: ctx, viewport });
+// LINKS POR PÁGINA
 
+// Página 1
+if (i === 1) {
+
+  const tel = document.createElement('a');
+  tel.href = "tel:+5516991128533";
+  tel.className = "link";
+
+  tel.style.top = "75%";
+  tel.style.left = "50%";
+  tel.style.transform = "translateX(-50%)";
+  tel.style.width = "220px";
+  tel.style.height = "50px";
+
+  slide.appendChild(tel);
+}
+
+
+// Página 6
+if (i === 6) {
+  const wpp = document.createElement('a');
+  wpp.href = "https://wa.me/5516991128533";
+  wpp.className = "link";
+
+  wpp.style.bottom = "8%";
+  wpp.style.left = "50%";
+  wpp.style.transform = "translateX(-50%)";
+  wpp.style.width = "260px";
+  wpp.style.height = "70px";
+
+  slide.appendChild(wpp);
+}
+
+
+// Página 8
+if (i === 8) {
+  const tel2 = document.createElement('a');
+  tel2.href = "tel:+5516991128533";
+  tel2.className = "link";
+
+  tel2.style.top = "80%";
+  tel2.style.left = "50%";
+  tel2.style.transform = "translateX(-50%)";
+  tel2.style.width = "220px";
+  tel2.style.height = "50px";
+
+  slide.appendChild(tel2);
+}
 Perfeito — agora sim, revisão completa feita.
 
 👉 Seu código está 95% correto.
@@ -111,7 +159,6 @@ const wpp = document.createElement('a');
 ✅ CORREÇÃO FINAL (copiar e colar)
 🔴 SUBSTITUA ESTE TRECHO:
 // WhatsApp clicável
-const wpp = document.createElement('a');
 wpp.href = "https://wa.me/5516991128533";
 wpp.className = "link";
 
