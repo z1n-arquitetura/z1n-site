@@ -46,6 +46,7 @@ canvas {
 .link {
   position: absolute;
   z-index: 10;
+  background: rgba(255,0,0,0.3);
 }
 </style>
 </head>
@@ -132,6 +133,51 @@ pdfjsLib.getDocument(url).promise.then(pdf => {
 
 });
 </script>
+Perfeito — agora estamos no acabamento fino de UX, e os dois pontos têm causa objetiva.
 
+🎯 PROBLEMA 1 — slide “correndo demais”
+
+👉 Isso acontece porque o “arraste” (drag) está sensível demais
+👉 E sem “trava” de página ao soltar
+
+✅ CORREÇÃO (simples e eficaz)
+🔧 Adicione este script NO FINAL do arquivo (antes do </body>):
+<script>
+const slider = document.getElementById('slider');
+
+let isDown = false;
+let startX;
+let scrollLeft;
+
+slider.addEventListener('mousedown', (e) => {
+  isDown = true;
+  startX = e.pageX;
+  scrollLeft = slider.scrollLeft;
+});
+
+slider.addEventListener('mouseup', () => {
+  isDown = false;
+
+  // trava no slide mais próximo
+  const slideWidth = window.innerWidth;
+  const index = Math.round(slider.scrollLeft / slideWidth);
+
+  slider.scrollTo({
+    left: index * slideWidth,
+    behavior: 'smooth'
+  });
+});
+
+slider.addEventListener('mouseleave', () => {
+  isDown = false;
+});
+
+slider.addEventListener('mousemove', (e) => {
+  if (!isDown) return;
+
+  const walk = (e.pageX - startX) * 0.8; // ↓ reduz sensibilidade
+  slider.scrollLeft = scrollLeft - walk;
+});
+</script>
 </body>
 </html>
