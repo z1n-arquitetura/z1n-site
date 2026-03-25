@@ -22,7 +22,6 @@ html, body {
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
 }
 
 .slide {
@@ -34,7 +33,6 @@ html, body {
   align-items: center;
   scroll-snap-align: start;
   position: relative;
-  background: #000;
 }
 
 canvas {
@@ -43,16 +41,12 @@ canvas {
   object-fit: contain;
 }
 
-/* MODO VISUAL */
+/* VISUAL TEMPORÁRIO */
 .link {
   position: absolute;
-  z-index: 10;
-  background: rgba(255,0,0,0.3);
-  border: 2px dashed #fff;
-  resize: both;
-  overflow: auto;
+  background: rgba(255,0,0,0.25);
+  border: 1px dashed #fff;
   cursor: move;
-  user-select: none;
 }
 </style>
 </head>
@@ -64,168 +58,124 @@ canvas {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
 <script>
-// FUNÇÃO DRAG (APLICADA EM TODOS)
-function ativarDrag(el) {
+// DRAG SIMPLES
+function ativarDrag(el){
+  let down=false, ox=0, oy=0;
 
-  let isDragging = false;
-  let offsetX, offsetY;
-
-  el.addEventListener('mousedown', (e) => {
+  el.onmousedown=(e)=>{
     e.preventDefault();
-    isDragging = true;
-    offsetX = e.offsetX;
-    offsetY = e.offsetY;
-  });
+    down=true;
+    ox=e.offsetX;
+    oy=e.offsetY;
+  };
 
-  document.addEventListener('mousemove', (e) => {
-    if (!isDragging) return;
+  document.onmousemove=(e)=>{
+    if(!down) return;
 
-    const parent = el.parentElement.getBoundingClientRect();
+    const p = el.parentElement.getBoundingClientRect();
 
-    let x = ((e.clientX - parent.left - offsetX) / parent.width) * 100;
-    let y = ((e.clientY - parent.top - offsetY) / parent.height) * 100;
+    el.style.left = ((e.clientX - p.left - ox)/p.width*100)+"%";
+    el.style.top  = ((e.clientY - p.top  - oy)/p.height*100)+"%";
+  };
 
-    el.style.left = x + "%";
-    el.style.top = y + "%";
-    el.style.transform = "none";
-  });
-
-  document.addEventListener('mouseup', () => {
-    if (!isDragging) return;
-    isDragging = false;
-
-    console.log("TOP:", el.style.top);
-    console.log("LEFT:", el.style.left);
-    console.log("WIDTH:", el.offsetWidth + "px");
-    console.log("HEIGHT:", el.offsetHeight + "px");
-  });
+  document.onmouseup=()=> down=false;
 }
 
-const url = 'portfolio.pdf';
 const slider = document.getElementById('slider');
 
-pdfjsLib.getDocument(url).promise.then(pdf => {
+pdfjsLib.getDocument('portfolio.pdf').promise.then(pdf=>{
 
-  for (let i = 1; i <= pdf.numPages; i++) {
+for(let i=1;i<=pdf.numPages;i++){
 
-    pdf.getPage(i).then(page => {
+pdf.getPage(i).then(page=>{
 
-      const viewport = page.getViewport({ scale: 2 });
+const v = page.getViewport({scale:2});
 
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
+const canvas = document.createElement('canvas');
+canvas.width = v.width;
+canvas.height = v.height;
 
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
+const ctx = canvas.getContext('2d');
 
-      const slide = document.createElement('div');
-      slide.className = 'slide';
+const slide = document.createElement('div');
+slide.className="slide";
 
-      slide.appendChild(canvas);
-      slider.appendChild(slide);
+slide.appendChild(canvas);
+slider.appendChild(slide);
 
-      page.render({ canvasContext: ctx, viewport });
+page.render({canvasContext:ctx,viewport:v});
 
-      // ===== LINKS =====
+// ===== PÁGINA 1 =====
+if(i===1){
 
-      if (i === 1) {
+const tel = document.createElement('a');
+tel.href="tel:+5516991128533";
+tel.className="link";
+tel.style.top="70%";
+tel.style.left="50%";
+tel.style.transform="translateX(-50%)";
+tel.style.width="260px";
+tel.style.height="45px";
+slide.appendChild(tel);
+ativarDrag(tel);
 
-        const tel = document.createElement('a');
-        tel.href = "tel:+5516991128533";
-        tel.className = "link";
-        tel.style.top = "66%";
-        tel.style.left = "50%";
-        tel.style.transform = "translateX(-50%)";
-        tel.style.width = "300px";
-        tel.style.height = "550px";
-        slide.appendChild(tel);
-        ativarDrag(tel);
+const wpp = document.createElement('a');
+wpp.href="https://wa.me/5516991128533";
+wpp.className="link";
+wpp.style.top="82%";
+wpp.style.left="50%";
+wpp.style.transform="translateX(-50%)";
+wpp.style.width="70px";
+wpp.style.height="70px";
+slide.appendChild(wpp);
+ativarDrag(wpp);
+}
 
-        const wpp1 = document.createElement('a');
-        wpp1.href = "https://wa.me/5516991128533";
-        wpp1.className = "link";
-        wpp1.style.top = "78%";
-        wpp1.style.left = "50%";
-        wpp1.style.transform = "translateX(-50%)";
-        wpp1.style.width = "80px";
-        wpp1.style.height = "80px";
-        slide.appendChild(wpp1);
-        ativarDrag(wpp1);
-      }
+// ===== PÁGINA 6 =====
+if(i===6){
 
-      if (i === 6) {
+const wpp = document.createElement('a');
+wpp.href="https://wa.me/5516991128533";
+wpp.className="link";
+wpp.style.top="85%";
+wpp.style.left="50%";
+wpp.style.transform="translateX(-50%)";
+wpp.style.width="280px";
+wpp.style.height="60px";
+slide.appendChild(wpp);
+ativarDrag(wpp);
+}
 
-        const wpp = document.createElement('a');
-        wpp.href = "https://wa.me/5516991128533";
-        wpp.className = "link";
-        wpp.style.bottom = "12%";
-        wpp.style.left = "50%";
-        wpp.style.transform = "translateX(-50%)";
-        wpp.style.width = "320px";
-        wpp.style.height = "90px";
-        slide.appendChild(wpp);
-        ativarDrag(wpp);
-      }
+// ===== PÁGINA 8 =====
+if(i===8){
 
-      if (i === 8) {
+const tel = document.createElement('a');
+tel.href="tel:+5516991128533";
+tel.className="link";
+tel.style.top="70%";
+tel.style.left="50%";
+tel.style.transform="translateX(-50%)";
+tel.style.width="280px";
+tel.style.height="45px";
+slide.appendChild(tel);
+ativarDrag(tel);
 
-        const tel2 = document.createElement('a');
-        tel2.href = "tel:+5516991128533";
-        tel2.className = "link";
-        tel2.style.top = "68%";
-        tel2.style.left = "50%";
-        tel2.style.transform = "translateX(-50%)";
-        tel2.style.width = "320px";
-        tel2.style.height = "60px";
-        slide.appendChild(tel2);
-        ativarDrag(tel2);
-
-        const wpp2 = document.createElement('a');
-        wpp2.href = "https://wa.me/5516991128533";
-        wpp2.className = "link";
-        wpp2.style.top = "78%";
-        wpp2.style.left = "50%";
-        wpp2.style.transform = "translateX(-50%)";
-        wpp2.style.width = "80px";
-        wpp2.style.height = "80px";
-        slide.appendChild(wpp2);
-        ativarDrag(wpp2);
-      }
-
-    });
-
-  }
+const wpp = document.createElement('a');
+wpp.href="https://wa.me/5516991128533";
+wpp.className="link";
+wpp.style.top="82%";
+wpp.style.left="50%";
+wpp.style.transform="translateX(-50%)";
+wpp.style.width="70px";
+wpp.style.height="70px";
+slide.appendChild(wpp);
+ativarDrag(wpp);
+}
 
 });
-</script>
 
-<!-- SLIDE COM TRAVA -->
-<script>
-let isDown = false;
-let startX;
-let scrollLeft;
+}
 
-slider.addEventListener('mousedown', (e) => {
-  isDown = true;
-  startX = e.pageX;
-  scrollLeft = slider.scrollLeft;
-});
-
-slider.addEventListener('mouseup', () => {
-  isDown = false;
-  const slideWidth = window.innerWidth;
-  const index = Math.round(slider.scrollLeft / slideWidth);
-
-  slider.scrollTo({
-    left: index * slideWidth,
-    behavior: 'smooth'
-  });
-});
-
-slider.addEventListener('mousemove', (e) => {
-  if (!isDown) return;
-  const walk = (e.pageX - startX) * 0.8;
-  slider.scrollLeft = scrollLeft - walk;
 });
 </script>
 
