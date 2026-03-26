@@ -38,13 +38,12 @@ canvas {
   object-fit: contain;
 }
 
-/* ÁREAS CLICÁVEIS */
 .link {
   position: absolute;
   background: rgba(255,0,0,0.25);
   border: 1px dashed #fff;
   cursor: move;
-  touch-action: none; /* ESSENCIAL */
+  touch-action: none;
   z-index: 10;
 }
 </style>
@@ -57,49 +56,47 @@ canvas {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
 <script>
-// DRAG UNIVERSAL (MOUSE + TOUCH)
-function ativarDrag(el){
-  let down = false, ox = 0, oy = 0;
+// ===== CONTROLE GLOBAL DE DRAG =====
+let current = null;
+let ox = 0, oy = 0;
 
-  function start(e){
-    e.preventDefault();
-    down = true;
+function startDrag(e){
+  e.preventDefault();
 
-    const t = e.touches ? e.touches[0] : e;
-    const rect = el.getBoundingClientRect();
+  current = e.target;
 
-    ox = t.clientX - rect.left;
-    oy = t.clientY - rect.top;
-  }
+  const t = e.touches ? e.touches[0] : e;
+  const rect = current.getBoundingClientRect();
 
-  function move(e){
-    if(!down) return;
-
-    const t = e.touches ? e.touches[0] : e;
-    const p = el.parentElement.getBoundingClientRect();
-
-    let x = (t.clientX - p.left - ox) / p.width * 100;
-    let y = (t.clientY - p.top  - oy) / p.height * 100;
-
-    x = Math.max(0, Math.min(100, x));
-    y = Math.max(0, Math.min(100, y));
-
-    el.style.left = x + "%";
-    el.style.top  = y + "%";
-  }
-
-  function end(){
-    down = false;
-  }
-
-  el.addEventListener("mousedown", start);
-  document.addEventListener("mousemove", move);
-  document.addEventListener("mouseup", end);
-
-  el.addEventListener("touchstart", start, { passive:false });
-  document.addEventListener("touchmove", move, { passive:false });
-  document.addEventListener("touchend", end);
+  ox = t.clientX - rect.left;
+  oy = t.clientY - rect.top;
 }
+
+function moveDrag(e){
+  if(!current) return;
+
+  const t = e.touches ? e.touches[0] : e;
+  const p = current.parentElement.getBoundingClientRect();
+
+  let x = (t.clientX - p.left - ox) / p.width * 100;
+  let y = (t.clientY - p.top  - oy) / p.height * 100;
+
+  x = Math.max(0, Math.min(100, x));
+  y = Math.max(0, Math.min(100, y));
+
+  current.style.left = x + "%";
+  current.style.top  = y + "%";
+}
+
+function endDrag(){
+  current = null;
+}
+
+// EVENTOS GLOBAIS (UMA VEZ SÓ)
+document.addEventListener("mousemove", moveDrag);
+document.addEventListener("mouseup", endDrag);
+document.addEventListener("touchmove", moveDrag, { passive:false });
+document.addEventListener("touchend", endDrag);
 
 const slider = document.getElementById('slider');
 
@@ -125,66 +122,37 @@ slider.appendChild(slide);
 
 page.render({canvasContext:ctx,viewport:v});
 
+// FUNÇÃO PARA CRIAR LINKS
+function criarLink(href, top, left, width, height){
+  const el = document.createElement('a');
+  el.href = href;
+  el.className = "link";
+  el.style.top = top;
+  el.style.left = left;
+  el.style.width = width;
+  el.style.height = height;
+
+  el.addEventListener("mousedown", startDrag);
+  el.addEventListener("touchstart", startDrag, { passive:false });
+
+  slide.appendChild(el);
+}
+
 // ===== PÁGINA 1 =====
 if(i===1){
-
-const tel = document.createElement('a');
-tel.href="tel:+5516991128533";
-tel.className="link";
-tel.style.top="70%";
-tel.style.left="40%";
-tel.style.width="30%";
-tel.style.height="6%";
-slide.appendChild(tel);
-ativarDrag(tel);
-
-const wpp = document.createElement('a');
-wpp.href="https://wa.me/5516991128533";
-wpp.className="link";
-wpp.style.top="82%";
-wpp.style.left="46%";
-wpp.style.width="8%";
-wpp.style.height="10%";
-slide.appendChild(wpp);
-ativarDrag(wpp);
+  criarLink("tel:+5516991128533","70%","40%","30%","6%");
+  criarLink("https://wa.me/5516991128533","82%","46%","8%","10%");
 }
 
 // ===== PÁGINA 6 =====
 if(i===6){
-
-const wpp = document.createElement('a');
-wpp.href="https://wa.me/5516991128533";
-wpp.className="link";
-wpp.style.top="85%";
-wpp.style.left="35%";
-wpp.style.width="30%";
-wpp.style.height="8%";
-slide.appendChild(wpp);
-ativarDrag(wpp);
+  criarLink("https://wa.me/5516991128533","85%","35%","30%","8%");
 }
 
 // ===== PÁGINA 8 =====
 if(i===8){
-
-const tel = document.createElement('a');
-tel.href="tel:+5516991128533";
-tel.className="link";
-tel.style.top="70%";
-tel.style.left="35%";
-tel.style.width="30%";
-tel.style.height="6%";
-slide.appendChild(tel);
-ativarDrag(tel);
-
-const wpp = document.createElement('a');
-wpp.href="https://wa.me/5516991128533";
-wpp.className="link";
-wpp.style.top="82%";
-wpp.style.left="46%";
-wpp.style.width="8%";
-wpp.style.height="10%";
-slide.appendChild(wpp);
-ativarDrag(wpp);
+  criarLink("tel:+5516991128533","70%","35%","30%","6%");
+  criarLink("https://wa.me/5516991128533","82%","46%","8%","10%");
 }
 
 });
