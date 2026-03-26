@@ -41,7 +41,7 @@ canvas {
   object-fit: contain;
 }
 
-/* VISUAL TEMPORÁRIO */
+/* ÁREAS CLICÁVEIS */
 .link {
   position: absolute;
   background: rgba(255,0,0,0.25);
@@ -58,15 +58,16 @@ canvas {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
 <script>
-// DRAG SIMPLES
 function ativarDrag(el){
   let down=false, ox=0, oy=0;
 
   el.onmousedown=(e)=>{
     e.preventDefault();
     down=true;
-    ox=e.offsetX;
-    oy=e.offsetY;
+
+    const rect = el.getBoundingClientRect();
+    ox = e.clientX - rect.left;
+    oy = e.clientY - rect.top;
   };
 
   document.onmousemove=(e)=>{
@@ -74,8 +75,14 @@ function ativarDrag(el){
 
     const p = el.parentElement.getBoundingClientRect();
 
-    el.style.left = ((e.clientX - p.left - ox)/p.width*100)+"%";
-    el.style.top  = ((e.clientY - p.top  - oy)/p.height*100)+"%";
+    let x = (e.clientX - p.left - ox) / p.width * 100;
+    let y = (e.clientY - p.top - oy) / p.height * 100;
+
+    x = Math.max(0, Math.min(100, x));
+    y = Math.max(0, Math.min(100, y));
+
+    el.style.left = x + "%";
+    el.style.top  = y + "%";
   };
 
   document.onmouseup=()=> down=false;
@@ -112,10 +119,9 @@ const tel = document.createElement('a');
 tel.href="tel:+5516991128533";
 tel.className="link";
 tel.style.top="70%";
-tel.style.left="50%";
-tel.style.transform="translateX(-50%)";
-tel.style.width="260px";
-tel.style.height="45px";
+tel.style.left="40%";
+tel.style.width="30%";
+tel.style.height="6%";
 slide.appendChild(tel);
 ativarDrag(tel);
 
@@ -123,10 +129,9 @@ const wpp = document.createElement('a');
 wpp.href="https://wa.me/5516991128533";
 wpp.className="link";
 wpp.style.top="82%";
-wpp.style.left="50%";
-wpp.style.transform="translateX(-50%)";
-wpp.style.width="70px";
-wpp.style.height="70px";
+wpp.style.left="46%";
+wpp.style.width="8%";
+wpp.style.height="10%";
 slide.appendChild(wpp);
 ativarDrag(wpp);
 }
@@ -138,10 +143,9 @@ const wpp = document.createElement('a');
 wpp.href="https://wa.me/5516991128533";
 wpp.className="link";
 wpp.style.top="85%";
-wpp.style.left="50%";
-wpp.style.transform="translateX(-50%)";
-wpp.style.width="280px";
-wpp.style.height="60px";
+wpp.style.left="35%";
+wpp.style.width="30%";
+wpp.style.height="8%";
 slide.appendChild(wpp);
 ativarDrag(wpp);
 }
@@ -153,10 +157,9 @@ const tel = document.createElement('a');
 tel.href="tel:+5516991128533";
 tel.className="link";
 tel.style.top="70%";
-tel.style.left="50%";
-tel.style.transform="translateX(-50%)";
-tel.style.width="280px";
-tel.style.height="45px";
+tel.style.left="35%";
+tel.style.width="30%";
+tel.style.height="6%";
 slide.appendChild(tel);
 ativarDrag(tel);
 
@@ -164,10 +167,9 @@ const wpp = document.createElement('a');
 wpp.href="https://wa.me/5516991128533";
 wpp.className="link";
 wpp.style.top="82%";
-wpp.style.left="50%";
-wpp.style.transform="translateX(-50%)";
-wpp.style.width="70px";
-wpp.style.height="70px";
+wpp.style.left="46%";
+wpp.style.width="8%";
+wpp.style.height="10%";
 slide.appendChild(wpp);
 ativarDrag(wpp);
 }
