@@ -28,11 +28,8 @@ html, body {
   flex: none;
   width: 100vw;
   height: 100dvh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  scroll-snap-align: start;
   position: relative;
+  scroll-snap-align: start;
 }
 
 canvas {
@@ -47,6 +44,8 @@ canvas {
   background: rgba(255,0,0,0.25);
   border: 1px dashed #fff;
   cursor: move;
+  touch-action: none; /* ESSENCIAL */
+  z-index: 10;
 }
 </style>
 </head>
@@ -58,34 +57,48 @@ canvas {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
 <script>
+// DRAG UNIVERSAL (MOUSE + TOUCH)
 function ativarDrag(el){
-  let down=false, ox=0, oy=0;
+  let down = false, ox = 0, oy = 0;
 
-  el.onmousedown=(e)=>{
+  function start(e){
     e.preventDefault();
-    down=true;
+    down = true;
 
+    const t = e.touches ? e.touches[0] : e;
     const rect = el.getBoundingClientRect();
-    ox = e.clientX - rect.left;
-    oy = e.clientY - rect.top;
-  };
 
-  document.onmousemove=(e)=>{
+    ox = t.clientX - rect.left;
+    oy = t.clientY - rect.top;
+  }
+
+  function move(e){
     if(!down) return;
 
+    const t = e.touches ? e.touches[0] : e;
     const p = el.parentElement.getBoundingClientRect();
 
-    let x = (e.clientX - p.left - ox) / p.width * 100;
-    let y = (e.clientY - p.top - oy) / p.height * 100;
+    let x = (t.clientX - p.left - ox) / p.width * 100;
+    let y = (t.clientY - p.top  - oy) / p.height * 100;
 
     x = Math.max(0, Math.min(100, x));
     y = Math.max(0, Math.min(100, y));
 
     el.style.left = x + "%";
     el.style.top  = y + "%";
-  };
+  }
 
-  document.onmouseup=()=> down=false;
+  function end(){
+    down = false;
+  }
+
+  el.addEventListener("mousedown", start);
+  document.addEventListener("mousemove", move);
+  document.addEventListener("mouseup", end);
+
+  el.addEventListener("touchstart", start, { passive:false });
+  document.addEventListener("touchmove", move, { passive:false });
+  document.addEventListener("touchend", end);
 }
 
 const slider = document.getElementById('slider');
