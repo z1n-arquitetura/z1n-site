@@ -21,6 +21,7 @@ html, body {
   height: 100dvh;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
 }
 
 .slide {
@@ -28,6 +29,7 @@ html, body {
   width: 100vw;
   height: 100dvh;
   position: relative;
+  scroll-snap-align: start;
 }
 
 canvas {
@@ -36,12 +38,12 @@ canvas {
   object-fit: contain;
 }
 
+/* LINKS FINAIS (INVISÍVEIS) */
 .link {
   position: absolute;
-  background: rgba(255,0,0,0.25);
-  border: 1px dashed #fff;
-  cursor: move;
-  touch-action: none;
+  background: transparent;
+  border: none;
+  display: block;
   z-index: 10;
 }
 </style>
@@ -54,53 +56,6 @@ canvas {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
 <script>
-let current = null;
-let ox = 0, oy = 0;
-
-function startDrag(e){
-  e.preventDefault();
-  current = e.target;
-
-  const t = e.touches ? e.touches[0] : e;
-  const rect = current.getBoundingClientRect();
-
-  ox = t.clientX - rect.left;
-  oy = t.clientY - rect.top;
-}
-
-function moveDrag(e){
-  if(!current) return;
-
-  const t = e.touches ? e.touches[0] : e;
-  const p = current.parentElement.getBoundingClientRect();
-
-  let x = (t.clientX - p.left - ox) / p.width * 100;
-  let y = (t.clientY - p.top  - oy) / p.height * 100;
-
-  x = Math.max(0, Math.min(100, x));
-  y = Math.max(0, Math.min(100, y));
-
-  current.style.left = x + "%";
-  current.style.top  = y + "%";
-}
-
-function endDrag(){
-  if(!current) return;
-
-  // SALVA AUTOMATICAMENTE
-  localStorage.setItem(current.dataset.id, JSON.stringify({
-    left: current.style.left,
-    top: current.style.top
-  }));
-
-  current = null;
-}
-
-document.addEventListener("mousemove", moveDrag);
-document.addEventListener("mouseup", endDrag);
-document.addEventListener("touchmove", moveDrag, { passive:false });
-document.addEventListener("touchend", endDrag);
-
 const slider = document.getElementById('slider');
 
 pdfjsLib.getDocument('portfolio.pdf').promise.then(pdf=>{
@@ -125,49 +80,33 @@ slider.appendChild(slide);
 
 page.render({canvasContext:ctx,viewport:v});
 
-// FUNÇÃO CRIAR LINK COM ID ÚNICO
-function criarLink(id, href, top, left, width, height){
-
+// FUNÇÃO LINK FINAL
+function link(href, top, left, width, height){
   const el = document.createElement('a');
   el.href = href;
   el.className = "link";
-  el.dataset.id = id;
-
-  // RECUPERA POSIÇÃO SALVA
-  const saved = localStorage.getItem(id);
-  if(saved){
-    const pos = JSON.parse(saved);
-    el.style.top = pos.top;
-    el.style.left = pos.left;
-  } else {
-    el.style.top = top;
-    el.style.left = left;
-  }
-
+  el.style.top = top;
+  el.style.left = left;
   el.style.width = width;
   el.style.height = height;
-
-  el.addEventListener("mousedown", startDrag);
-  el.addEventListener("touchstart", startDrag, { passive:false });
-
   slide.appendChild(el);
 }
 
 // ===== PÁGINA 1 =====
 if(i===1){
-  criarLink("p1_tel","tel:+5516991128533","70%","40%","30%","6%");
-  criarLink("p1_wpp","https://wa.me/5516991128533","82%","46%","8%","10%");
+  link("tel:+5516991128533","74%","38%","32%","6%");
+  link("https://wa.me/5516991128533","85%","46%","8%","10%");
 }
 
 // ===== PÁGINA 6 =====
 if(i===6){
-  criarLink("p6_wpp","https://wa.me/5516991128533","85%","35%","30%","8%");
+  link("https://wa.me/5516991128533","87%","34%","32%","8%");
 }
 
 // ===== PÁGINA 8 =====
 if(i===8){
-  criarLink("p8_tel","tel:+5516991128533","70%","35%","30%","6%");
-  criarLink("p8_wpp","https://wa.me/5516991128533","82%","46%","8%","10%");
+  link("tel:+5516991128533","72%","34%","32%","6%");
+  link("https://wa.me/5516991128533","84%","46%","8%","10%");
 }
 
 });
