@@ -138,25 +138,35 @@ function link(href, top, left, width, height){
 
   el.href = href;
 
-  // FORÇA ABERTURA FORA DO SITE
   if(href.includes("wa.me")){
     el.target = "_blank";
     el.rel = "noopener";
-  } else if(href.startsWith("tel:")){
-    // telefone abre discador (mobile)
-  } else {
-    el.target = "_blank";
   }
 
   el.className="link";
 
-  // AJUSTE FINO GLOBAL (corrige "descer")
-  const offsetY = -4; // sobe 2% em todas (ajuste fino)
-  
-  el.style.top = `calc(${top} + ${offsetY}%)`;
+  // POSIÇÃO DIRETA (SEM CALC)
+  el.style.top = top;
   el.style.left = left;
   el.style.width = width;
   el.style.height = height;
+
+  // BLOQUEIA DUPLO CLIQUE (SWIPE vs CLICK)
+  let moved = false;
+
+  el.addEventListener("touchstart", () => {
+    moved = false;
+  });
+
+  el.addEventListener("touchmove", () => {
+    moved = true;
+  });
+
+  el.addEventListener("click", (e) => {
+    if(moved){
+      e.preventDefault();
+    }
+  });
 
   slide.appendChild(el);
 }
