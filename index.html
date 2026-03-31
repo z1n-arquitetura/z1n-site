@@ -15,28 +15,31 @@ html,body{
   background:#000;
 }
 
+/* SLIDER */
 .slider{
   display:flex;
-  width:100vw;
-  height:100vh;
+  height:100dvh;
   transition: transform .3s ease;
 }
 
 .slide{
   min-width:100vw;
-  height:100vh;
+  height:100dvh;
   position:relative;
   display:flex;
   justify-content:center;
   align-items:center;
 }
 
+/* CANVAS SEM DISTORÇÃO */
 canvas{
+  width:auto;
+  height:100%;
   max-width:100%;
-  max-height:100%;
   display:block;
 }
 
+/* LINKS */
 .link{
   position:absolute;
   z-index:10;
@@ -75,11 +78,6 @@ document.addEventListener("touchend", e=>{
   }
 });
 
-document.addEventListener("keydown", e=>{
-  if(e.key==="ArrowRight") goTo(index+1);
-  if(e.key==="ArrowLeft") goTo(index-1);
-});
-
 // ===== PDF =====
 pdfjsLib.getDocument('portfolio.pdf').promise.then(pdf=>{
 
@@ -104,7 +102,10 @@ slider.appendChild(slide);
 // ===== RENDER =====
 page.render({canvasContext:ctx,viewport:v}).promise.then(()=>{
 
-// ===== FUNÇÃO LINK (CORRIGIDA) =====
+// 🔥 pega tamanho REAL exibido (corrige mobile)
+const rect = canvas.getBoundingClientRect();
+
+// ===== FUNÇÃO LINK CORRIGIDA =====
 function link(href, top, left, width, height){
 
   const el = document.createElement('a');
@@ -116,14 +117,12 @@ function link(href, top, left, width, height){
     el.rel="noopener";
   }
 
-  const rect = canvas.getBoundingClientRect();
-
-  el.style.top = (rect.height * (parseFloat(top)/100)) + "px";
-  el.style.left = (rect.width * (parseFloat(left)/100)) + "px";
+  el.style.top = (rect.top + rect.height * (parseFloat(top)/100)) + "px";
+  el.style.left = (rect.left + rect.width * (parseFloat(left)/100)) + "px";
   el.style.width = (rect.width * (parseFloat(width)/100)) + "px";
   el.style.height = (rect.height * (parseFloat(height)/100)) + "px";
 
-  slide.appendChild(el);
+  document.body.appendChild(el);
 }
 
 // ===== LINKS =====
