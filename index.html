@@ -30,19 +30,23 @@ html,body{
   align-items:center;
 }
 
-/* NOVO: ÁREA REAL DO CONTEÚDO */
+/* FRAME COM PROPORÇÃO CONTROLADA */
 .frame{
   position:relative;
-  width:100%;
-  height:100%;
+  margin:auto;
+
+  width:100vw;
+  height:100vh;
+
   display:flex;
   justify-content:center;
   align-items:center;
 }
 
+/* CANVAS OCUPA 100% DO FRAME (SEM DISTORÇÃO DINÂMICA) */
 canvas{
-  max-width:100%;
-  max-height:100%;
+  width:100%;
+  height:100%;
 }
 
 /* LINKS */
@@ -66,12 +70,14 @@ let index = 0;
 let startX = 0;
 let isDown = false;
 
+// ===== SLIDE =====
 function goTo(i){
   const total = slider.children.length;
   index = Math.max(0, Math.min(total-1, i));
   slider.style.transform = `translateX(-${index * 100}vw)`;
 }
 
+// ===== SWIPE =====
 function onStart(x){
   startX = x;
   isDown = true;
@@ -92,6 +98,7 @@ function onEnd(x){
   }
 }
 
+// TOUCH
 document.addEventListener("touchstart", e=>{
   onStart(e.touches[0].clientX);
 }, {passive:true});
@@ -100,6 +107,7 @@ document.addEventListener("touchend", e=>{
   onEnd(e.changedTouches[0].clientX);
 });
 
+// MOUSE
 document.addEventListener("mousedown", e=>{
   onStart(e.clientX);
 });
@@ -117,26 +125,30 @@ pdf.getPage(i).then(page=>{
 
 const v = page.getViewport({scale:2});
 
+// ===== ELEMENTOS =====
 const canvas = document.createElement('canvas');
 canvas.width = v.width;
 canvas.height = v.height;
 
 const ctx = canvas.getContext('2d');
 
-// NOVO: estrutura correta
 const slide = document.createElement('div');
 slide.className="slide";
 
 const frame = document.createElement('div');
 frame.className="frame";
 
+// 🔥 AJUSTE CRÍTICO: PROPORÇÃO REAL DO PDF
+frame.style.aspectRatio = `${v.width} / ${v.height}`;
+
 frame.appendChild(canvas);
 slide.appendChild(frame);
 slider.appendChild(slide);
 
+// ===== RENDER PDF =====
 page.render({canvasContext:ctx,viewport:v});
 
-// ===== FUNÇÃO LINK (AGORA RELATIVA AO FRAME) =====
+// ===== FUNÇÃO DE LINK =====
 function link(href, top, left, width, height){
   const el = document.createElement('a');
 
@@ -154,6 +166,7 @@ function link(href, top, left, width, height){
   el.style.width = width;
   el.style.height = height;
 
+  // BLOQUEIO DE SWIPE VS CLICK
   let moved = false;
 
   el.addEventListener("touchstart", () => {
@@ -170,7 +183,6 @@ function link(href, top, left, width, height){
     }
   });
 
-  // 🔥 MUDANÇA CRÍTICA AQUI
   frame.appendChild(el);
 }
 
@@ -202,4 +214,3 @@ if(i===8){
 
 </body>
 </html>
-🧠 Leitura estratégica (o que mudou de verdade
