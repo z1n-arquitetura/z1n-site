@@ -19,7 +19,7 @@ html,body{
   display:flex;
   width:100vw;
   height:100vh;
-  transition: transform .32s ease;
+  transition: transform .3s ease;
 }
 
 .slide{
@@ -28,16 +28,13 @@ html,body{
   display:flex;
   justify-content:center;
   align-items:center;
+  position:relative;
 }
 
 .frame{
   position:relative;
-  margin:auto;
   width:100vw;
   height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
 }
 
 canvas{
@@ -45,7 +42,6 @@ canvas{
   height:100%;
 }
 
-/* LINKS VISUAIS */
 .link{
   position:absolute;
   background:rgba(255,0,0,0.2);
@@ -53,17 +49,25 @@ canvas{
   cursor:move;
 }
 
-/* BOTÃO SALVAR */
+.handle{
+  width:10px;
+  height:10px;
+  background:#fff;
+  position:absolute;
+  right:-5px;
+  bottom:-5px;
+  cursor:nwse-resize;
+}
+
 #saveBtn{
   position:fixed;
   top:10px;
   right:10px;
-  z-index:999;
-  padding:10px 15px;
+  z-index:9999;
+  padding:10px;
   background:#fff;
   border:none;
   cursor:pointer;
-  font-weight:bold;
 }
 </style>
 </head>
@@ -71,7 +75,6 @@ canvas{
 <body>
 
 <button id="saveBtn">SALVAR POSIÇÕES</button>
-
 <div class="slider" id="slider"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -90,29 +93,27 @@ pdf.getPage(i).then(page=>{
 
 const v = page.getViewport({scale:2});
 
-const canvas = document.createElement('canvas');
-canvas.width = v.width;
-canvas.height = v.height;
-
-const ctx = canvas.getContext('2d');
-
 const slide = document.createElement('div');
 slide.className="slide";
 
 const frame = document.createElement('div');
 frame.className="frame";
-frame.style.aspectRatio = `${v.width} / ${v.height}`;
+frame.style.aspectRatio = `${v.width}/${v.height}`;
+
+const canvas = document.createElement('canvas');
+canvas.width = v.width;
+canvas.height = v.height;
 
 frame.appendChild(canvas);
 slide.appendChild(frame);
 slider.appendChild(slide);
 
-page.render({canvasContext:ctx,viewport:v});
+page.render({canvasContext:canvas.getContext('2d'),viewport:v});
 
-// ===== CRIAR LINK EDITÁVEL =====
-function createLink(href, top, left, width, height){
+// ===== FUNÇÃO =====
+function createLink(page, name, top, left, width, height){
 
-const el = document.createElement('div'); // 🔥 trocamos <a> por div no modo edição
+const el = document.createElement('div');
 el.className="link";
 
 el.style.top = top;
@@ -120,121 +121,98 @@ el.style.left = left;
 el.style.width = width;
 el.style.height = height;
 
-frame.appendChild(el);
-
-// ===== HANDLE DE REDIMENSIONAMENTO =====
 const handle = document.createElement('div');
-handle.style.width = "10px";
-handle.style.height = "10px";
-handle.style.background = "#fff";
-handle.style.position = "absolute";
-handle.style.right = "-5px";
-handle.style.bottom = "-5px";
-handle.style.cursor = "nwse-resize";
-
+handle.className="handle";
 el.appendChild(handle);
 
-// ===== DRAG (MOVER) =====
-let dragging = false;
+frame.appendChild(el);
 
-el.addEventListener("mousedown", (e)=>{
+// DRAG + RESIZE
+let dragging=false, resizing=false;
+
+el.addEventListener("mousedown", e=>{
   if(e.target === handle) return;
-  dragging = true;
-  e.preventDefault();
+  dragging=true;
 });
 
-document.addEventListener("mouseup", ()=>{
-  dragging = false;
-  resizing = false;
-});
-
-// ===== RESIZE =====
-let resizing = false;
-
-handle.addEventListener("mousedown", (e)=>{
-  resizing = true;
+handle.addEventListener("mousedown", e=>{
+  resizing=true;
   e.stopPropagation();
 });
 
-// ===== MOVIMENTO =====
-document.addEventListener("mousemove", (e)=>{
+document.addEventListener("mouseup", ()=>{
+  dragging=false;
+  resizing=false;
+});
+
+document.addEventListener("mousemove", e=>{
 
 const rect = frame.getBoundingClientRect();
 
-// MOVE
 if(dragging){
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-
-  el.style.left = (x / rect.width)*100 + "%";
-  el.style.top = (y / rect.height)*100 + "%";
+  el.style.left = ((e.clientX - rect.left)/rect.width)*100 + "%";
+  el.style.top = ((e.clientY - rect.top)/rect.height)*100 + "%";
 }
 
-// RESIZE
 if(resizing){
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-
   const left = parseFloat(el.style.left);
   const top = parseFloat(el.style.top);
 
-  const newWidth = ((x / rect.width)*100) - left;
-  const newHeight = ((y / rect.height)*100) - top;
+  const w = ((e.clientX - rect.left)/rect.width)*100 - left;
+  const h = ((e.clientY - rect.top)/rect.height)*100 - top;
 
-  el.style.width = newWidth + "%";
-  el.style.height = newHeight + "%";
+  el.style.width = w + "%";
+  el.style.height = h + "%";
+}
+
+});
+
+linksData.push({page,name,el});
+}
+
+// ===== CAIXAS SOMENTE ONDE VOCÊ PRECISA =====
+
+// PÁGINA 1
+if(i===1){
+  createLink(i,"tel","76%","36%","34%","6%");
+  createLink(i,"wa","85%","32%","36%","8%");
+}
+
+// PÁGINA 6
+if(i===6){
+  createLink(i,"wa","89%","32%","36%","8%");
+}
+
+// PÁGINA 8
+if(i===8){
+  createLink(i,"tel","70%","32%","36%","6%");
+  createLink(i,"wa","82%","44%","12%","10%");
+}
+
+});
+
 }
 
 });
 
 // ===== SALVAR =====
-linksData.push({
-  page:i,
-  el:el,
-  href:href
-});
-
-}
-// ===== LINKS INICIAIS =====
-if(i===1){
-  createLink("tel:+5516991128533","76%","36%","34%","6%");
-  createLink("https://wa.me/5516991128533","85%","32%","36%","8%");
-}
-
-if(i===6){
-  createLink("https://wa.me/5516991128533","89%","32%","36%","8%");
-}
-
-if(i===8){
-  createLink("tel:+5516991128533","70%","32%","36%","6%");
-  createLink("https://wa.me/5516991128533","82%","44%","12%","10%");
-}
-
-});
-
-}
-
-});
-
-// ===== BOTÃO SALVAR =====
-saveBtn.addEventListener("click", ()=>{
+saveBtn.onclick = ()=>{
 
 let output = "";
 
 linksData.forEach(item=>{
-
 const el = item.el;
 
-output += `\nif(i===${item.page}){\n`;
-output += `  link("${item.href}","${el.style.top}","${el.style.left}","${el.style.width}","${el.style.height}");\n`;
-output += `}\n`;
-
+output += `
+if(i===${item.page}){
+  link("COLOQUE_LINK_AQUI","${el.style.top}","${el.style.left}","${el.style.width}","${el.style.height}");
+}
+`;
 });
 
 console.log(output);
-alert("Posições copiadas! Aperte F12 e copie do console.");
-
-});
+alert("Copie do console (F12)");
+};
 </script>
 
 </body>
