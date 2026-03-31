@@ -17,11 +17,10 @@ html,body{
 
 .slider{
   display:flex;
-  width:100vw;
   height:100vh;
   transition: transform .3s ease;
+  will-change: transform;
 }
-
 .slide{
   min-width:100vw;
   height:100vh;
@@ -86,6 +85,8 @@ const saveBtn = document.getElementById('saveBtn');
 let linksData = [];
 
 pdfjsLib.getDocument('portfolio.pdf').promise.then(pdf=>{
+  
+slider.style.width = (pdf.numPages * 100) + "vw";  
 
 for(let i=1;i<=pdf.numPages;i++){
 
