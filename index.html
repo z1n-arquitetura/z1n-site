@@ -13,14 +13,14 @@ html,body{
   height:100%;
   overflow:hidden;
   background:#000;
+  touch-action:pan-y;
 }
 
-/* SLIDER */
 .slider{
   display:flex;
-  width:100vw;
-  height:100vh;
-  transition: transform .3s ease;
+  width:100%;
+  height:100%;
+  transition: transform .35s cubic-bezier(.25,.8,.25,1);
 }
 
 .slide{
@@ -32,12 +32,10 @@ html,body{
   position:relative;
 }
 
-/* canvas correto */
 canvas{
   display:block;
 }
 
-/* overlay alinhado ao canvas */
 .overlay{
   position:absolute;
   top:50%;
@@ -45,7 +43,6 @@ canvas{
   transform:translate(-50%, -50%);
 }
 
-/* LINKS */
 .link{
   position:absolute;
   z-index:10;
@@ -64,30 +61,66 @@ const slider = document.getElementById('slider');
 
 let index = 0;
 let startX = 0;
+let isDragging = false;
+let currentTranslate = 0;
 
-// NAV
-function goTo(i){
-  const total = slider.children.length;
-  index = Math.max(0, Math.min(total-1, i));
+// SNAP NAV
+function updateSlider(animate=true){
+  if(animate){
+    slider.style.transition = "transform .35s cubic-bezier(.25,.8,.25,1)";
+  }else{
+    slider.style.transition = "none";
+  }
   slider.style.transform = `translateX(-${index * 100}vw)`;
 }
 
+function goTo(i){
+  const total = slider.children.length;
+  index = Math.max(0, Math.min(total-1, i));
+  updateSlider(true);
+}
+
+// TOUCH (com drag real + snap)
 document.addEventListener("touchstart", e=>{
   startX = e.touches[0].clientX;
+  isDragging = true;
+  slider.style.transition = "none";
+});
+
+document.addEventListener("touchmove", e=>{
+  if(!isDragging) return;
+
+  const currentX = e.touches[0].clientX;
+  const diff = currentX - startX;
+
+  const base = -index * window.innerWidth;
+  slider.style.transform = `translateX(${base + diff}px)`;
 });
 
 document.addEventListener("touchend", e=>{
-  const diff = startX - e.changedTouches[0].clientX;
-  if(Math.abs(diff) > 80){
-    if(diff > 0) goTo(index+1);
-    else goTo(index-1);
+  if(!isDragging) return;
+  isDragging = false;
+
+  const endX = e.changedTouches[0].clientX;
+  const diff = startX - endX;
+
+  if(Math.abs(diff) > 60){
+    if(diff > 0) index++;
+    else index--;
   }
+
+  updateSlider(true);
 });
 
 // PDF
 pdfjsLib.getDocument('portfolio.pdf').promise.then(pdf=>{
 
-for(let i=1;i<=pdf.numPages;i++){
+const rendered = new Set();
+
+function renderPage(i){
+
+if(rendered.has(i)) return;
+rendered.add(i);
 
 pdf.getPage(i).then(page=>{
 
@@ -100,15 +133,24 @@ const ctx = canvas.getContext('2d');
 canvas.width = viewport.width;
 canvas.height = viewport.height;
 
-canvas.style.width = viewport.width + "px";
-canvas.style.height = viewport.height + "px";
+// 🔥 FIT NA TELA
+const screenW = window.innerWidth;
+const screenH = window.innerHeight;
+
+const fit = Math.min(
+  screenW / viewport.width,
+  screenH / viewport.height
+);
+
+canvas.style.width = (viewport.width * fit) + "px";
+canvas.style.height = (viewport.height * fit) + "px";
 
 const slide = document.createElement('div');
-slide.className="slide";
+slide.className = "slide";
 
 slide.appendChild(canvas);
 
-// overlay alinhado ao canvas
+// overlay
 const overlay = document.createElement('div');
 overlay.className = "overlay";
 overlay.style.width = canvas.style.width;
@@ -118,18 +160,16 @@ slide.appendChild(overlay);
 slider.appendChild(slide);
 
 // render
-page.render({canvasContext:ctx,viewport:viewport});
+page.render({canvasContext:ctx,viewport});
 
-// função de link
+// links
 function link(href, top, left, width, height){
   const el = document.createElement('a');
 
   el.href = href;
-  el.className="link";
+  el.className = "link";
 
-  if(href.includes("wa.me")){
-    el.target="_blank";
-  }
+  if(href.includes("wa.me")) el.target="_blank";
 
   el.style.top = top;
   el.style.left = left;
@@ -139,8 +179,7 @@ function link(href, top, left, width, height){
   overlay.appendChild(el);
 }
 
-// LINKS
-
+// hotspots
 if(i===1){
   link("tel:+5516991128533","76%","36%","34%","6%");
   link("https://wa.me/5516991128533","85%","32%","36%","8%");
@@ -156,8 +195,17 @@ if(i===8){
 }
 
 });
-
 }
+
+// INIT
+renderPage(1);
+renderPage(2);
+
+// PRELOAD DINÂMICO
+document.addEventListener("touchend", ()=>{
+  renderPage(index+1);
+  renderPage(index+2);
+});
 
 });
 </script>
