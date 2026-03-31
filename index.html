@@ -26,16 +26,23 @@ html,body{
 .slide{
   min-width:100vw;
   height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   position:relative;
 }
 
-/* 🔥 CANVAS FIXO (resolve faixa preta) */
+/* canvas correto */
 canvas{
+  display:block;
+}
+
+/* overlay alinhado ao canvas */
+.overlay{
   position:absolute;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%);
 }
 
 /* LINKS */
@@ -84,7 +91,8 @@ for(let i=1;i<=pdf.numPages;i++){
 
 pdf.getPage(i).then(page=>{
 
-const viewport = page.getViewport({scale:2});
+const scale = window.devicePixelRatio || 1.5;
+const viewport = page.getViewport({scale});
 
 const canvas = document.createElement('canvas');
 const ctx = canvas.getContext('2d');
@@ -92,16 +100,27 @@ const ctx = canvas.getContext('2d');
 canvas.width = viewport.width;
 canvas.height = viewport.height;
 
+canvas.style.width = viewport.width + "px";
+canvas.style.height = viewport.height + "px";
+
 const slide = document.createElement('div');
 slide.className="slide";
 
 slide.appendChild(canvas);
+
+// overlay alinhado ao canvas
+const overlay = document.createElement('div');
+overlay.className = "overlay";
+overlay.style.width = canvas.style.width;
+overlay.style.height = canvas.style.height;
+
+slide.appendChild(overlay);
 slider.appendChild(slide);
 
 // render
 page.render({canvasContext:ctx,viewport:viewport});
 
-// 🔥 LINK RELATIVO AO SLIDE (ESTÁVEL)
+// função de link
 function link(href, top, left, width, height){
   const el = document.createElement('a');
 
@@ -117,7 +136,7 @@ function link(href, top, left, width, height){
   el.style.width = width;
   el.style.height = height;
 
-  slide.appendChild(el);
+  overlay.appendChild(el);
 }
 
 // LINKS
