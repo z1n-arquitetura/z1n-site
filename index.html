@@ -112,8 +112,7 @@ page.render({canvasContext:ctx,viewport:v});
 // ===== CRIAR LINK EDITÁVEL =====
 function createLink(href, top, left, width, height){
 
-const el = document.createElement('a');
-el.href = href;
+const el = document.createElement('div'); // 🔥 trocamos <a> por div no modo edição
 el.className="link";
 
 el.style.top = top;
@@ -123,30 +122,72 @@ el.style.height = height;
 
 frame.appendChild(el);
 
-// ===== DRAG =====
+// ===== HANDLE DE REDIMENSIONAMENTO =====
+const handle = document.createElement('div');
+handle.style.width = "10px";
+handle.style.height = "10px";
+handle.style.background = "#fff";
+handle.style.position = "absolute";
+handle.style.right = "-5px";
+handle.style.bottom = "-5px";
+handle.style.cursor = "nwse-resize";
+
+el.appendChild(handle);
+
+// ===== DRAG (MOVER) =====
 let dragging = false;
 
-el.addEventListener("mousedown", ()=>{
+el.addEventListener("mousedown", (e)=>{
+  if(e.target === handle) return;
   dragging = true;
+  e.preventDefault();
 });
 
 document.addEventListener("mouseup", ()=>{
   dragging = false;
+  resizing = false;
 });
 
+// ===== RESIZE =====
+let resizing = false;
+
+handle.addEventListener("mousedown", (e)=>{
+  resizing = true;
+  e.stopPropagation();
+});
+
+// ===== MOVIMENTO =====
 document.addEventListener("mousemove", (e)=>{
-  if(!dragging) return;
 
-  const rect = frame.getBoundingClientRect();
+const rect = frame.getBoundingClientRect();
 
+// MOVE
+if(dragging){
   const x = e.clientX - rect.left;
   const y = e.clientY - rect.top;
 
   el.style.left = (x / rect.width)*100 + "%";
   el.style.top = (y / rect.height)*100 + "%";
+}
+
+// RESIZE
+if(resizing){
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+
+  const left = parseFloat(el.style.left);
+  const top = parseFloat(el.style.top);
+
+  const newWidth = ((x / rect.width)*100) - left;
+  const newHeight = ((y / rect.height)*100) - top;
+
+  el.style.width = newWidth + "%";
+  el.style.height = newHeight + "%";
+}
+
 });
 
-// ===== SALVAR REFERÊNCIA =====
+// ===== SALVAR =====
 linksData.push({
   page:i,
   el:el,
@@ -154,7 +195,6 @@ linksData.push({
 });
 
 }
-
 // ===== LINKS INICIAIS =====
 if(i===1){
   createLink("tel:+5516991128533","76%","36%","34%","6%");
