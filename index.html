@@ -30,34 +30,47 @@ html,body{
   align-items:center;
 }
 
-/* FRAME COM PROPORÇÃO CONTROLADA */
 .frame{
   position:relative;
   margin:auto;
-
   width:100vw;
   height:100vh;
-
   display:flex;
   justify-content:center;
   align-items:center;
 }
 
-/* CANVAS OCUPA 100% DO FRAME (SEM DISTORÇÃO DINÂMICA) */
 canvas{
   width:100%;
   height:100%;
 }
 
-/* LINKS */
+/* LINKS VISUAIS */
 .link{
   position:absolute;
-  z-index:10;
+  background:rgba(255,0,0,0.2);
+  border:2px solid #fff;
+  cursor:move;
+}
+
+/* BOTÃO SALVAR */
+#saveBtn{
+  position:fixed;
+  top:10px;
+  right:10px;
+  z-index:999;
+  padding:10px 15px;
+  background:#fff;
+  border:none;
+  cursor:pointer;
+  font-weight:bold;
 }
 </style>
 </head>
 
 <body>
+
+<button id="saveBtn">SALVAR POSIÇÕES</button>
 
 <div class="slider" id="slider"></div>
 
@@ -65,58 +78,10 @@ canvas{
 
 <script>
 const slider = document.getElementById('slider');
+const saveBtn = document.getElementById('saveBtn');
 
-let index = 0;
-let startX = 0;
-let isDown = false;
+let linksData = [];
 
-// ===== SLIDE =====
-function goTo(i){
-  const total = slider.children.length;
-  index = Math.max(0, Math.min(total-1, i));
-  slider.style.transform = `translateX(-${index * 100}vw)`;
-}
-
-// ===== SWIPE =====
-function onStart(x){
-  startX = x;
-  isDown = true;
-}
-
-function onEnd(x){
-  if(!isDown) return;
-  isDown = false;
-
-  const diff = startX - x;
-  const threshold = 80;
-
-  if(Math.abs(diff) > threshold){
-    if(diff > 0) goTo(index + 1);
-    else goTo(index - 1);
-  }else{
-    goTo(index);
-  }
-}
-
-// TOUCH
-document.addEventListener("touchstart", e=>{
-  onStart(e.touches[0].clientX);
-}, {passive:true});
-
-document.addEventListener("touchend", e=>{
-  onEnd(e.changedTouches[0].clientX);
-});
-
-// MOUSE
-document.addEventListener("mousedown", e=>{
-  onStart(e.clientX);
-});
-
-document.addEventListener("mouseup", e=>{
-  onEnd(e.clientX);
-});
-
-// ===== PDF =====
 pdfjsLib.getDocument('portfolio.pdf').promise.then(pdf=>{
 
 for(let i=1;i<=pdf.numPages;i++){
@@ -125,7 +90,6 @@ pdf.getPage(i).then(page=>{
 
 const v = page.getViewport({scale:2});
 
-// ===== ELEMENTOS =====
 const canvas = document.createElement('canvas');
 canvas.width = v.width;
 canvas.height = v.height;
@@ -137,77 +101,98 @@ slide.className="slide";
 
 const frame = document.createElement('div');
 frame.className="frame";
-
-// 🔥 AJUSTE CRÍTICO: PROPORÇÃO REAL DO PDF
 frame.style.aspectRatio = `${v.width} / ${v.height}`;
 
 frame.appendChild(canvas);
 slide.appendChild(frame);
 slider.appendChild(slide);
 
-// ===== RENDER PDF =====
 page.render({canvasContext:ctx,viewport:v});
 
-// ===== FUNÇÃO DE LINK =====
-function link(href, top, left, width, height){
-  const el = document.createElement('a');
+// ===== CRIAR LINK EDITÁVEL =====
+function createLink(href, top, left, width, height){
 
-  el.href = href;
+const el = document.createElement('a');
+el.href = href;
+el.className="link";
 
-  if(href.includes("wa.me")){
-    el.target = "_blank";
-    el.rel = "noopener";
-  }
+el.style.top = top;
+el.style.left = left;
+el.style.width = width;
+el.style.height = height;
 
-  el.className="link";
+frame.appendChild(el);
 
-  el.style.top = top;
-  el.style.left = left;
-  el.style.width = width;
-  el.style.height = height;
+// ===== DRAG =====
+let dragging = false;
 
-  // BLOQUEIO DE SWIPE VS CLICK
-  let moved = false;
+el.addEventListener("mousedown", ()=>{
+  dragging = true;
+});
 
-  el.addEventListener("touchstart", () => {
-    moved = false;
-  });
+document.addEventListener("mouseup", ()=>{
+  dragging = false;
+});
 
-  el.addEventListener("touchmove", () => {
-    moved = true;
-  });
+document.addEventListener("mousemove", (e)=>{
+  if(!dragging) return;
 
-  el.addEventListener("click", (e) => {
-    if(moved){
-      e.preventDefault();
-    }
-  });
+  const rect = frame.getBoundingClientRect();
 
-  frame.appendChild(el);
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+
+  el.style.left = (x / rect.width)*100 + "%";
+  el.style.top = (y / rect.height)*100 + "%";
+});
+
+// ===== SALVAR REFERÊNCIA =====
+linksData.push({
+  page:i,
+  el:el,
+  href:href
+});
+
 }
 
-// ===== LINKS =====
-
-// PÁGINA 1
+// ===== LINKS INICIAIS =====
 if(i===1){
-  link("tel:+5516991128533","76%","36%","34%","6%");
-  link("https://wa.me/5516991128533","85%","32%","36%","8%");
+  createLink("tel:+5516991128533","76%","36%","34%","6%");
+  createLink("https://wa.me/5516991128533","85%","32%","36%","8%");
 }
 
-// PÁGINA 6
 if(i===6){
-  link("https://wa.me/5516991128533","89%","32%","36%","8%");
+  createLink("https://wa.me/5516991128533","89%","32%","36%","8%");
 }
 
-// PÁGINA 8
 if(i===8){
-  link("tel:+5516991128533","70%","32%","36%","6%");
-  link("https://wa.me/5516991128533","82%","44%","12%","10%");
+  createLink("tel:+5516991128533","70%","32%","36%","6%");
+  createLink("https://wa.me/5516991128533","82%","44%","12%","10%");
 }
 
 });
 
 }
+
+});
+
+// ===== BOTÃO SALVAR =====
+saveBtn.addEventListener("click", ()=>{
+
+let output = "";
+
+linksData.forEach(item=>{
+
+const el = item.el;
+
+output += `\nif(i===${item.page}){\n`;
+output += `  link("${item.href}","${el.style.top}","${el.style.left}","${el.style.width}","${el.style.height}");\n`;
+output += `}\n`;
+
+});
+
+console.log(output);
+alert("Posições copiadas! Aperte F12 e copie do console.");
 
 });
 </script>
