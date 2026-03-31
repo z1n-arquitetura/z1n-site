@@ -13,13 +13,11 @@ html,body{
   height:100%;
   overflow:hidden;
   background:#000;
-  touch-action: pan-y;
 }
 
 .slider{
   display:flex;
   height:100vh;
-  width:100%;
   transition: transform .3s ease;
 }
 
@@ -33,14 +31,14 @@ html,body{
 
 .frame{
   position:relative;
-  height:100vh;
-  aspect-ratio: 595 / 842;
-  margin:auto;
 }
 
 canvas{
-  width:100%;
-  height:100%;
+  display:block;
+  max-width:100vw;
+  max-height:100vh;
+  width:auto;
+  height:auto;
 }
 
 .link{
@@ -68,7 +66,6 @@ canvas{
   padding:10px;
   background:#fff;
   border:none;
-  cursor:pointer;
 }
 </style>
 </head>
@@ -89,17 +86,15 @@ let startX = 0;
 let isDown = false;
 let linksData = [];
 
-// 🔥 CARREGA SALVO
 let saved = JSON.parse(localStorage.getItem("linksZ1N") || "[]");
 
-// ===== NAVEGAÇÃO =====
+// ===== NAV =====
 function goTo(i){
   const total = slider.children.length;
   index = Math.max(0, Math.min(total-1, i));
   slider.style.transform = `translateX(-${index * 100}%)`;
 }
 
-// mouse
 document.addEventListener("mousedown", e=>{
   if(e.target.closest('.link')) return;
   startX = e.clientX;
@@ -108,23 +103,15 @@ document.addEventListener("mousedown", e=>{
 
 document.addEventListener("mouseup", e=>{
   if(!isDown) return;
-
-  if(e.target.closest('.link')){
-    isDown = false;
-    return;
-  }
-
   isDown = false;
 
   const diff = startX - e.clientX;
-
   if(Math.abs(diff) > 80){
     if(diff > 0) goTo(index+1);
     else goTo(index-1);
   }
 });
 
-// touch
 document.addEventListener("touchstart", e=>{
   startX = e.touches[0].clientX;
 });
@@ -137,12 +124,6 @@ document.addEventListener("touchend", e=>{
   }
 });
 
-// teclado
-document.addEventListener("keydown", e=>{
-  if(e.key === "ArrowRight") goTo(index+1);
-  if(e.key === "ArrowLeft") goTo(index-1);
-});
-
 // ===== PDF =====
 pdfjsLib.getDocument('portfolio.pdf').promise.then(pdf=>{
 
@@ -152,7 +133,7 @@ for(let i=1;i<=pdf.numPages;i++){
 
 pdf.getPage(i).then(page=>{
 
-const v = page.getViewport({scale:1});
+const viewport = page.getViewport({scale:2}); // resolução boa
 
 const slide = document.createElement('div');
 slide.className="slide";
@@ -161,16 +142,19 @@ const frame = document.createElement('div');
 frame.className="frame";
 
 const canvas = document.createElement('canvas');
-canvas.width = v.width;
-canvas.height = v.height;
+canvas.width = viewport.width;
+canvas.height = viewport.height;
 
 frame.appendChild(canvas);
 slide.appendChild(frame);
 slider.appendChild(slide);
 
-page.render({canvasContext:canvas.getContext('2d'),viewport:v});
+page.render({
+  canvasContext:canvas.getContext('2d'),
+  viewport:viewport
+});
 
-// ===== FUNÇÃO LINK =====
+// ===== LINKS =====
 function createLink(page, top, left, width, height){
 
 const el = document.createElement('div');
@@ -226,14 +210,14 @@ if(resizing){
 linksData.push({page,el});
 }
 
-// ===== CARREGA SALVOS =====
+// carregar salvo
 saved.forEach(item=>{
   if(item.page === i){
     createLink(item.page,item.top,item.left,item.width,item.height);
   }
 });
 
-// ===== PADRÃO (primeiro uso) =====
+// padrão
 if(saved.length === 0){
 
 if(i===1){
@@ -258,9 +242,8 @@ if(i===8){
 
 });
 
-// ===== SALVAR =====
+// salvar
 saveBtn.onclick = ()=>{
-
 let data = [];
 
 linksData.forEach(item=>{
@@ -276,8 +259,7 @@ data.push({
 });
 
 localStorage.setItem("linksZ1N", JSON.stringify(data));
-
-alert("Salvo com sucesso!");
+alert("Salvo!");
 };
 </script>
 
