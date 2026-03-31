@@ -13,16 +13,18 @@ html,body{
   height:100%;
   overflow:hidden;
   background:#000;
+  touch-action: pan-y;
 }
 
 .slider{
   display:flex;
   height:100vh;
+  width:100%;
   transition: transform .3s ease;
 }
 
 .slide{
-  min-width:100vw;
+  min-width:100%;
   height:100vh;
   display:flex;
   justify-content:center;
@@ -32,7 +34,7 @@ html,body{
 .frame{
   position:relative;
   height:100vh;
-  aspect-ratio: 595 / 842; /* proporção estável */
+  aspect-ratio: 595 / 842;
   margin:auto;
 }
 
@@ -94,7 +96,7 @@ let saved = JSON.parse(localStorage.getItem("linksZ1N") || "[]");
 function goTo(i){
   const total = slider.children.length;
   index = Math.max(0, Math.min(total-1, i));
-  slider.style.transform = `translateX(-${index * 100}vw)`;
+  slider.style.transform = `translateX(-${index * 100}%)`;
 }
 
 // mouse
@@ -144,7 +146,7 @@ document.addEventListener("keydown", e=>{
 // ===== PDF =====
 pdfjsLib.getDocument('portfolio.pdf').promise.then(pdf=>{
 
-slider.style.width = (pdf.numPages * 100) + "vw";
+slider.style.width = (pdf.numPages * 100) + "%";
 
 for(let i=1;i<=pdf.numPages;i++){
 
@@ -231,7 +233,7 @@ saved.forEach(item=>{
   }
 });
 
-// ===== SE NÃO HOUVER SALVO, CRIA PADRÃO =====
+// ===== PADRÃO (primeiro uso) =====
 if(saved.length === 0){
 
 if(i===1){
@@ -256,7 +258,7 @@ if(i===8){
 
 });
 
-// ===== SALVAR DEFINITIVO =====
+// ===== SALVAR =====
 saveBtn.onclick = ()=>{
 
 let data = [];
