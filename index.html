@@ -5,25 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Z1N Arquiteturas</title>
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 
 html,body{
   width:100%;
   height:100%;
-  overflow:hidden;
   background:#000;
 }
 
-.slider{
-  display:flex;
-  height:100%;
-  transition: transform .3s ease;
+/* SWIPER */
+.swiper{
+  width:100vw;
+  height:100vh;
 }
 
-.slide{
-  min-width:100vw;
-  height:100vh;
+.swiper-slide{
   display:flex;
   align-items:center;
   justify-content:center;
@@ -35,6 +34,7 @@ canvas{
   max-height:100%;
 }
 
+/* overlay */
 .overlay{
   position:absolute;
   top:50%;
@@ -50,49 +50,34 @@ canvas{
 
 <body>
 
-<div class="slider" id="slider"></div>
+<div class="swiper">
+  <div class="swiper-wrapper" id="wrapper"></div>
+</div>
 
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
 <script>
-const slider = document.getElementById('slider');
+const wrapper = document.getElementById('wrapper');
 
-let index = 0;
-let startX = 0;
-
-// NAV
-function update(){
-  slider.style.transform = `translateX(-${index * 100}vw)`;
-}
-
-function goTo(i){
-  index = Math.max(0, Math.min(slider.children.length - 1, i));
-  update();
-}
-
-// SWIPE SIMPLES (estável)
-document.addEventListener("touchstart", e=>{
-  startX = e.touches[0].clientX;
-});
-
-document.addEventListener("touchend", e=>{
-  const diff = startX - e.changedTouches[0].clientX;
-
-  if(Math.abs(diff) > 60){
-    if(diff > 0) goTo(index + 1);
-    else goTo(index - 1);
-  }
+// INIT SWIPER
+const swiper = new Swiper('.swiper', {
+  direction: 'horizontal',
+  loop: false,
+  resistanceRatio: 0.85,
+  speed: 400,
 });
 
 // PDF
 pdfjsLib.getDocument('portfolio.pdf').promise.then(pdf=>{
 
-// 🔥 1. CRIA TODOS OS SLIDES ANTES
 const slides = [];
 
+// 🔥 cria slides primeiro
 for(let i=1;i<=pdf.numPages;i++){
+
   const slide = document.createElement('div');
-  slide.className = "slide";
+  slide.className = "swiper-slide";
 
   const canvas = document.createElement('canvas');
   slide.appendChild(canvas);
@@ -101,24 +86,29 @@ for(let i=1;i<=pdf.numPages;i++){
   overlay.className = "overlay";
   slide.appendChild(overlay);
 
-  slider.appendChild(slide);
+  wrapper.appendChild(slide);
 
-  slides.push({slide, canvas, overlay});
+  slides.push({canvas, overlay});
 }
 
-// 🔥 2. RENDERIZA DEPOIS (não quebra o slider)
-slides.forEach((item, idx)=>{
+// atualiza swiper depois de criar
+swiper.update();
 
-  pdf.getPage(idx+1).then(page=>{
+// render controlado (só visíveis)
+function renderPage(i){
+
+  if(slides[i].rendered) return;
+  slides[i].rendered = true;
+
+  pdf.getPage(i+1).then(page=>{
 
     const viewport = page.getViewport({scale:2});
-    const canvas = item.canvas;
+    const canvas = slides[i].canvas;
     const ctx = canvas.getContext('2d');
 
     canvas.width = viewport.width;
     canvas.height = viewport.height;
 
-    // FIT automático
     const ratio = Math.min(
       window.innerWidth / viewport.width,
       window.innerHeight / viewport.height
@@ -127,8 +117,8 @@ slides.forEach((item, idx)=>{
     canvas.style.width = (viewport.width * ratio) + "px";
     canvas.style.height = (viewport.height * ratio) + "px";
 
-    item.overlay.style.width = canvas.style.width;
-    item.overlay.style.height = canvas.style.height;
+    slides[i].overlay.style.width = canvas.style.width;
+    slides[i].overlay.style.height = canvas.style.height;
 
     page.render({canvasContext:ctx,viewport});
 
@@ -146,27 +136,36 @@ slides.forEach((item, idx)=>{
       el.style.width = width;
       el.style.height = height;
 
-      item.overlay.appendChild(el);
+      slides[i].overlay.appendChild(el);
     }
 
-    const i = idx+1;
+    const pageNum = i+1;
 
-    if(i===1){
+    if(pageNum===1){
       link("tel:+5516991128533","76%","36%","34%","6%");
       link("https://wa.me/5516991128533","85%","32%","36%","8%");
     }
 
-    if(i===6){
+    if(pageNum===6){
       link("https://wa.me/5516991128533","89%","32%","36%","8%");
     }
 
-    if(i===8){
+    if(pageNum===8){
       link("tel:+5516991128533","70%","32%","36%","6%");
       link("https://wa.me/5516991128533","82%","44%","12%","10%");
     }
 
   });
+}
 
+// 🔥 render inicial
+renderPage(0);
+renderPage(1);
+
+// 🔥 lazy loading real
+swiper.on('slideChange', ()=>{
+  renderPage(swiper.activeIndex);
+  renderPage(swiper.activeIndex + 1);
 });
 
 });
