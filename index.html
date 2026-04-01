@@ -33,14 +33,12 @@ html,body{
   position:relative;
 }
 
-/* canvas */
 canvas{
   display:block;
   max-width:100%;
   max-height:100%;
 }
 
-/* overlay alinhado com o canvas */
 .overlay{
   position:absolute;
   top:0;
@@ -69,11 +67,9 @@ const wrapper = document.getElementById('wrapper');
 const swiper = new Swiper('.swiper', {
   direction: 'horizontal',
   loop: false,
-  resistanceRatio: 0.85,
   speed: 350
 });
 
-// worker melhora performance
 pdfjsLib.GlobalWorkerOptions.workerSrc =
 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
@@ -111,7 +107,7 @@ function renderPage(i){
 
   slides[i].rendered = true;
 
-  pdf.getPage(i+1).then(page=>{
+  pdf.getPage(i+1).then(async page=>{
 
     const viewport = page.getViewport({scale:2});
     const canvas = slides[i].canvas;
@@ -139,38 +135,35 @@ function renderPage(i){
       viewport
     });
 
-    function link(href, top, left, width, height){
-      const el = document.createElement('a');
+    // 🔥 detectar links do PDF automaticamente
+    const annotations = await page.getAnnotations();
 
-      el.href = href;
-      el.className = "link";
+    annotations.forEach(annotation => {
 
-      el.target = "_blank";
-      el.rel = "noopener noreferrer";
+      if(annotation.subtype === "Link" && annotation.url){
 
-      el.style.top = top;
-      el.style.left = left;
-      el.style.width = width;
-      el.style.height = height;
+        const rect = pdfjsLib.Util.normalizeRect(annotation.rect);
 
-      slides[i].overlay.appendChild(el);
-    }
+        const x = rect[0] * ratio;
+        const y = (viewport.height - rect[3]) * ratio;
+        const w = (rect[2] - rect[0]) * ratio;
+        const h = (rect[3] - rect[1]) * ratio;
 
-    const pageNum = i+1;
+        const link = document.createElement("a");
+        link.href = annotation.url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
 
-    if(pageNum===1){
-      link("tel:+5516991128533","76%","36%","34%","6%");
-      link("https://wa.me/5516991128533","85%","32%","36%","8%");
-    }
+        link.className = "link";
+        link.style.left = x + "px";
+        link.style.top = y + "px";
+        link.style.width = w + "px";
+        link.style.height = h + "px";
 
-    if(pageNum===6){
-      link("https://wa.me/5516991128533","89%","32%","36%","8%");
-    }
+        slides[i].overlay.appendChild(link);
+      }
 
-    if(pageNum===8){
-      link("tel:+5516991128533","70%","32%","36%","6%");
-      link("https://wa.me/5516991128533","82%","44%","12%","10%");
-    }
+    });
 
   });
 }
@@ -182,14 +175,11 @@ renderPage(2);
 
 // lazy load
 swiper.on('slideChange', ()=>{
-
   const i = swiper.activeIndex;
 
   renderPage(i);
   renderPage(i+1);
-  renderPage(i+2);
   renderPage(i-1);
-
 });
 
 });
