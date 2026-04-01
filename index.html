@@ -13,14 +13,12 @@ html,body{
   height:100%;
   overflow:hidden;
   background:#000;
-  touch-action:pan-y;
 }
 
 .slider{
   display:flex;
-  width:100%;
   height:100%;
-  transition: transform .35s cubic-bezier(.25,.8,.25,1);
+  transition: transform .3s ease;
 }
 
 .slide{
@@ -33,19 +31,19 @@ html,body{
 }
 
 canvas{
-  display:block;
+  max-width:100%;
+  max-height:100%;
 }
 
 .overlay{
   position:absolute;
   top:50%;
   left:50%;
-  transform:translate(-50%, -50%);
+  transform:translate(-50%,-50%);
 }
 
 .link{
   position:absolute;
-  z-index:10;
 }
 </style>
 </head>
@@ -61,150 +59,114 @@ const slider = document.getElementById('slider');
 
 let index = 0;
 let startX = 0;
-let isDragging = false;
-let currentTranslate = 0;
 
-// SNAP NAV
-function updateSlider(animate=true){
-  if(animate){
-    slider.style.transition = "transform .35s cubic-bezier(.25,.8,.25,1)";
-  }else{
-    slider.style.transition = "none";
-  }
+// NAV
+function update(){
   slider.style.transform = `translateX(-${index * 100}vw)`;
 }
 
 function goTo(i){
-  const total = slider.children.length;
-  index = Math.max(0, Math.min(total-1, i));
-  updateSlider(true);
+  index = Math.max(0, Math.min(slider.children.length - 1, i));
+  update();
 }
 
-// TOUCH (com drag real + snap)
+// SWIPE SIMPLES (estável)
 document.addEventListener("touchstart", e=>{
   startX = e.touches[0].clientX;
-  isDragging = true;
-  slider.style.transition = "none";
-});
-
-document.addEventListener("touchmove", e=>{
-  if(!isDragging) return;
-
-  const currentX = e.touches[0].clientX;
-  const diff = currentX - startX;
-
-  const base = -index * window.innerWidth;
-  slider.style.transform = `translateX(${base + diff}px)`;
 });
 
 document.addEventListener("touchend", e=>{
-  if(!isDragging) return;
-  isDragging = false;
-
-  const endX = e.changedTouches[0].clientX;
-  const diff = startX - endX;
+  const diff = startX - e.changedTouches[0].clientX;
 
   if(Math.abs(diff) > 60){
-    if(diff > 0) index++;
-    else index--;
+    if(diff > 0) goTo(index + 1);
+    else goTo(index - 1);
   }
-
-  updateSlider(true);
 });
 
 // PDF
 pdfjsLib.getDocument('portfolio.pdf').promise.then(pdf=>{
 
-const rendered = new Set();
+// 🔥 1. CRIA TODOS OS SLIDES ANTES
+const slides = [];
 
-function renderPage(i){
+for(let i=1;i<=pdf.numPages;i++){
+  const slide = document.createElement('div');
+  slide.className = "slide";
 
-if(rendered.has(i)) return;
-rendered.add(i);
+  const canvas = document.createElement('canvas');
+  slide.appendChild(canvas);
 
-pdf.getPage(i).then(page=>{
+  const overlay = document.createElement('div');
+  overlay.className = "overlay";
+  slide.appendChild(overlay);
 
-const scale = window.devicePixelRatio || 1.5;
-const viewport = page.getViewport({scale});
+  slider.appendChild(slide);
 
-const canvas = document.createElement('canvas');
-const ctx = canvas.getContext('2d');
-
-canvas.width = viewport.width;
-canvas.height = viewport.height;
-
-// 🔥 FIT NA TELA
-const screenW = window.innerWidth;
-const screenH = window.innerHeight;
-
-const fit = Math.min(
-  screenW / viewport.width,
-  screenH / viewport.height
-);
-
-canvas.style.width = (viewport.width * fit) + "px";
-canvas.style.height = (viewport.height * fit) + "px";
-
-const slide = document.createElement('div');
-slide.className = "slide";
-
-slide.appendChild(canvas);
-
-// overlay
-const overlay = document.createElement('div');
-overlay.className = "overlay";
-overlay.style.width = canvas.style.width;
-overlay.style.height = canvas.style.height;
-
-slide.appendChild(overlay);
-slider.appendChild(slide);
-
-// render
-page.render({canvasContext:ctx,viewport});
-
-// links
-function link(href, top, left, width, height){
-  const el = document.createElement('a');
-
-  el.href = href;
-  el.className = "link";
-
-  if(href.includes("wa.me")) el.target="_blank";
-
-  el.style.top = top;
-  el.style.left = left;
-  el.style.width = width;
-  el.style.height = height;
-
-  overlay.appendChild(el);
+  slides.push({slide, canvas, overlay});
 }
 
-// hotspots
-if(i===1){
-  link("tel:+5516991128533","76%","36%","34%","6%");
-  link("https://wa.me/5516991128533","85%","32%","36%","8%");
-}
+// 🔥 2. RENDERIZA DEPOIS (não quebra o slider)
+slides.forEach((item, idx)=>{
 
-if(i===6){
-  link("https://wa.me/5516991128533","89%","32%","36%","8%");
-}
+  pdf.getPage(idx+1).then(page=>{
 
-if(i===8){
-  link("tel:+5516991128533","70%","32%","36%","6%");
-  link("https://wa.me/5516991128533","82%","44%","12%","10%");
-}
+    const viewport = page.getViewport({scale:2});
+    const canvas = item.canvas;
+    const ctx = canvas.getContext('2d');
 
-});
-}
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
 
-// INIT
-renderPage(1);
-renderPage(2);
+    // FIT automático
+    const ratio = Math.min(
+      window.innerWidth / viewport.width,
+      window.innerHeight / viewport.height
+    );
 
-// PRELOAD DINÂMICO
-document.addEventListener("touchend", ()=>{
-  renderPage(index+1);
-  renderPage(index+2);
+    canvas.style.width = (viewport.width * ratio) + "px";
+    canvas.style.height = (viewport.height * ratio) + "px";
+
+    item.overlay.style.width = canvas.style.width;
+    item.overlay.style.height = canvas.style.height;
+
+    page.render({canvasContext:ctx,viewport});
+
+    // LINKS
+    function link(href, top, left, width, height){
+      const el = document.createElement('a');
+
+      el.href = href;
+      el.className = "link";
+
+      if(href.includes("wa.me")) el.target="_blank";
+
+      el.style.top = top;
+      el.style.left = left;
+      el.style.width = width;
+      el.style.height = height;
+
+      item.overlay.appendChild(el);
+    }
+
+    const i = idx+1;
+
+    if(i===1){
+      link("tel:+5516991128533","76%","36%","34%","6%");
+      link("https://wa.me/5516991128533","85%","32%","36%","8%");
+    }
+
+    if(i===6){
+      link("https://wa.me/5516991128533","89%","32%","36%","8%");
+    }
+
+    if(i===8){
+      link("tel:+5516991128533","70%","32%","36%","6%");
+      link("https://wa.me/5516991128533","82%","44%","12%","10%");
+    }
+
+  });
+
 });
 
 });
