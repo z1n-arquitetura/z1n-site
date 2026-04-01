@@ -35,14 +35,11 @@ html,body{
 
 canvas{
   display:block;
-  max-width:100%;
-  max-height:100%;
 }
 
+/* overlay agora acompanha o canvas */
 .overlay{
   position:absolute;
-  top:0;
-  left:0;
 }
 
 .link{
@@ -109,33 +106,38 @@ function renderPage(i){
 
   pdf.getPage(i+1).then(async page=>{
 
-    const viewport = page.getViewport({scale:2});
-    const canvas = slides[i].canvas;
-    const ctx = canvas.getContext('2d');
+    const viewport = page.getViewport({scale:1});
 
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
-
-    const ratio = Math.min(
+    const scale = Math.min(
       window.innerWidth / viewport.width,
       window.innerHeight / viewport.height
     );
 
-    const width = viewport.width * ratio;
-    const height = viewport.height * ratio;
+    const scaledViewport = page.getViewport({scale});
 
-    canvas.style.width = width + "px";
-    canvas.style.height = height + "px";
+    const canvas = slides[i].canvas;
+    const ctx = canvas.getContext('2d');
 
-    slides[i].overlay.style.width = width + "px";
-    slides[i].overlay.style.height = height + "px";
+    canvas.width = scaledViewport.width;
+    canvas.height = scaledViewport.height;
 
     page.render({
       canvasContext:ctx,
-      viewport
+      viewport:scaledViewport
     });
 
-    // 🔥 detectar links do PDF automaticamente
+    /* posição exata do canvas no slide */
+    const canvasRect = canvas.getBoundingClientRect();
+    const slideRect = canvas.parentElement.getBoundingClientRect();
+
+    const offsetX = canvasRect.left - slideRect.left;
+    const offsetY = canvasRect.top - slideRect.top;
+
+    slides[i].overlay.style.left = offsetX + "px";
+    slides[i].overlay.style.top = offsetY + "px";
+    slides[i].overlay.style.width = canvas.width + "px";
+    slides[i].overlay.style.height = canvas.height + "px";
+
     const annotations = await page.getAnnotations();
 
     annotations.forEach(annotation => {
@@ -144,17 +146,19 @@ function renderPage(i){
 
         const rect = pdfjsLib.Util.normalizeRect(annotation.rect);
 
-        const x = rect[0] * ratio;
-        const y = (viewport.height - rect[3]) * ratio;
-        const w = (rect[2] - rect[0]) * ratio;
-        const h = (rect[3] - rect[1]) * ratio;
+        const x = rect[0] * scale;
+        const y = (viewport.height - rect[3]) * scale;
+        const w = (rect[2] - rect[0]) * scale;
+        const h = (rect[3] - rect[1]) * scale;
 
         const link = document.createElement("a");
+
         link.href = annotation.url;
         link.target = "_blank";
         link.rel = "noopener noreferrer";
 
         link.className = "link";
+
         link.style.left = x + "px";
         link.style.top = y + "px";
         link.style.width = w + "px";
@@ -168,15 +172,11 @@ function renderPage(i){
   });
 }
 
-// render inicial
 renderPage(0);
 renderPage(1);
-renderPage(2);
 
-// lazy load
 swiper.on('slideChange', ()=>{
   const i = swiper.activeIndex;
-
   renderPage(i);
   renderPage(i+1);
   renderPage(i-1);
