@@ -13,6 +13,9 @@
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 
+<!-- fallback para crawler -->
+<meta name="description" content="Z1N Arquiteturas">
+
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
 
 <style>
@@ -34,7 +37,6 @@ html{
   height:100%;
 }
 
-/* altura real do celular */
 .swiper{
   width:100%;
   height:calc(var(--vh) * 100);
@@ -63,6 +65,11 @@ canvas{
 </head>
 
 <body>
+
+<!-- 👇 ESSENCIAL PARA WHATSAPP -->
+<div style="display:none;">
+  Z1N Arquiteturas - José Luís F. Navarro
+</div>
 
 <div class="swiper">
   <div class="swiper-wrapper" id="wrapper"></div>
@@ -195,11 +202,9 @@ async function renderPage(i){
   });
 }
 
-/* render inicial */
 renderPage(0);
 renderPage(1);
 
-/* preload inteligente */
 swiper.on('slideChange', ()=>{
   const i = swiper.activeIndex;
 
@@ -210,7 +215,6 @@ swiper.on('slideChange', ()=>{
   alinharOverlay(slides[i]);
 });
 
-/* ajuste em resize */
 window.addEventListener("resize", ()=>{
   slides.forEach(slide=>{
     if(slide.rendered){
