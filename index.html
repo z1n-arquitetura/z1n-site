@@ -23,14 +23,12 @@ html, body {
   background: #000;
 }
 
-/* Container */
 .slider {
   width: 100vw;
   height: 100vh;
   position: relative;
 }
 
-/* Slides */
 .slide {
   width: 100vw;
   height: 100vh;
@@ -47,22 +45,19 @@ html, body {
   display: flex;
 }
 
-/* Canvas */
 canvas {
   max-width: 100%;
   max-height: 100%;
   transform-origin: top center;
   display: block;
-  cursor: grab;
+  pointer-events: none; /* ESSENCIAL */
 }
 
-/* WhatsApp botão */
 .link {
   position: absolute;
-  z-index: 10;
+  z-index: 30;
 }
 
-/* Setas limpas */
 .nav {
   position: absolute;
   bottom: 20px;
@@ -105,7 +100,7 @@ let isDragging = false;
 let startX = 0;
 let startY = 0;
 
-/* páginas com zoom liberado (3,4,5) */
+/* páginas com zoom liberado */
 const zoomPages = [2, 3, 4];
 
 /* -------- PDF LOAD -------- */
@@ -135,18 +130,60 @@ pdfjsLib.getDocument(url).promise.then(pdf => {
 
       page.render({ canvasContext: ctx, viewport });
 
-      /* WhatsApp */
-      const wpp = document.createElement('a');
-      wpp.href = "https://wa.me/5516991128533";
-      wpp.className = "link";
+      const pageIndex = i - 1;
 
-      wpp.style.bottom = "12%";
-      wpp.style.left = "50%";
-      wpp.style.transform = "translateX(-50%)";
-      wpp.style.width = "260px";
-      wpp.style.height = "70px";
+      /* -------- LINKS POR PÁGINA -------- */
 
-      slide.appendChild(wpp);
+      // Página 1
+      if (pageIndex === 0) {
+
+        const wpp = document.createElement('a');
+        wpp.href = "https://wa.me/5516991128533";
+        wpp.className = "link";
+
+        wpp.style.top = "78%";
+        wpp.style.left = "50%";
+        wpp.style.transform = "translateX(-50%)";
+        wpp.style.width = "260px";
+        wpp.style.height = "70px";
+
+        slide.appendChild(wpp);
+
+      }
+
+      // Página 5
+      if (pageIndex === 4) {
+
+        const wpp = document.createElement('a');
+        wpp.href = "https://wa.me/5516991128533";
+        wpp.className = "link";
+
+        wpp.style.top = "80%";
+        wpp.style.left = "50%";
+        wpp.style.transform = "translateX(-50%)";
+        wpp.style.width = "260px";
+        wpp.style.height = "70px";
+
+        slide.appendChild(wpp);
+
+      }
+
+      // Última página (telefone)
+      if (pageIndex === pdf.numPages - 1) {
+
+        const tel = document.createElement('a');
+        tel.href = "tel:+5516991128533";
+        tel.className = "link";
+
+        tel.style.top = "75%";
+        tel.style.left = "50%";
+        tel.style.transform = "translateX(-50%)";
+        tel.style.width = "260px";
+        tel.style.height = "70px";
+
+        slide.appendChild(tel);
+
+      }
 
     });
 
@@ -154,7 +191,7 @@ pdfjsLib.getDocument(url).promise.then(pdf => {
 
 });
 
-/* -------- NAV (LOOP INFINITO) -------- */
+/* -------- NAV LOOP -------- */
 function showPage(index) {
   if (index < 0 || index >= slides.length) return;
 
@@ -197,7 +234,7 @@ function resetZoom() {
   applyTransform();
 }
 
-/* -------- ZOOM DESKTOP -------- */
+/* -------- ZOOM -------- */
 document.addEventListener("wheel", (e) => {
 
   if (!zoomPages.includes(current)) return;
@@ -213,7 +250,7 @@ document.addEventListener("wheel", (e) => {
 
 }, { passive: false });
 
-/* -------- PAN DESKTOP -------- */
+/* -------- PAN -------- */
 document.addEventListener("mousedown", (e) => {
   if (scale <= 1 || !zoomPages.includes(current)) return;
 
@@ -250,7 +287,6 @@ document.addEventListener("touchmove", (e) => {
 
   if (!zoomPages.includes(current)) return;
 
-  /* PINCH */
   if (e.touches.length === 2) {
     e.preventDefault();
 
@@ -267,7 +303,6 @@ document.addEventListener("touchmove", (e) => {
     }
   }
 
-  /* PAN */
   if (e.touches.length === 1 && isDragging) {
     posX = e.touches[0].clientX - startX;
     posY = e.touches[0].clientY - startY;
