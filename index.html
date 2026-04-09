@@ -2,236 +2,204 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5, user-scalable=yes">
 <title>Z1N Arquiteturas</title>
 
-<!-- Open Graph -->
-<meta property="og:title" content="Z1N Arquiteturas">
-<meta property="og:description" content="José Luís F. Navarro">
-<meta property="og:image" content="https://z1n-arq.com.br/og-image.jpg">
-<meta property="og:url" content="https://z1n-arq.com.br">
-<meta property="og:type" content="website">
-<meta name="twitter:card" content="summary_large_image">
-
-<!-- fallback para crawler -->
-<meta name="description" content="Z1N Arquiteturas">
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
-
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html, body {
+  overflow: hidden;
+  background: #000;
 }
 
-body{
-  width:100%;
-  height:100%;
-  background:#000;
-  overflow:hidden;
+/* Container */
+.slider {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
 }
 
-html{
-  width:100%;
-  height:100%;
+/* Slides */
+.slide {
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: none;
+  justify-content: center;
+  align-items: center;
 }
 
-.swiper{
-  width:100%;
-  height:calc(var(--vh) * 100);
+.slide.active {
+  display: flex;
 }
 
-.swiper-slide{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  position:relative;
+/* Canvas */
+canvas {
+  max-width: 100%;
+  max-height: 100%;
+  transform-origin: center center;
 }
 
-canvas{
-  display:block;
+/* Botão WhatsApp */
+.link {
+  position: absolute;
+  z-index: 10;
 }
 
-.overlay{
-  position:absolute;
+/* Setas */
+.nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 20;
+  background: rgba(255,255,255,0.2);
+  color: white;
+  border: none;
+  font-size: 30px;
+  padding: 10px 15px;
+  cursor: pointer;
 }
 
-.link{
-  position:absolute;
-  display:block;
-}
+.prev { left: 10px; }
+.next { right: 10px; }
+
 </style>
 </head>
 
 <body>
 
-<!-- 👇 ESSENCIAL PARA WHATSAPP -->
-<div style="display:none;">
-  Z1N Arquiteturas - José Luís F. Navarro
-</div>
+<div class="slider" id="slider"></div>
 
-<div class="swiper">
-  <div class="swiper-wrapper" id="wrapper"></div>
-</div>
+<button class="nav prev" onclick="prev()">←</button>
+<button class="nav next" onclick="next()">→</button>
 
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
 <script>
-function setRealViewportHeight(){
-  const vh = window.innerHeight * 0.01;
-  document.documentElement.style.setProperty('--vh', `${vh}px`);
-}
-setRealViewportHeight();
-window.addEventListener('resize', setRealViewportHeight);
-window.addEventListener('orientationchange', setRealViewportHeight);
+const url = 'portfolio.pdf';
+const slider = document.getElementById('slider');
 
-const wrapper = document.getElementById('wrapper');
+let current = 0;
+let slides = [];
+let scale = 1;
 
-const swiper = new Swiper('.swiper', {
-  direction: 'horizontal',
-  loop: false,
-  speed: 350
+/* -------- PDF LOAD -------- */
+pdfjsLib.getDocument(url).promise.then(pdf => {
+
+  for (let i = 1; i <= pdf.numPages; i++) {
+
+    pdf.getPage(i).then(page => {
+
+      const viewport = page.getViewport({ scale: 2 });
+
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+
+      const slide = document.createElement('div');
+      slide.className = 'slide';
+
+      slide.appendChild(canvas);
+      slider.appendChild(slide);
+
+      slides.push(slide);
+
+      if (slides.length === 1) slide.classList.add("active");
+
+      page.render({ canvasContext: ctx, viewport });
+
+      /* WhatsApp */
+      const wpp = document.createElement('a');
+      wpp.href = "https://wa.me/5516991128533";
+      wpp.className = "link";
+
+      wpp.style.bottom = "8%";
+      wpp.style.left = "50%";
+      wpp.style.transform = "translateX(-50%)";
+      wpp.style.width = "260px";
+      wpp.style.height = "70px";
+
+      slide.appendChild(wpp);
+
+    });
+
+  }
+
 });
 
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+/* -------- NAV -------- */
+function showPage(index) {
+  if (index < 0 || index >= slides.length) return;
 
-pdfjsLib.getDocument({
-  url: 'portfolio.pdf',
-  rangeChunkSize: 65536
-}).promise.then(pdf=>{
+  slides[current].classList.remove("active");
+  current = index;
+  slides[current].classList.add("active");
 
-const slides = [];
-
-for(let i=1;i<=pdf.numPages;i++){
-
-  const slide = document.createElement('div');
-  slide.className = "swiper-slide";
-
-  const canvas = document.createElement('canvas');
-  slide.appendChild(canvas);
-
-  const overlay = document.createElement('div');
-  overlay.className = "overlay";
-  slide.appendChild(overlay);
-
-  wrapper.appendChild(slide);
-
-  slides.push({
-    canvas,
-    overlay,
-    rendered:false
-  });
+  resetZoom();
 }
 
-swiper.update();
-
-function alinharOverlay(slide){
-  const canvasRect = slide.canvas.getBoundingClientRect();
-  const slideRect = slide.canvas.parentElement.getBoundingClientRect();
-
-  slide.overlay.style.left = (canvasRect.left - slideRect.left) + "px";
-  slide.overlay.style.top = (canvasRect.top - slideRect.top) + "px";
+function next() {
+  showPage(current + 1);
 }
 
-async function renderPage(i){
+function prev() {
+  showPage(current - 1);
+}
 
-  if(!slides[i]) return;
-  if(slides[i].rendered) return;
+/* -------- ZOOM DESKTOP -------- */
+document.addEventListener("wheel", (e) => {
+  if (e.ctrlKey) {
+    e.preventDefault();
 
-  slides[i].rendered = true;
+    scale += e.deltaY * -0.01;
+    scale = Math.min(Math.max(1, scale), 4);
 
-  const page = await pdf.getPage(i+1);
+    applyZoom();
+  }
+}, { passive: false });
 
-  const viewport = page.getViewport({scale:1});
+/* -------- ZOOM MOBILE (PINCH) -------- */
+let initialDistance = null;
 
-  const scale = Math.min(
-    window.innerWidth / viewport.width,
-    window.innerHeight / viewport.height
-  );
+document.addEventListener("touchmove", (e) => {
+  if (e.touches.length === 2) {
+    e.preventDefault();
 
-  const scaledViewport = page.getViewport({scale});
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
 
-  const canvas = slides[i].canvas;
-  const ctx = canvas.getContext('2d');
-
-  canvas.width = scaledViewport.width;
-  canvas.height = scaledViewport.height;
-
-  await page.render({
-    canvasContext:ctx,
-    viewport:scaledViewport
-  }).promise;
-
-  slides[i].overlay.style.width = canvas.width + "px";
-  slides[i].overlay.style.height = canvas.height + "px";
-
-  alinharOverlay(slides[i]);
-
-  const annotations = await page.getAnnotations();
-
-  annotations.forEach(annotation => {
-
-    if(annotation.subtype === "Link" && annotation.url){
-
-      const rect = pdfjsLib.Util.normalizeRect(annotation.rect);
-
-      const x = rect[0] * scale;
-      const y = (viewport.height - rect[3]) * scale;
-      const w = (rect[2] - rect[0]) * scale;
-      const h = (rect[3] - rect[1]) * scale;
-
-      const link = document.createElement("a");
-
-      link.href = annotation.url;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-
-      link.className = "link";
-
-      link.style.left = x + "px";
-      link.style.top = y + "px";
-      link.style.width = w + "px";
-      link.style.height = h + "px";
-
-      slides[i].overlay.appendChild(link);
+    if (!initialDistance) {
+      initialDistance = distance;
+    } else {
+      scale = distance / initialDistance;
+      scale = Math.min(Math.max(1, scale), 4);
+      applyZoom();
     }
+  }
+}, { passive: false });
 
-  });
+document.addEventListener("touchend", () => {
+  initialDistance = null;
+});
+
+/* -------- APPLY ZOOM -------- */
+function applyZoom() {
+  const canvas = slides[current].querySelector("canvas");
+  if (canvas) {
+    canvas.style.transform = `scale(${scale})`;
+  }
 }
 
-renderPage(0);
-renderPage(1);
-
-swiper.on('slideChange', ()=>{
-  const i = swiper.activeIndex;
-
-  if(i >= 0) renderPage(i);
-  if(i + 1 < slides.length) renderPage(i + 1);
-  if(i - 1 >= 0) renderPage(i - 1);
-
-  alinharOverlay(slides[i]);
-});
-
-window.addEventListener("resize", ()=>{
-  slides.forEach(slide=>{
-    if(slide.rendered){
-      alinharOverlay(slide);
-    }
-  });
-});
-
-}).catch(err => {
-  document.body.innerHTML = `
-    <div style="color:white;text-align:center;padding:40px">
-      Erro ao carregar portfólio.<br>
-      <a href="portfolio.pdf" style="color:white">Baixar PDF</a>
-    </div>
-  `;
-  console.error(err);
-});
+function resetZoom() {
+  scale = 1;
+  applyZoom();
+}
 </script>
 
 </body>
