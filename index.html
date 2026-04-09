@@ -10,7 +10,7 @@
 <!-- Open Graph (WhatsApp preview) -->
 <meta property="og:title" content="Z1N Arquiteturas">
 <meta property="og:description" content="Apresentação interativa">
-<meta property="og:image" content="0g-image.jpg">
+<meta property="og:image" content="og-image.jpg">
 
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -58,19 +58,17 @@ canvas {
   z-index: 10;
 }
 
-/* Setas inferiores nas extremidades */
+/* Setas (SEM bolinha) */
 .nav {
   position: absolute;
   bottom: 20px;
   z-index: 20;
-  background: rgba(255,255,255,0.2);
+  background: transparent;
   color: white;
   border: none;
-  font-size: 28px;
-  padding: 14px 20px;
-  border-radius: 50px;
+  font-size: 32px;
+  padding: 10px;
   cursor: pointer;
-  backdrop-filter: blur(6px);
 }
 
 .prev { left: 20px; }
@@ -117,7 +115,7 @@ let startX = 0;
 let startY = 0;
 
 /* páginas com zoom liberado */
-const zoomPages = [2, 3, 4]; // (índice começa em 0 → páginas 3,4,5)
+const zoomPages = [2, 3, 4];
 
 /* -------- PDF LOAD -------- */
 pdfjsLib.getDocument(url).promise.then(pdf => {
