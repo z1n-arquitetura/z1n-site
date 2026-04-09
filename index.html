@@ -29,7 +29,8 @@ html, body {
   left: 0;
   display: none;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
+  overflow: hidden;
 }
 
 .slide.active {
@@ -40,10 +41,12 @@ html, body {
 canvas {
   max-width: 100%;
   max-height: 100%;
-  transform-origin: center center;
+  transform-origin: top center;
+  display: block;
+  cursor: grab;
 }
 
-/* Botão WhatsApp */
+/* WhatsApp */
 .link {
   position: absolute;
   z-index: 10;
@@ -84,7 +87,14 @@ const slider = document.getElementById('slider');
 
 let current = 0;
 let slides = [];
+
+/* ZOOM + PAN STATE */
 let scale = 1;
+let posX = 0;
+let posY = 0;
+let isDragging = false;
+let startX = 0;
+let startY = 0;
 
 /* -------- PDF LOAD -------- */
 pdfjsLib.getDocument(url).promise.then(pdf => {
@@ -151,6 +161,22 @@ function prev() {
   showPage(current - 1);
 }
 
+/* -------- APPLY TRANSFORM -------- */
+function applyTransform() {
+  const canvas = slides[current].querySelector("canvas");
+  if (canvas) {
+    canvas.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
+  }
+}
+
+/* -------- RESET -------- */
+function resetZoom() {
+  scale = 1;
+  posX = 0;
+  posY = 0;
+  applyTransform();
+}
+
 /* -------- ZOOM DESKTOP -------- */
 document.addEventListener("wheel", (e) => {
   if (e.ctrlKey) {
@@ -159,14 +185,46 @@ document.addEventListener("wheel", (e) => {
     scale += e.deltaY * -0.01;
     scale = Math.min(Math.max(1, scale), 4);
 
-    applyZoom();
+    applyTransform();
   }
 }, { passive: false });
 
-/* -------- ZOOM MOBILE (PINCH) -------- */
+/* -------- PAN DESKTOP -------- */
+document.addEventListener("mousedown", (e) => {
+  if (scale <= 1) return;
+
+  isDragging = true;
+  startX = e.clientX - posX;
+  startY = e.clientY - posY;
+});
+
+document.addEventListener("mousemove", (e) => {
+  if (!isDragging) return;
+
+  posX = e.clientX - startX;
+  posY = e.clientY - startY;
+
+  applyTransform();
+});
+
+document.addEventListener("mouseup", () => {
+  isDragging = false;
+});
+
+/* -------- TOUCH (PINCH + PAN) -------- */
 let initialDistance = null;
 
+document.addEventListener("touchstart", (e) => {
+  if (e.touches.length === 1 && scale > 1) {
+    isDragging = true;
+    startX = e.touches[0].clientX - posX;
+    startY = e.touches[0].clientY - posY;
+  }
+});
+
 document.addEventListener("touchmove", (e) => {
+
+  /* PINCH */
   if (e.touches.length === 2) {
     e.preventDefault();
 
@@ -179,27 +237,24 @@ document.addEventListener("touchmove", (e) => {
     } else {
       scale = distance / initialDistance;
       scale = Math.min(Math.max(1, scale), 4);
-      applyZoom();
+      applyTransform();
     }
   }
+
+  /* PAN */
+  if (e.touches.length === 1 && isDragging) {
+    posX = e.touches[0].clientX - startX;
+    posY = e.touches[0].clientY - startY;
+    applyTransform();
+  }
+
 }, { passive: false });
 
 document.addEventListener("touchend", () => {
+  isDragging = false;
   initialDistance = null;
 });
 
-/* -------- APPLY ZOOM -------- */
-function applyZoom() {
-  const canvas = slides[current].querySelector("canvas");
-  if (canvas) {
-    canvas.style.transform = `scale(${scale})`;
-  }
-}
-
-function resetZoom() {
-  scale = 1;
-  applyZoom();
-}
 </script>
 
 </body>
