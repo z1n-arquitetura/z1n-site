@@ -7,7 +7,7 @@
 
 <title>Z1N Arquiteturas</title>
 
-<!-- Open Graph (WhatsApp preview CORRETO) -->
+<!-- Open Graph -->
 <meta property="og:title" content="Z1N Arquiteturas">
 <meta property="og:description" content="Projetos modernos e exclusivos">
 <meta property="og:image" content="https://z1n-arq.com.br/og-image.jpg">
@@ -53,6 +53,7 @@ canvas {
   max-height: 100%;
   transform-origin: top center;
   display: block;
+  cursor: grab;
 }
 
 /* WhatsApp botão */
@@ -61,7 +62,7 @@ canvas {
   z-index: 10;
 }
 
-/* Setas limpas (sem bolinha) */
+/* Setas limpas */
 .nav {
   position: absolute;
   bottom: 20px;
@@ -77,24 +78,12 @@ canvas {
 .prev { left: 20px; }
 .next { right: 20px; }
 
-/* Indicador */
-.indicator {
-  position: absolute;
-  top: 15px;
-  width: 100%;
-  text-align: center;
-  color: white;
-  font-size: 14px;
-  opacity: 0.7;
-}
 </style>
 </head>
 
 <body>
 
 <div class="slider" id="slider"></div>
-
-<div class="indicator" id="indicator">1 / 1</div>
 
 <button class="nav prev" onclick="prev()">←</button>
 <button class="nav next" onclick="next()">→</button>
@@ -104,7 +93,6 @@ canvas {
 <script>
 const url = 'portfolio.pdf';
 const slider = document.getElementById('slider');
-const indicator = document.getElementById('indicator');
 
 let current = 0;
 let slides = [];
@@ -122,8 +110,6 @@ const zoomPages = [2, 3, 4];
 
 /* -------- PDF LOAD -------- */
 pdfjsLib.getDocument(url).promise.then(pdf => {
-
-  indicator.innerText = `1 / ${pdf.numPages}`;
 
   for (let i = 1; i <= pdf.numPages; i++) {
 
@@ -168,7 +154,7 @@ pdfjsLib.getDocument(url).promise.then(pdf => {
 
 });
 
-/* -------- NAV -------- */
+/* -------- NAV (LOOP INFINITO) -------- */
 function showPage(index) {
   if (index < 0 || index >= slides.length) return;
 
@@ -176,13 +162,24 @@ function showPage(index) {
   current = index;
   slides[current].classList.add("active");
 
-  indicator.innerText = `${current + 1} / ${slides.length}`;
-
   resetZoom();
 }
 
-function next() { showPage(current + 1); }
-function prev() { showPage(current - 1); }
+function next() {
+  if (current >= slides.length - 1) {
+    showPage(0);
+  } else {
+    showPage(current + 1);
+  }
+}
+
+function prev() {
+  if (current <= 0) {
+    showPage(slides.length - 1);
+  } else {
+    showPage(current - 1);
+  }
+}
 
 /* -------- TRANSFORM -------- */
 function applyTransform() {
