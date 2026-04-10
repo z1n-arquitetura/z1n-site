@@ -6,16 +6,14 @@
 
 <title>Z1N Arquiteturas</title>
 
-<!-- 🔥 CAPA WHATSAPP -->
+<!-- CAPA WHATSAPP -->
 <meta property="og:title" content="Z1N Arquiteturas">
 <meta property="og:description" content="Projetos exclusivos">
 <meta property="og:image" content="https://z1n-arquitetura.github.io/z1n-site/og-image.jpg">
-
 <meta property="og:url" content="https://z1n-arquitetura.github.io/z1n-site/">
 <meta property="og:type" content="website">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:type" content="image/jpeg">
 
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -49,11 +47,10 @@ canvas {
   max-height: 100%;
 }
 
-/* LINKS INVISÍVEIS */
+/* LINKS */
 .link {
   position: absolute;
   z-index: 10;
-  background: transparent;
 }
 
 /* SETAS */
@@ -75,64 +72,86 @@ canvas {
 
 <body>
 
-<div class="slider">
-
-<!-- PAGINA 1 -->
-<div class="slide active">
-  <canvas width="1620" height="2880"></canvas>
-
-  <a href="https://wa.me/5516991128533"
-     class="link"
-     style="left:1142px; top:735px; width:120px; height:120px;"></a>
-
-  <a href="tel:+5516991128533"
-     class="link"
-     style="left:1274px; top:757px; width:488px; height:81px;"></a>
-</div>
-
-<!-- PAGINAS SEM LINK -->
-<div class="slide"><canvas width="1620" height="2880"></canvas></div>
-<div class="slide"><canvas width="1626" height="2883"></canvas></div>
-<div class="slide"><canvas width="1620" height="2880"></canvas></div>
-<div class="slide"><canvas width="1620" height="2880"></canvas></div>
-
-<!-- PAGINA 6 -->
-<div class="slide">
-  <canvas width="1620" height="2880"></canvas>
-
-  <a href="https://wa.me/5516991128533"
-     class="link"
-     style="left:1158px; top:918px; width:120px; height:120px;"></a>
-
-  <a href="tel:+5516991128533"
-     class="link"
-     style="left:1284px; top:929px; width:458px; height:94px;"></a>
-</div>
-
-<div class="slide"><canvas width="1620" height="2880"></canvas></div>
-
-<!-- PAGINA 8 -->
-<div class="slide">
-  <canvas width="1620" height="2880"></canvas>
-
-  <a href="https://wa.me/5516991128533"
-     class="link"
-     style="left:1383px; top:825px; width:127px; height:97px;"></a>
-
-  <a href="tel:+5516991128533"
-     class="link"
-     style="left:1157px; top:666px; width:592px; height:151px;"></a>
-</div>
-
-</div>
+<div class="slider" id="slider"></div>
 
 <button class="nav prev" onclick="prev()">←</button>
 <button class="nav next" onclick="next()">→</button>
 
-<script>
-let current = 0;
-const slides = document.querySelectorAll('.slide');
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
+<script>
+const url = 'portfolio.pdf';
+const slider = document.getElementById('slider');
+
+let current = 0;
+let slides = [];
+
+pdfjsLib.getDocument(url).promise.then(pdf => {
+
+  for (let i = 1; i <= pdf.numPages; i++) {
+
+    pdf.getPage(i).then(page => {
+
+      const viewport = page.getViewport({ scale: 2 });
+
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+
+      const slide = document.createElement('div');
+      slide.className = 'slide';
+
+      slide.appendChild(canvas);
+      slider.appendChild(slide);
+
+      slides.push(slide);
+      if (slides.length === 1) slide.classList.add("active");
+
+      page.render({ canvasContext: ctx, viewport });
+
+      const pageIndex = i;
+
+      /* PAGINA 1 */
+      if (pageIndex === 1) {
+        createLink(slide, "https://wa.me/5516991128533", 1142, 735, 120, 120);
+        createLink(slide, "tel:+5516991128533", 1274, 757, 488, 81);
+      }
+
+      /* PAGINA 6 */
+      if (pageIndex === 6) {
+        createLink(slide, "https://wa.me/5516991128533", 1158, 918, 120, 120);
+        createLink(slide, "tel:+5516991128533", 1284, 929, 458, 94);
+      }
+
+      /* PAGINA 8 */
+      if (pageIndex === pdf.numPages) {
+        createLink(slide, "https://wa.me/5516991128533", 1383, 825, 127, 97);
+        createLink(slide, "tel:+5516991128533", 1157, 666, 592, 151);
+      }
+
+    });
+
+  }
+
+});
+
+/* CRIAR LINK */
+function createLink(slide, href, x, y, w, h) {
+  const link = document.createElement('a');
+  link.href = href;
+  link.className = 'link';
+
+  link.style.left = x + "px";
+  link.style.top = y + "px";
+  link.style.width = w + "px";
+  link.style.height = h + "px";
+
+  slide.appendChild(link);
+}
+
+/* NAV */
 function showPage(index) {
   slides[current].classList.remove("active");
   current = index;
