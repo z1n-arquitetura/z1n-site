@@ -1,183 +1,217 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Z1N Arquiteturas</title>
 
-<title>Z1N Arquiteturas</title>
+    <!-- Open Graph / WhatsApp -->
+    <meta property="og:title" content="Z1N Arquiteturas">
+    <meta property="og:description" content="Projetos exclusivos">
+    <meta property="og:image" content="https://z1n-arquitetura.github.io/z1n-site/og-image.jpg">
+    <meta property="og:url" content="https://z1n-arquitetura.github.io/z1n-site/">
+    <meta property="og:type" content="website">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
 
-<!-- CAPA WHATSAPP -->
-<meta property="og:title" content="Z1N Arquiteturas">
-<meta property="og:description" content="Projetos exclusivos">
-<meta property="og:image" content="https://z1n-arquitetura.github.io/z1n-site/og-image.jpg">
-<meta property="og:url" content="https://z1n-arquitetura.github.io/z1n-site/">
-<meta property="og:type" content="website">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<style>
-* { margin:0; padding:0; box-sizing:border-box; }
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+            touch-action: manipulation; /* melhora clique no mobile */
+        }
 
-html, body {
-  overflow: hidden;
-  background: #000;
-}
+        .slider {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
 
-/* SLIDER */
-.slider {
-  width: 100vw;
-  height: 100vh;
-  position: relative;
-}
+        .slide {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            display: none;
+            justify-content: center;
+            align-items: flex-start;
+        }
 
-.slide {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  display: none;
-  justify-content: center;
-  align-items: flex-start; /* remove faixa preta */
-}
+        .slide.active {
+            display: flex;
+        }
 
-.slide.active {
-  display: flex;
-}
+        canvas {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+        }
 
-canvas {
-  max-width: 100%;
-  max-height: 100%;
-  display: block;
-}
+        /* LINKS */
+        .link {
+            position: absolute;
+            z-index: 9999;
+            display: block;
+            /* Debug: descomente a linha abaixo para ver as áreas clicáveis */
+            /* background: rgba(255, 0, 0, 0.25); */
+        }
 
-/* LINKS (AGORA FUNCIONA EM TUDO) */
-.link {
-  position: absolute;
-  z-index: 9999;
-  display: block;
-}
+        /* SETAS DE NAVEGAÇÃO */
+        .nav {
+            position: absolute;
+            bottom: 20px;
+            z-index: 100;
+            color: white;
+            font-size: 42px;
+            background: rgba(0,0,0,0.5);
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
 
-/* SETAS */
-.nav {
-  position: absolute;
-  bottom: 20px;
-  z-index: 20;
-  color: white;
-  font-size: 32px;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
+        .nav:hover {
+            background: rgba(0,0,0,0.8);
+        }
 
-.prev { left: 20px; }
-.next { right: 20px; }
-
-</style>
+        .prev { left: 20px; }
+        .next { right: 20px; }
+    </style>
 </head>
-
 <body>
 
-<div class="slider" id="slider"></div>
+    <div class="slider" id="slider"></div>
 
-<button class="nav prev" onclick="prev()">←</button>
-<button class="nav next" onclick="next()">→</button>
+    <button class="nav prev" onclick="prev()">←</button>
+    <button class="nav next" onclick="next()">→</button>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- pdf.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
-<script>
-const url = 'portfolio.pdf';
-const slider = document.getElementById('slider');
+    <script>
+        // Configuração do worker do pdf.js (importante no GitHub Pages)
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-let current = 0;
-let slides = [];
+        // URL do PDF - mais robusta para GitHub Pages
+        let pdfUrl = 'portfolio.pdf';
+        if (window.location.hostname.includes('github.io')) {
+            pdfUrl = 'https://z1n-arquitetura.github.io/z1n-site/portfolio.pdf';
+        }
 
-pdfjsLib.getDocument(url).promise.then(pdf => {
+        const slider = document.getElementById('slider');
+        let current = 0;
+        let slides = [];
 
-  for (let i = 1; i <= pdf.numPages; i++) {
+        // Carrega o PDF
+        pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
+            console.log(`PDF carregado com ${pdf.numPages} páginas`);
 
-    pdf.getPage(i).then(page => {
+            for (let i = 1; i <= pdf.numPages; i++) {
+                pdf.getPage(i).then(page => {
+                    const viewport = page.getViewport({ scale: 2.0 }); // escala boa para qualidade
 
-      const viewport = page.getViewport({ scale: 2 });
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
 
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
+                    const slide = document.createElement('div');
+                    slide.className = 'slide';
+                    slide.appendChild(canvas);
+                    slider.appendChild(slide);
 
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
+                    slides.push(slide);
 
-      const slide = document.createElement('div');
-      slide.className = 'slide';
+                    // Renderiza a página
+                    page.render({
+                        canvasContext: ctx,
+                        viewport: viewport
+                    });
 
-      slide.appendChild(canvas);
-      slider.appendChild(slide);
+                    const pageIndex = i;
 
-      slides.push(slide);
-      if (slides.length === 1) slide.classList.add("active");
+                    // === Seus links por página ===
+                    if (pageIndex === 1) {
+                        createLink(slide, "https://wa.me/5516991128533", 1142, 735, 120, 120);
+                        createLink(slide, "tel:+5516991128533", 1274, 757, 488, 81);
+                    }
+                    if (pageIndex === 6) {
+                        createLink(slide, "https://wa.me/5516991128533", 1158, 918, 120, 120);
+                        createLink(slide, "tel:+5516991128533", 1284, 929, 458, 94);
+                    }
+                    if (pageIndex === pdf.numPages) {
+                        createLink(slide, "https://wa.me/5516991128533", 1383, 825, 127, 97);
+                        createLink(slide, "tel:+5516991128533", 1157, 666, 592, 151);
+                    }
 
-      page.render({ canvasContext: ctx, viewport });
+                    // Ativa a primeira página
+                    if (slides.length === 1) {
+                        slide.classList.add("active");
+                    }
+                });
+            }
+        }).catch(err => {
+            console.error("Erro ao carregar o PDF:", err);
+            alert("Não foi possível carregar o portfolio.pdf. Verifique se o arquivo está na raiz do repositório.");
+        });
 
-      const pageIndex = i;
+        // Função para criar links responsivos
+        function createLink(slide, href, x, y, w, h) {
+            const link = document.createElement('a');
+            link.href = href;
+            link.className = 'link';
+            link.target = href.startsWith('https') ? '_blank' : '';
+            link.rel = 'noopener';
 
-      /* ===== PAGINA 1 ===== */
-      if (pageIndex === 1) {
-        createLink(slide, "https://wa.me/5516991128533", 1142, 735, 120, 120);
-        createLink(slide, "tel:+5516991128533", 1274, 757, 488, 81);
-      }
+            const canvas = slide.querySelector('canvas');
+            if (!canvas) return;
 
-      /* ===== PAGINA 6 ===== */
-      if (pageIndex === 6) {
-        createLink(slide, "https://wa.me/5516991128533", 1158, 918, 120, 120);
-        createLink(slide, "tel:+5516991128533", 1284, 929, 458, 94);
-      }
+            const percentX = (x / canvas.width) * 100;
+            const percentY = (y / canvas.height) * 100;
+            const percentW = (w / canvas.width) * 100;
+            const percentH = (h / canvas.height) * 100;
 
-      /* ===== PAGINA FINAL ===== */
-      if (pageIndex === pdf.numPages) {
-        createLink(slide, "https://wa.me/5516991128533", 1383, 825, 127, 97);
-        createLink(slide, "tel:+5516991128533", 1157, 666, 592, 151);
-      }
+            link.style.left = percentX + '%';
+            link.style.top = percentY + '%';
+            link.style.width = percentW + '%';
+            link.style.height = percentH + '%';
 
-    });
+            slide.appendChild(link);
+        }
 
-  }
+        // Navegação
+        function showPage(index) {
+            if (!slides[current] || !slides[index]) return;
+            slides[current].classList.remove("active");
+            current = index;
+            slides[current].classList.add("active");
+        }
 
-});
+        function next() {
+            current >= slides.length - 1 ? showPage(0) : showPage(current + 1);
+        }
 
-/* LINKS RESPONSIVOS (FUNCIONA MOBILE + DESKTOP) */
-function createLink(slide, href, x, y, w, h) {
+        function prev() {
+            current <= 0 ? showPage(slides.length - 1) : showPage(current - 1);
+        }
 
-  const link = document.createElement('a');
-  link.href = href;
-  link.className = 'link';
-
-  const canvas = slide.querySelector("canvas");
-
-  const percentX = (x / canvas.width) * 100;
-  const percentY = (y / canvas.height) * 100;
-  const percentW = (w / canvas.width) * 100;
-  const percentH = (h / canvas.height) * 100;
-
-  link.style.left = percentX + "%";
-  link.style.top = percentY + "%";
-  link.style.width = percentW + "%";
-  link.style.height = percentH + "%";
-
-  slide.appendChild(link);
-}
-
-/* NAVEGAÇÃO */
-function showPage(index) {
-  slides[current].classList.remove("active");
-  current = index;
-  slides[current].classList.add("active");
-}
-
-function next() {
-  current >= slides.length - 1 ? showPage(0) : showPage(current + 1);
-}
-
-function prev() {
-  current <= 0 ? showPage(slides.length - 1) : showPage(current - 1);
-}
-</script>
-
+        // Suporte a teclado (opcional)
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowRight') next();
+            if (e.key === 'ArrowLeft') prev();
+        });
+    </script>
 </body>
 </html>
