@@ -2,7 +2,6 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Z1N Arquiteturas</title>
@@ -15,7 +14,6 @@ html, body {
   background: #000;
 }
 
-/* SLIDER */
 .slider {
   width: 100vw;
   height: 100vh;
@@ -40,7 +38,7 @@ canvas {
   max-height: 100%;
 }
 
-/* LINKS VISÍVEIS (EDITÁVEIS) */
+/* LINKS VISÍVEIS */
 .link {
   position: absolute;
   z-index: 50;
@@ -87,7 +85,6 @@ const slider = document.getElementById('slider');
 let current = 0;
 let slides = [];
 
-/* -------- PDF LOAD -------- */
 pdfjsLib.getDocument(url).promise.then(pdf => {
 
   for (let i = 1; i <= pdf.numPages; i++) {
@@ -115,35 +112,29 @@ pdfjsLib.getDocument(url).promise.then(pdf => {
 
       const pageIndex = i;
 
-/* =========================
-   PÁGINA 1
-========================= */
-if (pageIndex === 1) {
+      /* -------- PÁGINA 1 -------- */
+      if (pageIndex === 1) {
 
-  createLink(slide, "wpp", "https://wa.me/5516991128533", 20, 75, 80, 80);
-  createLink(slide, "tel", "tel:+5516991128533", 35, 75, 300, 80);
+        createLink(slide, "wpp", "https://wa.me/5516991128533", 120, 520, 90, 90);
+        createLink(slide, "tel", "tel:+5516991128533", 220, 520, 350, 90);
 
-}
+      }
 
-/* =========================
-   PÁGINA 6
-========================= */
-if (pageIndex === 6) {
+      /* -------- PÁGINA 6 -------- */
+      if (pageIndex === 6) {
 
-  createLink(slide, "wpp", "https://wa.me/5516991128533", 40, 75, 80, 80);
-  createLink(slide, "tel", "tel:+5516991128533", 10, 65, 400, 90);
+        createLink(slide, "wpp", "https://wa.me/5516991128533", 250, 550, 90, 90);
+        createLink(slide, "tel", "tel:+5516991128533", 80, 450, 500, 100);
 
-}
+      }
 
-/* =========================
-   PÁGINA 8 (ÚLTIMA)
-========================= */
-if (pageIndex === pdf.numPages) {
+      /* -------- ÚLTIMA PÁGINA -------- */
+      if (pageIndex === pdf.numPages) {
 
-  createLink(slide, "wpp", "https://wa.me/5516991128533", 10, 70, 90, 90);
-  createLink(slide, "tel", "tel:+5516991128533", 30, 70, 350, 90);
+        createLink(slide, "wpp", "https://wa.me/5516991128533", 80, 500, 100, 100);
+        createLink(slide, "tel", "tel:+5516991128533", 220, 500, 400, 100);
 
-}
+      }
 
     });
 
@@ -159,7 +150,7 @@ function createLink(slide, type, href, x, y, w, h) {
   link.className = 'link ' + type;
 
   link.style.left = x + "px";
-  link.style.top = y + "%";
+  link.style.top = y + "px";
   link.style.width = w + "px";
   link.style.height = h + "px";
 
@@ -168,21 +159,21 @@ function createLink(slide, type, href, x, y, w, h) {
   makeDraggable(link);
 }
 
-/* -------- DRAG -------- */
+/* -------- DRAG CORRIGIDO -------- */
 function makeDraggable(el) {
   let isDown = false, offsetX, offsetY;
 
   el.addEventListener('mousedown', e => {
     isDown = true;
-    offsetX = e.offsetX;
-    offsetY = e.offsetY;
+    offsetX = e.clientX - el.offsetLeft;
+    offsetY = e.clientY - el.offsetTop;
   });
 
   document.addEventListener('mousemove', e => {
     if (!isDown) return;
 
-    el.style.left = (e.pageX - offsetX) + 'px';
-    el.style.top = (e.pageY - offsetY) + 'px';
+    el.style.left = (e.clientX - offsetX) + 'px';
+    el.style.top = (e.clientY - offsetY) + 'px';
   });
 
   document.addEventListener('mouseup', () => {
