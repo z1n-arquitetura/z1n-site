@@ -1,4 +1,13 @@
-<!DOCTYPE html>
+Entendi! O botão não apareceu provavelmente porque ele está position: fixed e pode estar sendo ocultado ou o CSS não carregou corretamente.
+Aqui está a versão corrigida e mais segura. Fiz as seguintes melhorias:
+
+O botão de salvar agora é mais visível (fundo verde forte + texto maior)
+Coloquei z-index ainda mais alto
+Adicionei uma mensagem de confirmação mais clara
+O botão aparece sempre no topo direito
+
+Código Completo Atualizado (com botão de salvar visível):
+HTML<!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
@@ -55,22 +64,29 @@
             cursor: nwse-resize;
             border-radius: 50%;
         }
+
+        /* Botão Salvar - mais visível */
         .save-btn {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 20000;
+            top: 15px;
+            right: 15px;
+            z-index: 99999;
             background: #00ff00;
             color: black;
             border: none;
-            padding: 12px 20px;
-            font-size: 16px;
+            padding: 15px 25px;
+            font-size: 18px;
             font-weight: bold;
             border-radius: 8px;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,255,0,0.4);
+            box-shadow: 0 6px 20px rgba(0, 255, 0, 0.6);
+            text-transform: uppercase;
         }
-        .save-btn:hover { background: #00cc00; }
+        .save-btn:hover {
+            background: #00cc00;
+            transform: scale(1.05);
+        }
+
         .nav {
             position: absolute;
             bottom: 30px;
@@ -92,7 +108,7 @@
     <div class="slider" id="slider"></div>
     <button class="nav prev" onclick="prev()">←</button>
     <button class="nav next" onclick="next()">→</button>
-    <button class="save-btn" onclick="savePositions()">💾 SALVAR POSIÇÕES ATUAIS</button>
+    <button class="save-btn" onclick="savePositions()">💾 SALVAR POSIÇÕES</button>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>
@@ -106,7 +122,7 @@
         const slider = document.getElementById('slider');
         let current = 0;
         let slides = [];
-        let allLinks = [];   // guarda referência de todos os links criados
+        let allLinks = [];
 
         pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
             console.log(`✅ PDF carregado com ${pdf.numPages} páginas`);
@@ -183,7 +199,6 @@
                 updatePosition(pX, pY, pW, pH);
             });
 
-            // Duplo clique para editar
             link.addEventListener('dblclick', (e) => {
                 e.preventDefault();
                 const curX = parseFloat(link.style.left) || 0;
@@ -196,7 +211,9 @@
                 const nw = prompt("Largura (%):", curW.toFixed(1));
                 const nh = prompt("Altura (%):", curH.toFixed(1));
 
-                if (nx && ny && nw && nh) updatePosition(parseFloat(nx), parseFloat(ny), parseFloat(nw), parseFloat(nh));
+                if (nx && ny && nw && nh) {
+                    updatePosition(parseFloat(nx), parseFloat(ny), parseFloat(nw), parseFloat(nh));
+                }
             });
 
             slide.appendChild(link);
@@ -208,7 +225,6 @@
             let startMouseX, startMouseY, startPercentX, startPercentY, startPercentW, startPercentH;
 
             el.addEventListener('mousedown', e => {
-                const rect = canvas.getBoundingClientRect();
                 startMouseX = e.clientX;
                 startMouseY = e.clientY;
                 startPercentX = parseFloat(el.style.left) || 0;
@@ -247,14 +263,21 @@
                 }
             });
 
-            document.addEventListener('mouseup', () => { dragging = false; resizing = false; });
+            document.addEventListener('mouseup', () => {
+                dragging = false;
+                resizing = false;
+            });
         }
 
-        // ====================== FUNÇÃO PARA SALVAR ======================
         function savePositions() {
-            let output = "=== POSIÇÕES SALVAS ===\n\n";
+            if (allLinks.length === 0) {
+                alert("Nenhum link encontrado ainda.");
+                return;
+            }
 
-            allLinks.forEach(item => {
+            let output = "=== POSIÇÕES AJUSTADAS - COPIE ESTE CÓDIGO ===\n\n";
+
+            allLinks.forEach((item, index) => {
                 const style = item.link.style;
                 const canvas = item.canvas;
                 const x = Math.round((parseFloat(style.left) / 100) * canvas.width);
@@ -262,17 +285,18 @@
                 const w = Math.round((parseFloat(style.width) / 100) * canvas.width);
                 const h = Math.round((parseFloat(style.height) / 100) * canvas.height);
 
-                output += `Página ${item.pageNum} - ${item.label}\n`;
+                output += `// Página ${item.pageNum} - ${item.label}\n`;
                 output += `createLink(slide, "${item.href}", ${x}, ${y}, ${w}, ${h});\n\n`;
             });
 
-            console.log("%c✅ POSIÇÕES SALVAS COM SUCESSO!", "color: lime; font-size: 18px");
+            console.clear();
+            console.log("%c✅ POSIÇÕES SALVAS COM SUCESSO!", "color: lime; font-size: 20px; font-weight: bold");
             console.log(output);
 
-            // Salva também no localStorage
-            localStorage.setItem('z1n_link_positions', output);
+            alert("✅ Posições salvas!\n\nAbra o Console do navegador (pressione F12) e copie todo o código que apareceu.\n\nDepois cole aqui para mim que eu faço a versão final limpa.");
 
-            alert("✅ Posições salvas!\n\nAbra o Console (F12) e copie o código gerado.\n\nTambém foi salvo no localStorage.");
+            // Salva no localStorage como backup
+            localStorage.setItem('z1n_link_positions', output);
         }
 
         function showPage(index) {
