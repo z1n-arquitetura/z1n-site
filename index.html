@@ -45,6 +45,11 @@ canvas {
   border: 2px dashed yellow;
   background: rgba(255,255,0,0.2);
   cursor: move;
+
+  resize: both;        /* 🔥 permite redimensionar */
+  overflow: auto;      /* necessário pro resize */
+  min-width: 40px;
+  min-height: 40px;
 }
 
 .link.wpp {
