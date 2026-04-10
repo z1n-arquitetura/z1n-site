@@ -68,18 +68,6 @@
             border-radius: 8px;
             cursor: pointer;
         }
-        .message {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.9);
-            padding: 30px;
-            border-radius: 12px;
-            text-align: center;
-            max-width: 80%;
-            z-index: 9999;
-        }
         #result-box {
             position: fixed;
             top: 90px;
@@ -98,6 +86,7 @@
             overflow: auto;
             font-family: monospace;
             font-size: 15px;
+            line-height: 1.5;
         }
         .close-btn {
             position: absolute;
@@ -127,30 +116,18 @@
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-        // Caminho do PDF - ajuste se necessário
-        let pdfUrl = 'portfolio.pdf';
+        // Caminho CORRETO do PDF no seu domínio
+        const pdfUrl = 'https://z1n-arq.com.br/portfolio.pdf';
 
-        // Para domínio real
-        if (location.hostname.includes('z1n-arq.com.br') || location.hostname.includes('github.io')) {
-            pdfUrl = 'https://z1n-arquitetura.github.io/z1n-site/portfolio.pdf';
-        }
-
-        console.log("Carregando PDF de:", pdfUrl);
+        console.log("Tentando carregar PDF:", pdfUrl);
 
         const slider = document.getElementById('slider');
         let slides = [];
         let allLinks = [];
         let current = 0;
 
-        // Mostrar mensagem enquanto carrega
-        const loadingMsg = document.createElement('div');
-        loadingMsg.className = 'message';
-        loadingMsg.innerHTML = `<h2>Carregando portfólio...</h2><p>Aguarde um momento</p>`;
-        slider.appendChild(loadingMsg);
-
         pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
-            console.log(`✅ PDF carregado! ${pdf.numPages} páginas`);
-            loadingMsg.remove();
+            console.log(`✅ PDF carregado com sucesso! ${pdf.numPages} páginas`);
 
             for (let i = 1; i <= pdf.numPages; i++) {
                 pdf.getPage(i).then(page => {
@@ -187,16 +164,24 @@
                 });
             }
         }).catch(err => {
-            console.error("Erro ao carregar PDF:", err);
-            loadingMsg.innerHTML = `
+            console.error("Erro:", err);
+            const errorDiv = document.createElement('div');
+            errorDiv.style.position = "absolute";
+            errorDiv.style.top = "50%";
+            errorDiv.style.left = "50%";
+            errorDiv.style.transform = "translate(-50%, -50%)";
+            errorDiv.style.background = "rgba(0,0,0,0.9)";
+            errorDiv.style.padding = "30px";
+            errorDiv.style.borderRadius = "12px";
+            errorDiv.style.textAlign = "center";
+            errorDiv.innerHTML = `
                 <h2>❌ Erro ao carregar o PDF</h2>
-                <p>Não foi possível carregar o arquivo <strong>portfolio.pdf</strong></p>
                 <p>URL tentada: ${pdfUrl}</p>
-                <p><strong>Solução:</strong> Verifique se o arquivo portfolio.pdf está na mesma pasta do HTML ou no GitHub.</p>
+                <p><strong>Verifique se o arquivo portfolio.pdf está publicado no servidor.</strong></p>
             `;
+            slider.appendChild(errorDiv);
         });
 
-        // Função para criar links arrastáveis (mesma de antes)
         function createDraggableLink(slide, href, x, y, w, h, label, pageNum) {
             const link = document.createElement('a');
             link.href = href;
@@ -249,11 +234,11 @@
 
         function savePositions() {
             if (allLinks.length === 0) {
-                alert("PDF ainda não carregou ou não há links para salvar.");
+                alert("PDF ainda não carregou completamente.");
                 return;
             }
 
-            let text = "// === POSIÇÕES AJUSTADAS ===\n\n";
+            let text = "// === POSIÇÕES AJUSTADAS - COLE NA VERSÃO FINAL ===\n\n";
 
             allLinks.forEach(item => {
                 const s = item.link.style;
