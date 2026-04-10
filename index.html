@@ -38,7 +38,7 @@ canvas {
   max-height: 100%;
 }
 
-/* 🔥 CAIXAS GARANTIDAS */
+/* CAIXAS */
 .link {
   position: absolute;
   z-index: 99999;
@@ -61,7 +61,7 @@ canvas {
   background: rgba(255,0,0,0.5);
 }
 
-/* HANDLE */
+/* RESIZE */
 .handle {
   position: absolute;
   width: 20px;
@@ -72,7 +72,7 @@ canvas {
   cursor: nwse-resize;
 }
 
-/* NAV */
+/* SETAS */
 .nav {
   position: absolute;
   bottom: 20px;
@@ -86,6 +86,19 @@ canvas {
 .prev { left: 20px; }
 .next { right: 20px; }
 
+/* BOTÃO SALVAR */
+.save-btn {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 999999;
+  padding: 10px;
+  background: black;
+  color: white;
+  border: 1px solid white;
+  cursor: pointer;
+}
+
 </style>
 </head>
 
@@ -95,6 +108,9 @@ canvas {
 
 <button class="nav prev" onclick="prev()">←</button>
 <button class="nav next" onclick="next()">→</button>
+
+<!-- 🔥 BOTÃO SALVAR -->
+<button class="save-btn" onclick="exportHTML()">SALVAR</button>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
@@ -132,20 +148,7 @@ pdfjsLib.getDocument(url).promise.then(pdf => {
 
       const pageIndex = i;
 
-      /* PÁGINA 1 */
-      if (pageIndex === 1) {
-        createLink(slide, "wpp", "https://wa.me/5516991128533");
-        createLink(slide, "tel", "tel:+5516991128533");
-      }
-
-      /* PÁGINA 6 */
-      if (pageIndex === 6) {
-        createLink(slide, "wpp", "https://wa.me/5516991128533");
-        createLink(slide, "tel", "tel:+5516991128533");
-      }
-
-      /* ÚLTIMA */
-      if (pageIndex === pdf.numPages) {
+      if (pageIndex === 1 || pageIndex === 6 || pageIndex === pdf.numPages) {
         createLink(slide, "wpp", "https://wa.me/5516991128533");
         createLink(slide, "tel", "tel:+5516991128533");
       }
@@ -156,7 +159,7 @@ pdfjsLib.getDocument(url).promise.then(pdf => {
 
 });
 
-/* CRIAR LINK SEM POSIÇÃO */
+/* CRIAR LINK */
 function createLink(slide, type, href) {
 
   const link = document.createElement('a');
@@ -217,6 +220,18 @@ function makeResizable(el, handle) {
   document.addEventListener('mouseup', () => {
     isResizing = false;
   });
+}
+
+/* SALVAR */
+function exportHTML() {
+  const html = document.documentElement.outerHTML;
+
+  const blob = new Blob([html], { type: "text/html" });
+  const a = document.createElement("a");
+
+  a.href = URL.createObjectURL(blob);
+  a.download = "index.html";
+  a.click();
 }
 
 /* NAV */
