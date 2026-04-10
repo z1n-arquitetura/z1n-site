@@ -9,7 +9,7 @@
 
 <!-- Open Graph -->
 <meta property="og:title" content="Z1N Arquiteturas">
-<meta property="og:description" content="Projetos exclusivos">
+<meta property="og:description" content="Projetos modernos e exclusivos">
 <meta property="og:image" content="https://z1n-arq.com.br/og-image.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -50,12 +50,11 @@ canvas {
   max-height: 100%;
   transform-origin: top center;
   display: block;
-  pointer-events: none; /* ESSENCIAL */
 }
 
 .link {
   position: absolute;
-  z-index: 30;
+  z-index: 50;
 }
 
 .nav {
@@ -72,7 +71,6 @@ canvas {
 
 .prev { left: 20px; }
 .next { right: 20px; }
-
 </style>
 </head>
 
@@ -100,7 +98,7 @@ let isDragging = false;
 let startX = 0;
 let startY = 0;
 
-/* páginas com zoom liberado */
+/* páginas com zoom */
 const zoomPages = [2, 3, 4];
 
 /* -------- PDF LOAD -------- */
@@ -132,57 +130,94 @@ pdfjsLib.getDocument(url).promise.then(pdf => {
 
       const pageIndex = i - 1;
 
-      /* -------- LINKS POR PÁGINA -------- */
-
-      // Página 1
+      /* =========================
+         PÁGINA 1 (AJUSTE FINO)
+      ========================= */
       if (pageIndex === 0) {
 
+        // WhatsApp
         const wpp = document.createElement('a');
         wpp.href = "https://wa.me/5516991128533";
         wpp.className = "link";
 
-        wpp.style.top = "78%";
-        wpp.style.left = "50%";
-        wpp.style.transform = "translateX(-50%)";
-        wpp.style.width = "260px";
-        wpp.style.height = "70px";
+        wpp.style.top = "73%";
+        wpp.style.left = "18%";
+        wpp.style.width = "85px";
+        wpp.style.height = "85px";
 
         slide.appendChild(wpp);
 
-      }
-
-      // Página 5
-      if (pageIndex === 4) {
-
-        const wpp = document.createElement('a');
-        wpp.href = "https://wa.me/5516991128533";
-        wpp.className = "link";
-
-        wpp.style.top = "80%";
-        wpp.style.left = "50%";
-        wpp.style.transform = "translateX(-50%)";
-        wpp.style.width = "260px";
-        wpp.style.height = "70px";
-
-        slide.appendChild(wpp);
-
-      }
-
-      // Última página (telefone)
-      if (pageIndex === pdf.numPages - 1) {
-
+        // Telefone
         const tel = document.createElement('a');
         tel.href = "tel:+5516991128533";
         tel.className = "link";
 
-        tel.style.top = "75%";
-        tel.style.left = "50%";
-        tel.style.transform = "translateX(-50%)";
-        tel.style.width = "260px";
-        tel.style.height = "70px";
+        tel.style.top = "73%";
+        tel.style.left = "32%";
+        tel.style.width = "58%";
+        tel.style.height = "85px";
 
         slide.appendChild(tel);
+      }
 
+      /* =========================
+         PÁGINA 5 (AJUSTE FINO)
+      ========================= */
+      if (pageIndex === 4) {
+
+        // WhatsApp
+        const wpp = document.createElement('a');
+        wpp.href = "https://wa.me/5516991128533";
+        wpp.className = "link";
+
+        wpp.style.top = "76%";
+        wpp.style.left = "42%";
+        wpp.style.width = "80px";
+        wpp.style.height = "80px";
+
+        slide.appendChild(wpp);
+
+        // Telefone
+        const tel = document.createElement('a');
+        tel.href = "tel:+5516991128533";
+        tel.className = "link";
+
+        tel.style.top = "64%";
+        tel.style.left = "8%";
+        tel.style.width = "84%";
+        tel.style.height = "95px";
+
+        slide.appendChild(tel);
+      }
+
+      /* =========================
+         ÚLTIMA PÁGINA (AJUSTE FINO)
+      ========================= */
+      if (pageIndex === pdf.numPages - 1) {
+
+        // WhatsApp
+        const wpp = document.createElement('a');
+        wpp.href = "https://wa.me/5516991128533";
+        wpp.className = "link";
+
+        wpp.style.top = "71%";
+        wpp.style.left = "8%";
+        wpp.style.width = "95px";
+        wpp.style.height = "95px";
+
+        slide.appendChild(wpp);
+
+        // Telefone
+        const tel = document.createElement('a');
+        tel.href = "tel:+5516991128533";
+        tel.className = "link";
+
+        tel.style.top = "69%";
+        tel.style.left = "24%";
+        tel.style.width = "68%";
+        tel.style.height = "95px";
+
+        slide.appendChild(tel);
       }
 
     });
@@ -203,19 +238,11 @@ function showPage(index) {
 }
 
 function next() {
-  if (current >= slides.length - 1) {
-    showPage(0);
-  } else {
-    showPage(current + 1);
-  }
+  current >= slides.length - 1 ? showPage(0) : showPage(current + 1);
 }
 
 function prev() {
-  if (current <= 0) {
-    showPage(slides.length - 1);
-  } else {
-    showPage(current - 1);
-  }
+  current <= 0 ? showPage(slides.length - 1) : showPage(current - 1);
 }
 
 /* -------- TRANSFORM -------- */
@@ -226,7 +253,6 @@ function applyTransform() {
   }
 }
 
-/* -------- RESET -------- */
 function resetZoom() {
   scale = 1;
   posX = 0;
@@ -236,22 +262,19 @@ function resetZoom() {
 
 /* -------- ZOOM -------- */
 document.addEventListener("wheel", (e) => {
-
   if (!zoomPages.includes(current)) return;
 
   if (e.ctrlKey) {
     e.preventDefault();
-
     scale += e.deltaY * -0.01;
     scale = Math.min(Math.max(1, scale), 4);
-
     applyTransform();
   }
-
 }, { passive: false });
 
 /* -------- PAN -------- */
 document.addEventListener("mousedown", (e) => {
+  if (e.target.classList.contains("link")) return;
   if (scale <= 1 || !zoomPages.includes(current)) return;
 
   isDragging = true;
@@ -276,6 +299,8 @@ document.addEventListener("mouseup", () => {
 let initialDistance = null;
 
 document.addEventListener("touchstart", (e) => {
+  if (e.target.classList.contains("link")) return;
+
   if (e.touches.length === 1 && scale > 1 && zoomPages.includes(current)) {
     isDragging = true;
     startX = e.touches[0].clientX - posX;
@@ -284,7 +309,6 @@ document.addEventListener("touchstart", (e) => {
 });
 
 document.addEventListener("touchmove", (e) => {
-
   if (!zoomPages.includes(current)) return;
 
   if (e.touches.length === 2) {
