@@ -23,6 +23,7 @@ html, body {
   background: #000;
 }
 
+/* SLIDER */
 .slider {
   width: 100vw;
   height: 100vh;
@@ -35,7 +36,7 @@ html, body {
   position: absolute;
   display: none;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start; /* 🔥 remove faixa preta */
 }
 
 .slide.active {
@@ -113,19 +114,19 @@ pdfjsLib.getDocument(url).promise.then(pdf => {
 
       const pageIndex = i;
 
-      /* PAGINA 1 */
+      /* ===== PAGINA 1 ===== */
       if (pageIndex === 1) {
         createLink(slide, "https://wa.me/5516991128533", 1142, 735, 120, 120);
         createLink(slide, "tel:+5516991128533", 1274, 757, 488, 81);
       }
 
-      /* PAGINA 6 */
+      /* ===== PAGINA 6 ===== */
       if (pageIndex === 6) {
         createLink(slide, "https://wa.me/5516991128533", 1158, 918, 120, 120);
         createLink(slide, "tel:+5516991128533", 1284, 929, 458, 94);
       }
 
-      /* PAGINA 8 */
+      /* ===== PAGINA FINAL ===== */
       if (pageIndex === pdf.numPages) {
         createLink(slide, "https://wa.me/5516991128533", 1383, 825, 127, 97);
         createLink(slide, "tel:+5516991128533", 1157, 666, 592, 151);
@@ -137,21 +138,29 @@ pdfjsLib.getDocument(url).promise.then(pdf => {
 
 });
 
-/* CRIAR LINK */
+/* ===== LINKS RESPONSIVOS ===== */
 function createLink(slide, href, x, y, w, h) {
+
   const link = document.createElement('a');
   link.href = href;
   link.className = 'link';
 
-  link.style.left = x + "px";
-  link.style.top = y + "px";
-  link.style.width = w + "px";
-  link.style.height = h + "px";
+  const canvas = slide.querySelector("canvas");
+
+  const percentX = (x / canvas.width) * 100;
+  const percentY = (y / canvas.height) * 100;
+  const percentW = (w / canvas.width) * 100;
+  const percentH = (h / canvas.height) * 100;
+
+  link.style.left = percentX + "%";
+  link.style.top = percentY + "%";
+  link.style.width = percentW + "%";
+  link.style.height = percentH + "%";
 
   slide.appendChild(link);
 }
 
-/* NAV */
+/* ===== NAVEGAÇÃO ===== */
 function showPage(index) {
   slides[current].classList.remove("active");
   current = index;
