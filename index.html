@@ -12,6 +12,8 @@
 html, body {
   overflow: hidden;
   background: #000;
+  width: 100%;
+  height: 100%;
 }
 
 /* SLIDER */
@@ -21,39 +23,46 @@ html, body {
   position: relative;
 }
 
+/* SLIDE */
 .slide {
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   position: absolute;
   display: none;
+
   justify-content: center;
+  align-items: center;
 }
 
 .slide.active {
   display: flex;
 }
 
+/* CANVAS */
 canvas {
+  display: block;
   max-width: 100%;
   max-height: 100%;
 }
 
-/* LINKS VISÍVEIS */
+/* LINKS (GARANTIDO VISÍVEL) */
 .link {
   position: absolute;
-  z-index: 50;
+  z-index: 9999;
+
   border: 3px dashed yellow;
-  background: rgba(255,255,0,0.3);
+  background: rgba(255,255,0,0.4);
+
   cursor: move;
 }
 
 /* WhatsApp */
 .link.wpp {
   border-color: red;
-  background: rgba(255,0,0,0.3);
+  background: rgba(255,0,0,0.4);
 }
 
-/* ALÇA DE REDIMENSIONAR */
+/* HANDLE */
 .handle {
   position: absolute;
   width: 18px;
@@ -68,11 +77,12 @@ canvas {
 .nav {
   position: absolute;
   bottom: 20px;
-  z-index: 20;
+  z-index: 10000;
   background: transparent;
   color: white;
   border: none;
   font-size: 32px;
+  cursor: pointer;
 }
 
 .prev { left: 20px; }
@@ -97,6 +107,7 @@ const slider = document.getElementById('slider');
 let current = 0;
 let slides = [];
 
+/* LOAD PDF */
 pdfjsLib.getDocument(url).promise.then(pdf => {
 
   for (let i = 1; i <= pdf.numPages; i++) {
@@ -136,7 +147,7 @@ pdfjsLib.getDocument(url).promise.then(pdf => {
         createLink(slide, "tel", "tel:+5516991128533", 80, 450, 500, 100);
       }
 
-      /* ÚLTIMA */
+      /* ÚLTIMA PÁGINA */
       if (pageIndex === pdf.numPages) {
         createLink(slide, "wpp", "https://wa.me/5516991128533", 80, 500, 100, 100);
         createLink(slide, "tel", "tel:+5516991128533", 220, 500, 400, 100);
@@ -160,7 +171,6 @@ function createLink(slide, type, href, x, y, w, h) {
   link.style.width = w + "px";
   link.style.height = h + "px";
 
-  /* HANDLE */
   const handle = document.createElement('div');
   handle.className = 'handle';
   link.appendChild(handle);
