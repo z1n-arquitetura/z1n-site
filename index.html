@@ -14,6 +14,7 @@ html, body {
   background: #000;
 }
 
+/* SLIDER */
 .slider {
   width: 100vw;
   height: 100vh;
@@ -38,23 +39,41 @@ canvas {
   max-height: 100%;
 }
 
-/* LINKS VISÍVEIS */
+/* LINKS EDITÁVEIS */
 .link {
   position: absolute;
   z-index: 50;
+
   border: 2px dashed yellow;
-  background: rgba(255,255,0,0.2);
+  background: rgba(255,255,0,0.25);
+
   cursor: move;
 
-  resize: both;        /* 🔥 permite redimensionar */
-  overflow: auto;      /* necessário pro resize */
-  min-width: 40px;
-  min-height: 40px;
+  resize: both;
+  overflow: hidden;
+
+  min-width: 60px;
+  min-height: 60px;
+
+  display: block;
 }
 
+/* alça de resize visível */
+.link::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  bottom: 0;
+  right: 0;
+  background: white;
+  cursor: se-resize;
+}
+
+/* WhatsApp */
 .link.wpp {
   border-color: red;
-  background: rgba(255,0,0,0.2);
+  background: rgba(255,0,0,0.25);
 }
 
 /* SETAS */
@@ -90,6 +109,7 @@ const slider = document.getElementById('slider');
 let current = 0;
 let slides = [];
 
+/* -------- PDF LOAD -------- */
 pdfjsLib.getDocument(url).promise.then(pdf => {
 
   for (let i = 1; i <= pdf.numPages; i++) {
@@ -164,7 +184,7 @@ function createLink(slide, type, href, x, y, w, h) {
   makeDraggable(link);
 }
 
-/* -------- DRAG CORRIGIDO -------- */
+/* -------- DRAG -------- */
 function makeDraggable(el) {
   let isDown = false, offsetX, offsetY;
 
