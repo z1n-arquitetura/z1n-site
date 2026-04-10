@@ -27,7 +27,6 @@ html, body {
   position: absolute;
   display: none;
   justify-content: center;
-  align-items: flex-start;
 }
 
 .slide.active {
@@ -39,41 +38,30 @@ canvas {
   max-height: 100%;
 }
 
-/* LINKS EDITÁVEIS */
+/* LINKS VISÍVEIS */
 .link {
   position: absolute;
   z-index: 50;
-
-  border: 2px dashed yellow;
-  background: rgba(255,255,0,0.25);
-
+  border: 3px dashed yellow;
+  background: rgba(255,255,0,0.3);
   cursor: move;
-
-  resize: both;
-  overflow: hidden;
-
-  min-width: 60px;
-  min-height: 60px;
-
-  display: block;
-}
-
-/* alça de resize visível */
-.link::after {
-  content: "";
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  bottom: 0;
-  right: 0;
-  background: white;
-  cursor: se-resize;
 }
 
 /* WhatsApp */
 .link.wpp {
   border-color: red;
-  background: rgba(255,0,0,0.25);
+  background: rgba(255,0,0,0.3);
+}
+
+/* ALÇA DE REDIMENSIONAR */
+.handle {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  background: white;
+  right: -9px;
+  bottom: -9px;
+  cursor: nwse-resize;
 }
 
 /* SETAS */
@@ -109,7 +97,6 @@ const slider = document.getElementById('slider');
 let current = 0;
 let slides = [];
 
-/* -------- PDF LOAD -------- */
 pdfjsLib.getDocument(url).promise.then(pdf => {
 
   for (let i = 1; i <= pdf.numPages; i++) {
@@ -137,28 +124,22 @@ pdfjsLib.getDocument(url).promise.then(pdf => {
 
       const pageIndex = i;
 
-      /* -------- PÁGINA 1 -------- */
+      /* PÁGINA 1 */
       if (pageIndex === 1) {
-
         createLink(slide, "wpp", "https://wa.me/5516991128533", 120, 520, 90, 90);
         createLink(slide, "tel", "tel:+5516991128533", 220, 520, 350, 90);
-
       }
 
-      /* -------- PÁGINA 6 -------- */
+      /* PÁGINA 6 */
       if (pageIndex === 6) {
-
         createLink(slide, "wpp", "https://wa.me/5516991128533", 250, 550, 90, 90);
         createLink(slide, "tel", "tel:+5516991128533", 80, 450, 500, 100);
-
       }
 
-      /* -------- ÚLTIMA PÁGINA -------- */
+      /* ÚLTIMA */
       if (pageIndex === pdf.numPages) {
-
         createLink(slide, "wpp", "https://wa.me/5516991128533", 80, 500, 100, 100);
         createLink(slide, "tel", "tel:+5516991128533", 220, 500, 400, 100);
-
       }
 
     });
@@ -167,7 +148,7 @@ pdfjsLib.getDocument(url).promise.then(pdf => {
 
 });
 
-/* -------- CRIAR LINK -------- */
+/* CRIAR LINK */
 function createLink(slide, type, href, x, y, w, h) {
 
   const link = document.createElement('a');
@@ -179,16 +160,24 @@ function createLink(slide, type, href, x, y, w, h) {
   link.style.width = w + "px";
   link.style.height = h + "px";
 
+  /* HANDLE */
+  const handle = document.createElement('div');
+  handle.className = 'handle';
+  link.appendChild(handle);
+
   slide.appendChild(link);
 
   makeDraggable(link);
+  makeResizable(link, handle);
 }
 
-/* -------- DRAG -------- */
+/* DRAG */
 function makeDraggable(el) {
   let isDown = false, offsetX, offsetY;
 
   el.addEventListener('mousedown', e => {
+    if (e.target.classList.contains("handle")) return;
+
     isDown = true;
     offsetX = e.clientX - el.offsetLeft;
     offsetY = e.clientY - el.offsetTop;
@@ -203,3 +192,45 @@ function makeDraggable(el) {
 
   document.addEventListener('mouseup', () => {
     isDown = false;
+  });
+}
+
+/* RESIZE */
+function makeResizable(el, handle) {
+  let isResizing = false;
+
+  handle.addEventListener('mousedown', e => {
+    e.stopPropagation();
+    isResizing = true;
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!isResizing) return;
+
+    el.style.width = (e.clientX - el.offsetLeft) + 'px';
+    el.style.height = (e.clientY - el.offsetTop) + 'px';
+  });
+
+  document.addEventListener('mouseup', () => {
+    isResizing = false;
+  });
+}
+
+/* NAV */
+function showPage(index) {
+  slides[current].classList.remove("active");
+  current = index;
+  slides[current].classList.add("active");
+}
+
+function next() {
+  current >= slides.length - 1 ? showPage(0) : showPage(current + 1);
+}
+
+function prev() {
+  current <= 0 ? showPage(slides.length - 1) : showPage(current - 1);
+}
+</script>
+
+</body>
+</html>
