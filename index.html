@@ -5,87 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Z1N Arquiteturas</title>
 
-    <!-- Open Graph / WhatsApp -->
     <meta property="og:title" content="Z1N Arquiteturas">
     <meta property="og:description" content="Projetos exclusivos">
     <meta property="og:image" content="https://z1n-arquitetura.github.io/z1n-site/og-image.jpg">
     <meta property="og:url" content="https://z1n-arquitetura.github.io/z1n-site/">
     <meta property="og:type" content="website">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin:0; padding:0; box-sizing:border-box; }
         html, body {
             height: 100%;
             overflow: hidden;
             background: #000;
-            touch-action: manipulation; /* melhora clique no mobile */
+            touch-action: manipulation;
         }
-
         .slider {
             width: 100vw;
             height: 100vh;
             position: relative;
         }
-
         .slide {
             width: 100%;
             height: 100%;
             position: absolute;
             display: none;
             justify-content: center;
-            align-items: flex-start;
+            align-items: center; /* melhor centralização */
         }
-
-        .slide.active {
-            display: flex;
-        }
-
+        .slide.active { display: flex; }
         canvas {
             max-width: 100%;
             max-height: 100%;
             display: block;
-            box-shadow: 0 0 20px rgba(0,0,0,0.8);
         }
-
-        /* LINKS */
         .link {
             position: absolute;
             z-index: 9999;
             display: block;
-            /* Debug: descomente a linha abaixo para ver as áreas clicáveis */
-            /* background: rgba(255, 0, 0, 0.25); */
+            background: rgba(255, 0, 0, 0.35); /* vermelho para debug */
+            border: 3px solid red;
+            pointer-events: all; /* garante clique */
         }
-
-        /* SETAS DE NAVEGAÇÃO */
         .nav {
             position: absolute;
-            bottom: 20px;
+            bottom: 30px;
             z-index: 100;
             color: white;
             font-size: 42px;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.7);
             border: none;
             border-radius: 50%;
-            width: 60px;
-            height: 60px;
+            width: 65px;
+            height: 65px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            user-select: none;
         }
-
-        .nav:hover {
-            background: rgba(0,0,0,0.8);
-        }
-
         .prev { left: 20px; }
         .next { right: 20px; }
     </style>
@@ -93,20 +66,16 @@
 <body>
 
     <div class="slider" id="slider"></div>
-
     <button class="nav prev" onclick="prev()">←</button>
     <button class="nav next" onclick="next()">→</button>
 
-    <!-- pdf.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
     <script>
-        // Configuração do worker do pdf.js (importante no GitHub Pages)
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-        // URL do PDF - mais robusta para GitHub Pages
         let pdfUrl = 'portfolio.pdf';
-        if (window.location.hostname.includes('github.io')) {
+        if (location.hostname.includes('github.io')) {
             pdfUrl = 'https://z1n-arquitetura.github.io/z1n-site/portfolio.pdf';
         }
 
@@ -114,14 +83,12 @@
         let current = 0;
         let slides = [];
 
-        // Carrega o PDF
         pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
-            console.log(`PDF carregado com ${pdf.numPages} páginas`);
+            console.log(`PDF carregado: ${pdf.numPages} páginas`);
 
             for (let i = 1; i <= pdf.numPages; i++) {
                 pdf.getPage(i).then(page => {
-                    const viewport = page.getViewport({ scale: 2.0 }); // escala boa para qualidade
-
+                    const viewport = page.getViewport({ scale: 2.0 });
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
                     canvas.width = viewport.width;
@@ -131,72 +98,68 @@
                     slide.className = 'slide';
                     slide.appendChild(canvas);
                     slider.appendChild(slide);
-
                     slides.push(slide);
 
-                    // Renderiza a página
-                    page.render({
-                        canvasContext: ctx,
-                        viewport: viewport
+                    // Renderiza o PDF
+                    page.render({ canvasContext: ctx, viewport: viewport }).promise.then(() => {
+                        // Só cria os links DEPOIS que o canvas terminou de renderizar
+                        const pageIndex = i;
+
+                        if (pageIndex === 1) {
+                            createLink(slide, "https://wa.me/5516991128533", 1142, 735, 120, 120);
+                            createLink(slide, "tel:+5516991128533", 1274, 757, 488, 81);
+                        }
+                        if (pageIndex === 6) {
+                            createLink(slide, "https://wa.me/5516991128533", 1158, 918, 120, 120);
+                            createLink(slide, "tel:+5516991128533", 1284, 929, 458, 94);
+                        }
+                        if (pageIndex === pdf.numPages) {
+                            createLink(slide, "https://wa.me/5516991128533", 1383, 825, 127, 97);
+                            createLink(slide, "tel:+5516991128533", 1157, 666, 592, 151);
+                        }
                     });
 
-                    const pageIndex = i;
-
-                    // === Seus links por página ===
-                    if (pageIndex === 1) {
-                        createLink(slide, "https://wa.me/5516991128533", 1142, 735, 120, 120);
-                        createLink(slide, "tel:+5516991128533", 1274, 757, 488, 81);
-                    }
-                    if (pageIndex === 6) {
-                        createLink(slide, "https://wa.me/5516991128533", 1158, 918, 120, 120);
-                        createLink(slide, "tel:+5516991128533", 1284, 929, 458, 94);
-                    }
-                    if (pageIndex === pdf.numPages) {
-                        createLink(slide, "https://wa.me/5516991128533", 1383, 825, 127, 97);
-                        createLink(slide, "tel:+5516991128533", 1157, 666, 592, 151);
-                    }
-
-                    // Ativa a primeira página
-                    if (slides.length === 1) {
-                        slide.classList.add("active");
-                    }
+                    if (slides.length === 1) slide.classList.add("active");
                 });
             }
         }).catch(err => {
-            console.error("Erro ao carregar o PDF:", err);
-            alert("Não foi possível carregar o portfolio.pdf. Verifique se o arquivo está na raiz do repositório.");
+            console.error("Erro ao carregar PDF:", err);
         });
 
-        // Função para criar links responsivos
+        // Função createLink com delay extra para garantir que o canvas tenha tamanho
         function createLink(slide, href, x, y, w, h) {
-            const link = document.createElement('a');
-            link.href = href;
-            link.className = 'link';
-            link.target = href.startsWith('https') ? '_blank' : '';
-            link.rel = 'noopener';
+            setTimeout(() => {   // pequeno delay para garantir tamanho final do canvas
+                const link = document.createElement('a');
+                link.href = href;
+                link.className = 'link';
+                link.target = '_blank';
+                link.rel = 'noopener';
 
-            const canvas = slide.querySelector('canvas');
-            if (!canvas) return;
+                const canvas = slide.querySelector('canvas');
+                if (!canvas || canvas.width === 0) {
+                    console.warn("Canvas ainda sem tamanho para página");
+                    return;
+                }
 
-            const percentX = (x / canvas.width) * 100;
-            const percentY = (y / canvas.height) * 100;
-            const percentW = (w / canvas.width) * 100;
-            const percentH = (h / canvas.height) * 100;
+                const percentX = (x / canvas.width) * 100;
+                const percentY = (y / canvas.height) * 100;
+                const percentW = (w / canvas.width) * 100;
+                const percentH = (h / canvas.height) * 100;
 
-            link.style.left = percentX + '%';
-            link.style.top = percentY + '%';
-            link.style.width = percentW + '%';
-            link.style.height = percentH + '%';
+                link.style.left = percentX + '%';
+                link.style.top = percentY + '%';
+                link.style.width = percentW + '%';
+                link.style.height = percentH + '%';
 
-            slide.appendChild(link);
+                slide.appendChild(link);
+                console.log(`Link criado na página - x:${percentX.toFixed(1)}% y:${percentY.toFixed(1)}%`);
+            }, 100);
         }
 
-        // Navegação
         function showPage(index) {
-            if (!slides[current] || !slides[index]) return;
-            slides[current].classList.remove("active");
+            if (slides[current]) slides[current].classList.remove("active");
             current = index;
-            slides[current].classList.add("active");
+            if (slides[current]) slides[current].classList.add("active");
         }
 
         function next() {
@@ -206,12 +169,6 @@
         function prev() {
             current <= 0 ? showPage(slides.length - 1) : showPage(current - 1);
         }
-
-        // Suporte a teclado (opcional)
-        document.addEventListener('keydown', e => {
-            if (e.key === 'ArrowRight') next();
-            if (e.key === 'ArrowLeft') prev();
-        });
     </script>
 </body>
 </html>
