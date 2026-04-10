@@ -12,11 +12,7 @@
             background: #000;
             font-family: Arial, sans-serif;
         }
-        .slider {
-            width: 100vw;
-            height: 100vh;
-            position: relative;
-        }
+        .slider { width: 100vw; height: 100vh; position: relative; }
         .slide {
             width: 100%;
             height: 100%;
@@ -26,11 +22,8 @@
             align-items: center;
         }
         .slide.active { display: flex; }
-        canvas {
-            max-width: 100%;
-            max-height: 100%;
-            display: block;
-        }
+        canvas { max-width: 100%; max-height: 100%; display: block; }
+
         .link {
             position: absolute;
             z-index: 10000;
@@ -41,9 +34,7 @@
             font-size: 14px;
             padding: 6px 10px;
             text-align: center;
-            box-shadow: 0 0 10px rgba(255,0,0,0.8);
         }
-        .link:hover { background: rgba(255, 0, 0, 0.55); }
         .resize-handle {
             position: absolute;
             bottom: -8px;
@@ -56,7 +47,7 @@
             border-radius: 50%;
         }
 
-        /* Botão Salvar - mais visível */
+        /* Botão Salvar */
         .save-btn {
             position: fixed;
             top: 15px;
@@ -70,29 +61,39 @@
             font-weight: bold;
             border-radius: 8px;
             cursor: pointer;
-            box-shadow: 0 6px 20px rgba(0, 255, 0, 0.6);
-            text-transform: uppercase;
-        }
-        .save-btn:hover {
-            background: #00cc00;
-            transform: scale(1.05);
         }
 
-        .nav {
-            position: absolute;
-            bottom: 30px;
-            z-index: 100;
-            color: white;
-            font-size: 42px;
-            background: rgba(0,0,0,0.7);
-            border: none;
-            border-radius: 50%;
-            width: 65px;
-            height: 65px;
-            cursor: pointer;
+        /* Caixa que vai aparecer com o código */
+        #result-box {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 800px;
+            background: #111;
+            color: #0f0;
+            border: 3px solid #0f0;
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 999999;
+            display: none;
+            font-family: monospace;
+            font-size: 15px;
+            max-height: 70vh;
+            overflow: auto;
         }
-        .prev { left: 20px; }
-        .next { right: 20px; }
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: red;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
@@ -100,6 +101,12 @@
     <button class="nav prev" onclick="prev()">←</button>
     <button class="nav next" onclick="next()">→</button>
     <button class="save-btn" onclick="savePositions()">💾 SALVAR POSIÇÕES</button>
+
+    <!-- Caixa de resultado -->
+    <div id="result-box">
+        <button class="close-btn" onclick="closeResult()">Fechar</button>
+        <pre id="code-output"></pre>
+    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>
@@ -115,6 +122,7 @@
         let slides = [];
         let allLinks = [];
 
+        // ==================== Carregamento do PDF (mesmo de antes) ====================
         pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
             console.log(`✅ PDF carregado com ${pdf.numPages} páginas`);
 
@@ -152,7 +160,7 @@
                     if (slides.length === 1) slide.classList.add("active");
                 });
             }
-        }).catch(err => console.error("Erro ao carregar PDF:", err));
+        }).catch(err => console.error("Erro:", err));
 
         function createDraggableLink(slide, href, x, y, w, h, label, pageNum) {
             const link = document.createElement('a');
@@ -171,12 +179,7 @@
                 link.style.height = ph + '%';
             }
 
-            updatePosition(
-                (x / canvas.width) * 100,
-                (y / canvas.height) * 100,
-                (w / canvas.width) * 100,
-                (h / canvas.height) * 100
-            );
+            updatePosition((x/canvas.width)*100, (y/canvas.height)*100, (w/canvas.width)*100, (h/canvas.height)*100);
 
             const resizeHandle = document.createElement('div');
             resizeHandle.className = 'resize-handle';
@@ -190,21 +193,18 @@
                 updatePosition(pX, pY, pW, pH);
             });
 
-            link.addEventListener('dblclick', (e) => {
-                e.preventDefault();
-                const curX = parseFloat(link.style.left) || 0;
-                const curY = parseFloat(link.style.top) || 0;
-                const curW = parseFloat(link.style.width) || 0;
-                const curH = parseFloat(link.style.height) || 0;
+            link.addEventListener('dblclick', () => {
+                let curX = parseFloat(link.style.left) || 0;
+                let curY = parseFloat(link.style.top) || 0;
+                let curW = parseFloat(link.style.width) || 0;
+                let curH = parseFloat(link.style.height) || 0;
 
-                const nx = prompt("X (%):", curX.toFixed(1));
-                const ny = prompt("Y (%):", curY.toFixed(1));
-                const nw = prompt("Largura (%):", curW.toFixed(1));
-                const nh = prompt("Altura (%):", curH.toFixed(1));
+                let nx = prompt("X (%):", curX.toFixed(1));
+                let ny = prompt("Y (%):", curY.toFixed(1));
+                let nw = prompt("Largura (%):", curW.toFixed(1));
+                let nh = prompt("Altura (%):", curH.toFixed(1));
 
-                if (nx && ny && nw && nh) {
-                    updatePosition(parseFloat(nx), parseFloat(ny), parseFloat(nw), parseFloat(nh));
-                }
+                if (nx && ny && nw && nh) updatePosition(parseFloat(nx), parseFloat(ny), parseFloat(nw), parseFloat(nh));
             });
 
             slide.appendChild(link);
@@ -229,65 +229,50 @@
 
             document.addEventListener('mousemove', e => {
                 if (!dragging && !resizing) return;
-
-                const canvasRect = canvas.getBoundingClientRect();
-                const dxPercent = ((e.clientX - startMouseX) / canvasRect.width) * 100;
-                const dyPercent = ((e.clientY - startMouseY) / canvasRect.height) * 100;
+                const rect = canvas.getBoundingClientRect();
+                const dx = ((e.clientX - startMouseX) / rect.width) * 100;
+                const dy = ((e.clientY - startMouseY) / rect.height) * 100;
 
                 if (dragging) {
-                    const newX = Math.max(0, startPercentX + dxPercent);
-                    const newY = Math.max(0, startPercentY + dyPercent);
-                    callback(
-                        (newX / 100) * canvas.width,
-                        (newY / 100) * canvas.height,
-                        (startPercentW / 100) * canvas.width,
-                        (startPercentH / 100) * canvas.height
-                    );
+                    callback((startPercentX + dx)/100 * canvas.width, (startPercentY + dy)/100 * canvas.height,
+                             (startPercentW / 100) * canvas.width, (startPercentH / 100) * canvas.height);
                 } else if (resizing) {
-                    const newW = Math.max(80, (startPercentW + dxPercent) / 100 * canvas.width);
-                    const newH = Math.max(40, (startPercentH + dyPercent) / 100 * canvas.height);
-                    callback(
-                        (startPercentX / 100) * canvas.width,
-                        (startPercentY / 100) * canvas.height,
-                        newW, newH
-                    );
+                    const newW = Math.max(80, (startPercentW + dx)/100 * canvas.width);
+                    const newH = Math.max(40, (startPercentH + dy)/100 * canvas.height);
+                    callback((startPercentX / 100)*canvas.width, (startPercentY / 100)*canvas.height, newW, newH);
                 }
             });
 
-            document.addEventListener('mouseup', () => {
-                dragging = false;
-                resizing = false;
-            });
+            document.addEventListener('mouseup', () => { dragging = false; resizing = false; });
         }
 
+        // ===================== SALVAR =====================
         function savePositions() {
             if (allLinks.length === 0) {
-                alert("Nenhum link encontrado ainda.");
+                alert("Nenhum link encontrado.");
                 return;
             }
 
-            let output = "=== POSIÇÕES AJUSTADAS - COPIE ESTE CÓDIGO ===\n\n";
+            let output = "// === POSIÇÕES AJUSTADAS - COLE ESTE CÓDIGO NA VERSÃO FINAL ===\n\n";
 
-            allLinks.forEach((item, index) => {
+            allLinks.forEach(item => {
                 const style = item.link.style;
                 const canvas = item.canvas;
-                const x = Math.round((parseFloat(style.left) / 100) * canvas.width);
-                const y = Math.round((parseFloat(style.top) / 100) * canvas.height);
-                const w = Math.round((parseFloat(style.width) / 100) * canvas.width);
-                const h = Math.round((parseFloat(style.height) / 100) * canvas.height);
+                const x = Math.round((parseFloat(style.left)/100) * canvas.width);
+                const y = Math.round((parseFloat(style.top)/100) * canvas.height);
+                const w = Math.round((parseFloat(style.width)/100) * canvas.width);
+                const h = Math.round((parseFloat(style.height)/100) * canvas.height);
 
                 output += `// Página ${item.pageNum} - ${item.label}\n`;
                 output += `createLink(slide, "${item.href}", ${x}, ${y}, ${w}, ${h});\n\n`;
             });
 
-            console.clear();
-            console.log("%c✅ POSIÇÕES SALVAS COM SUCESSO!", "color: lime; font-size: 20px; font-weight: bold");
-            console.log(output);
+            document.getElementById('code-output').textContent = output;
+            document.getElementById('result-box').style.display = 'block';
+        }
 
-            alert("✅ Posições salvas!\n\nAbra o Console do navegador (pressione F12) e copie todo o código que apareceu.\n\nDepois cole aqui para mim que eu faço a versão final limpa.");
-
-            // Salva no localStorage como backup
-            localStorage.setItem('z1n_link_positions', output);
+        function closeResult() {
+            document.getElementById('result-box').style.display = 'none';
         }
 
         function showPage(index) {
@@ -296,13 +281,8 @@
             if (slides[current]) slides[current].classList.add("active");
         }
 
-        function next() {
-            current >= slides.length - 1 ? showPage(0) : showPage(current + 1);
-        }
-
-        function prev() {
-            current <= 0 ? showPage(slides.length - 1) : showPage(current - 1);
-        }
+        function next() { current >= slides.length - 1 ? showPage(0) : showPage(current + 1); }
+        function prev() { current <= 0 ? showPage(slides.length - 1) : showPage(current - 1); }
     </script>
 </body>
 </html>
