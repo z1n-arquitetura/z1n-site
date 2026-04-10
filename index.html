@@ -4,13 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Z1N Arquiteturas</title>
-
     <meta property="og:title" content="Z1N Arquiteturas">
     <meta property="og:description" content="Projetos exclusivos">
     <meta property="og:image" content="https://z1n-arquitetura.github.io/z1n-site/og-image.jpg">
     <meta property="og:url" content="https://z1n-arquitetura.github.io/z1n-site/">
     <meta property="og:type" content="website">
-
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         html, body {
@@ -27,10 +25,10 @@
         .slide {
             width: 100%;
             height: 100%;
-            position: absolute;
+            position: relative; /* importante */
             display: none;
             justify-content: center;
-            align-items: center; /* melhor centralização */
+            align-items: center;
         }
         .slide.active { display: flex; }
         canvas {
@@ -40,11 +38,16 @@
         }
         .link {
             position: absolute;
-            z-index: 9999;
-            display: block;
-            background: rgba(255, 0, 0, 0.35); /* vermelho para debug */
+            z-index: 10000;
+            background: rgba(255, 0, 0, 0.25); /* vermelho para debug - mude depois */
             border: 3px solid red;
-            pointer-events: all; /* garante clique */
+            pointer-events: all;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .link:hover {
+            background: rgba(0, 255, 0, 0.25);
+            border-color: lime;
         }
         .nav {
             position: absolute;
@@ -58,19 +61,20 @@
             width: 65px;
             height: 65px;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .prev { left: 20px; }
         .next { right: 20px; }
     </style>
 </head>
 <body>
-
     <div class="slider" id="slider"></div>
     <button class="nav prev" onclick="prev()">←</button>
     <button class="nav next" onclick="next()">→</button>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
@@ -102,20 +106,24 @@
 
                     // Renderiza o PDF
                     page.render({ canvasContext: ctx, viewport: viewport }).promise.then(() => {
-                        // Só cria os links DEPOIS que o canvas terminou de renderizar
                         const pageIndex = i;
 
+                        // === LINKS AJUSTADOS ===
                         if (pageIndex === 1) {
-                            createLink(slide, "https://wa.me/5516991128533", 1142, 735, 120, 120);
-                            createLink(slide, "tel:+5516991128533", 1274, 757, 488, 81);
+                            // WhatsApp (área maior)
+                            createLink(slide, "https://wa.me/5516991128533", 1020, 670, 250, 190);
+                            // Telefone / Botão "Solicitar análise"
+                            createLink(slide, "tel:+5516991128533", 1110, 715, 590, 180);
                         }
+
                         if (pageIndex === 6) {
-                            createLink(slide, "https://wa.me/5516991128533", 1158, 918, 120, 120);
-                            createLink(slide, "tel:+5516991128533", 1284, 929, 458, 94);
+                            createLink(slide, "https://wa.me/5516991128533", 1050, 840, 240, 190);
+                            createLink(slide, "tel:+5516991128533", 1140, 885, 590, 180);
                         }
+
                         if (pageIndex === pdf.numPages) {
-                            createLink(slide, "https://wa.me/5516991128533", 1383, 825, 127, 97);
-                            createLink(slide, "tel:+5516991128533", 1157, 666, 592, 151);
+                            createLink(slide, "https://wa.me/5516991128533", 1350, 780, 180, 150);
+                            createLink(slide, "tel:+5516991128533", 1090, 610, 690, 230);
                         }
                     });
 
@@ -126,21 +134,28 @@
             console.error("Erro ao carregar PDF:", err);
         });
 
-        // Função createLink com delay extra para garantir que o canvas tenha tamanho
+        // Função createLink melhorada
         function createLink(slide, href, x, y, w, h) {
-            setTimeout(() => {   // pequeno delay para garantir tamanho final do canvas
-                const link = document.createElement('a');
-                link.href = href;
-                link.className = 'link';
-                link.target = '_blank';
-                link.rel = 'noopener';
+            const link = document.createElement('a');
+            link.href = href;
+            link.className = 'link';
+            link.target = '_blank';
+            link.rel = 'noopener';
 
-                const canvas = slide.querySelector('canvas');
-                if (!canvas || canvas.width === 0) {
-                    console.warn("Canvas ainda sem tamanho para página");
-                    return;
+            const canvas = slide.querySelector('canvas');
+
+            // Usa MutationObserver para esperar o canvas estar pronto
+            const observer = new MutationObserver(() => {
+                if (canvas.width > 800 && canvas.height > 800) {
+                    observer.disconnect();
+                    applyLinkPosition();
                 }
+            });
 
+            observer.observe(canvas, { attributes: true, attributeFilter: ['width', 'height'] });
+
+            // Fallback
+            function applyLinkPosition() {
                 const percentX = (x / canvas.width) * 100;
                 const percentY = (y / canvas.height) * 100;
                 const percentW = (w / canvas.width) * 100;
@@ -152,8 +167,15 @@
                 link.style.height = percentH + '%';
 
                 slide.appendChild(link);
-                console.log(`Link criado na página - x:${percentX.toFixed(1)}% y:${percentY.toFixed(1)}%`);
-            }, 100);
+                console.log(`✅ Link criado - Página ${slides.indexOf(slide) + 1} | ${percentX.toFixed(1)}% x ${percentY.toFixed(1)}%`);
+            }
+
+            // Executa com delay caso o observer não capture
+            setTimeout(() => {
+                if (!link.parentNode && canvas.width > 800) {
+                    applyLinkPosition();
+                }
+            }, 400);
         }
 
         function showPage(index) {
