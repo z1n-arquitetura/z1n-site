@@ -3,8 +3,230 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Z1N Arquiteturas - Editor de Links</title>
+    <title>Z1N Arquiteturas</title>
     <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html, body { height:100%; overflow:hidden; background:#000; font-family:Arial, sans-serif; }
+        .slider { width:100vw; height:100vh; position:relative; }
+        .slide { position:relative; width:100%; height:100%; display:none; justify-content:center; align-items:center; }
+        .slide.active { display:flex; }
+        canvas { max-width:100%; max-height:100%; display:block; }
+
+        .link {
+            position:absolute;
+            z-index:10000;
+            background:rgba(255,0,0,0.45);
+            border:3px dashed red;
+            color:white;
+            font-size:14px;
+            padding:8px 12px;
+            text-align:center;
+            cursor:move;
+        }
+        .resize-handle {
+            position:absolute;
+            bottom:-8px; right:-8px;
+            width:18px; height:18px;
+            background:red;
+            border:2px solid white;
+            border-radius:50%;
+            cursor:nwse-resize;
+        }
+
+        .save-btn {
+            position:fixed;
+            top:15px; right:15px;
+            z-index:99999;
+            background:#00ff00;
+            color:black;
+            font-weight:bold;
+            font-size:17px;
+            padding:14px 24px;
+            border:none;
+            border-radius:8px;
+            cursor:pointer;
+        }
+
+        #result-box {
+            position:fixed;
+            top:90px; left:50%; transform:translateX(-50%);
+            width:92%; max-width:850px;
+            background:#1a1a1a;
+            border:3px solid #0f0;
+            color:#0f0;
+            padding:20px;
+            border-radius:12px;
+            z-index:999999;
+            display:none;
+            max-height:75vh;
+            overflow:auto;
+            font-family:monospace;
+            font-size:15px;
+            line-height:1.5;
+        }
+        .close-btn {
+            position:absolute;
+            top:12px; right:15px;
+            background:red;
+            color:white;
+            border:none;
+            padding:8px 16px;
+            border-radius:6px;
+            cursor:pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="slider" id="slider"></div>
+    <button class="nav prev" onclick="prev()">←</button>
+    <button class="nav next" onclick="next()">→</button>
+    <button class="save-btn" onclick="savePositions()">💾 SALVAR POSIÇÕES</button>
+
+    <div id="result-box">
+        <button class="close-btn" onclick="closeResult()">Fechar</button>
+        <pre id="code-output"></pre>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        let pdfUrl = 'portfolio.pdf';
+        if (location.hostname.includes('github.io') || location.hostname.includes('z1n-arq.com.br')) {
+            pdfUrl = 'https://z1n-arquitetura.github.io/z1n-site/portfolio.pdf';
+        }
+
+        const slider = document.getElementById('slider');
+        let slides = [];
+        let allLinks = [];
+
+        pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
+            for (let i = 1; i <= pdf.numPages; i++) {
+                pdf.getPage(i).then(page => {
+                    const viewport = page.getViewport({ scale: 2.0 });
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+
+                    const slide = document.createElement('div');
+                    slide.className = 'slide';
+                    slide.appendChild(canvas);
+                    slider.appendChild(slide);
+                    slides.push(slide);
+
+                    page.render({ canvasContext: ctx, viewport: viewport }).promise.then(() => {
+                        const p = i;
+                        if (p === 1 || p === 6 || p === pdf.numPages) {
+                            if (p === 1) {
+                                createDraggableLink(slide, "https://wa.me/5516991128533", 1050, 680, 240, 170, "WhatsApp", p);
+                                createDraggableLink(slide, "tel:+5516991128533", 1120, 720, 570, 160, "Telefone", p);
+                            }
+                            if (p === 6) {
+                                createDraggableLink(slide, "https://wa.me/5516991128533", 1070, 850, 230, 170, "WhatsApp", p);
+                                createDraggableLink(slide, "tel:+5516991128533", 1150, 890, 560, 160, "Telefone", p);
+                            }
+                            if (p === pdf.numPages) {
+                                createDraggableLink(slide, "https://wa.me/5516991128533", 1360, 790, 170, 140, "WhatsApp", p);
+                                createDraggableLink(slide, "tel:+5516991128533", 1110, 630, 660, 200, "Telefone", p);
+                            }
+                        }
+                    });
+
+                    if (slides.length === 1) slide.classList.add("active");
+                });
+            }
+        });
+
+        function createDraggableLink(slide, href, x, y, w, h, label, pageNum) {
+            const link = document.createElement('a');
+            link.href = href;
+            link.className = 'link';
+            link.target = '_blank';
+            link.textContent = label;
+
+            const canvas = slide.querySelector('canvas');
+
+            const update = (px, py, pw, ph) => {
+                link.style.left = px + '%';
+                link.style.top = py + '%';
+                link.style.width = pw + '%';
+                link.style.height = ph + '%';
+            };
+
+            update((x/canvas.width)*100, (y/canvas.height)*100, (w/canvas.width)*100, (h/canvas.height)*100);
+
+            const rh = document.createElement('div');
+            rh.className = 'resize-handle';
+            link.appendChild(rh);
+
+            let dragging = false, resizing = false, sx, sy, spx, spy, spw, sph;
+
+            link.addEventListener('mousedown', e => {
+                sx = e.clientX; sy = e.clientY;
+                spx = parseFloat(link.style.left) || 0;
+                spy = parseFloat(link.style.top) || 0;
+                spw = parseFloat(link.style.width) || 0;
+                sph = parseFloat(link.style.height) || 0;
+                if (e.target === rh) resizing = true;
+                else dragging = true;
+            });
+
+            document.addEventListener('mousemove', e => {
+                if (!dragging && !resizing) return;
+                const rect = canvas.getBoundingClientRect();
+                const dx = ((e.clientX - sx) / rect.width) * 100;
+                const dy = ((e.clientY - sy) / rect.height) * 100;
+
+                if (dragging) update(spx + dx, spy + dy, spw, sph);
+                else if (resizing) update(spx, spy, Math.max(80, spw + dx), Math.max(40, sph + dy));
+            });
+
+            document.addEventListener('mouseup', () => { dragging = resizing = false; });
+
+            slide.appendChild(link);
+            allLinks.push({link, canvas, href, label, pageNum});
+        }
+
+        function savePositions() {
+            if (allLinks.length === 0) {
+                alert("Aguarde o PDF carregar completamente.");
+                return;
+            }
+
+            let text = "// === POSIÇÕES AJUSTADAS - COLE ISSO NA VERSÃO FINAL ===\n\n";
+
+            allLinks.forEach(item => {
+                const s = item.link.style;
+                const c = item.canvas;
+                const x = Math.round((parseFloat(s.left) || 0) / 100 * c.width);
+                const y = Math.round((parseFloat(s.top) || 0) / 100 * c.height);
+                const w = Math.round((parseFloat(s.width) || 0) / 100 * c.width);
+                const h = Math.round((parseFloat(s.height) || 0) / 100 * c.height);
+
+                text += `// Página ${item.pageNum} - ${item.label}\n`;
+                text += `createLink(slide, "${item.href}", ${x}, ${y}, ${w}, ${h});\n\n`;
+            });
+
+            document.getElementById('code-output').textContent = text;
+            document.getElementById('result-box').style.display = 'block';
+        }
+
+        function closeResult() {
+            document.getElementById('result-box').style.display = 'none';
+        }
+
+        function next() { current >= slides.length - 1 ? showPage(0) : showPage(current + 1); }
+        function prev() { current <= 0 ? showPage(slides.length - 1) : showPage(current - 1); }
+        let current = 0;
+        function showPage(index) {
+            if (slides[current]) slides[current].classList.remove("active");
+            current = index;
+            if (slides[current]) slides[current].classList.add("active");
+        }
+    </script>
+</body>
+</html>
         * { margin:0; padding:0; box-sizing:border-box; }
         html, body {
             height: 100%;
