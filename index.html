@@ -1,4 +1,4 @@
-HTML<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
@@ -34,23 +34,23 @@ HTML<!DOCTYPE html>
         .link {
             position: absolute;
             z-index: 10000;
-            background: rgba(255, 0, 0, 0.35);
+            background: rgba(255, 0, 0, 0.4);
             border: 3px dashed red;
             cursor: move;
-            user-select: none;
             color: white;
-            font-size: 13px;
-            padding: 4px 8px;
+            font-size: 14px;
+            padding: 6px 10px;
             text-align: center;
-            box-shadow: 0 0 8px rgba(255,0,0,0.6);
+            box-shadow: 0 0 10px rgba(255,0,0,0.8);
+            pointer-events: all;
         }
-        .link:hover { background: rgba(255, 0, 0, 0.5); }
+        .link:hover { background: rgba(255, 0, 0, 0.55); }
         .resize-handle {
             position: absolute;
-            bottom: -6px;
-            right: -6px;
-            width: 16px;
-            height: 16px;
+            bottom: -8px;
+            right: -8px;
+            width: 18px;
+            height: 18px;
             background: red;
             border: 2px solid white;
             cursor: nwse-resize;
@@ -130,7 +130,6 @@ HTML<!DOCTYPE html>
             }
         }).catch(err => console.error("Erro ao carregar PDF:", err));
 
-        // ==================== LINK ARRÁSTAVEL + EDITÁVEL ====================
         function createDraggableLink(slide, href, x, y, w, h, label, pageNum) {
             const link = document.createElement('a');
             link.href = href;
@@ -141,86 +140,103 @@ HTML<!DOCTYPE html>
 
             const canvas = slide.querySelector('canvas');
 
-            function updatePosition(px, py, pw, ph) {
-                link.style.left = px + '%';
-                link.style.top = py + '%';
-                link.style.width = pw + '%';
-                link.style.height = ph + '%';
+            function updatePosition(percentX, percentY, percentW, percentH) {
+                link.style.left = percentX + '%';
+                link.style.top = percentY + '%';
+                link.style.width = percentW + '%';
+                link.style.height = percentH + '%';
             }
 
-            // Posição inicial
-            const initX = (x / canvas.width) * 100;
-            const initY = (y / canvas.height) * 100;
-            const initW = (w / canvas.width) * 100;
-            const initH = (h / canvas.height) * 100;
-            updatePosition(initX, initY, initW, initH);
+            // Posição inicial em porcentagem
+            updatePosition(
+                (x / canvas.width) * 100,
+                (y / canvas.height) * 100,
+                (w / canvas.width) * 100,
+                (h / canvas.height) * 100
+            );
 
-            // Handle de redimensionamento
             const resizeHandle = document.createElement('div');
             resizeHandle.className = 'resize-handle';
             link.appendChild(resizeHandle);
 
             makeDraggableAndResizable(link, resizeHandle, canvas, (newX, newY, newW, newH) => {
-                updatePosition(newX, newY, newW, newH);
+                const pX = (newX / canvas.width) * 100;
+                const pY = (newY / canvas.height) * 100;
+                const pW = (newW / canvas.width) * 100;
+                const pH = (newH / canvas.height) * 100;
 
-                console.log(`%c📍 Página ${pageNum} | ${label}`, 'color:#0f0; font-size:15px');
-                console.log(`createLink(slide, "${href}", ${Math.round(newX * canvas.width / 100)}, ${Math.round(newY * canvas.height / 100)}, ${Math.round(newW * canvas.width / 100)}, ${Math.round(newH * canvas.height / 100)});`);
+                updatePosition(pX, pY, pW, pH);
+
+                console.log(`%c📍 Página ${pageNum} — ${label}`, 'color:lime; font-weight:bold; font-size:15px');
+                console.log(`createLink(slide, "${href}", ${Math.round(newX)}, ${Math.round(newY)}, ${Math.round(newW)}, ${Math.round(newH)});`);
             });
 
-            // Duplo clique para editar manualmente
-            link.addEventListener('dblclick', () => {
-                const currentLeft = parseFloat(link.style.left);
-                const currentTop = parseFloat(link.style.top);
-                const currentW = parseFloat(link.style.width);
-                const currentH = parseFloat(link.style.height);
+            // Duplo clique para editar valores manualmente
+            link.addEventListener('dblclick', (e) => {
+                e.preventDefault();
+                const curX = parseFloat(link.style.left) || 0;
+                const curY = parseFloat(link.style.top) || 0;
+                const curW = parseFloat(link.style.width) || 0;
+                const curH = parseFloat(link.style.height) || 0;
 
-                const newX = prompt("Nova posição X (%):", currentLeft.toFixed(1));
-                const newY = prompt("Nova posição Y (%):", currentTop.toFixed(1));
-                const newW = prompt("Nova Largura (%):", currentW.toFixed(1));
-                const newH = prompt("Nova Altura (%):", currentH.toFixed(1));
+                const nx = prompt("X (%) :", curX.toFixed(1));
+                const ny = prompt("Y (%) :", curY.toFixed(1));
+                const nw = prompt("Largura (%) :", curW.toFixed(1));
+                const nh = prompt("Altura (%) :", curH.toFixed(1));
 
-                if (newX && newY && newW && newH) {
-                    updatePosition(parseFloat(newX), parseFloat(newY), parseFloat(newW), parseFloat(newH));
-                    console.log(`✅ Editado manualmente - Página ${pageNum}`);
+                if (nx !== null && ny !== null && nw !== null && nh !== null) {
+                    updatePosition(parseFloat(nx), parseFloat(ny), parseFloat(nw), parseFloat(nh));
                 }
             });
 
             slide.appendChild(link);
         }
 
-        function makeDraggableAndResizable(el, resizeHandle, canvas, callback) {
+        function makeDraggableAndResizable(el, handle, canvas, callback) {
             let dragging = false, resizing = false;
-            let startX, startY, startLeft, startTop, startW, startH;
+            let startMouseX, startMouseY, startPercentX, startPercentY, startPercentW, startPercentH;
 
-            // Drag
             el.addEventListener('mousedown', e => {
-                if (e.target === resizeHandle) {
+                const rect = canvas.getBoundingClientRect();
+                startMouseX = e.clientX;
+                startMouseY = e.clientY;
+
+                startPercentX = parseFloat(el.style.left) || 0;
+                startPercentY = parseFloat(el.style.top) || 0;
+                startPercentW = parseFloat(el.style.width) || 0;
+                startPercentH = parseFloat(el.style.height) || 0;
+
+                if (e.target === handle) {
                     resizing = true;
                 } else {
                     dragging = true;
                 }
-                startX = e.clientX;
-                startY = e.clientY;
-                startLeft = parseFloat(el.style.left) || 0;
-                startTop = parseFloat(el.style.top) || 0;
-                startW = parseFloat(el.style.width) || 0;
-                startH = parseFloat(el.style.height) || 0;
             });
 
             document.addEventListener('mousemove', e => {
                 if (!dragging && !resizing) return;
 
-                const dx = (e.clientX - startX) * (canvas.width / canvas.getBoundingClientRect().width);
-                const dy = (e.clientY - startY) * (canvas.height / canvas.getBoundingClientRect().height);
+                const canvasRect = canvas.getBoundingClientRect();
+                const dxPercent = ((e.clientX - startMouseX) / canvasRect.width) * 100;
+                const dyPercent = ((e.clientY - startMouseY) / canvasRect.height) * 100;
 
                 if (dragging) {
-                    const newX = startLeft * canvas.width / 100 + dx;
-                    const newY = startTop * canvas.height / 100 + dy;
-                    callback(newX, newY, startW * canvas.width / 100, startH * canvas.height / 100);
+                    const newX = startPercentX + dxPercent;
+                    const newY = startPercentY + dyPercent;
+                    callback(
+                        (newX / 100) * canvas.width,
+                        (newY / 100) * canvas.height,
+                        (startPercentW / 100) * canvas.width,
+                        (startPercentH / 100) * canvas.height
+                    );
                 } else if (resizing) {
-                    const newW = Math.max(50, startW * canvas.width / 100 + dx);
-                    const newH = Math.max(30, startH * canvas.height / 100 + dy);
-                    callback(startLeft * canvas.width / 100, startTop * canvas.height / 100, newW, newH);
+                    const newW = Math.max(80, (startPercentW + dxPercent) / 100 * canvas.width);
+                    const newH = Math.max(40, (startPercentH + dyPercent) / 100 * canvas.height);
+                    callback(
+                        (startPercentX / 100) * canvas.width,
+                        (startPercentY / 100) * canvas.height,
+                        newW, newH
+                    );
                 }
             });
 
