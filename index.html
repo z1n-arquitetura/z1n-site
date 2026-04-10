@@ -203,24 +203,3 @@ function makeDraggable(el) {
 
   document.addEventListener('mouseup', () => {
     isDown = false;
-  });
-}
-
-/* -------- NAV -------- */
-function showPage(index) {
-  slides[current].classList.remove("active");
-  current = index;
-  slides[current].classList.add("active");
-}
-
-function next() {
-  current >= slides.length - 1 ? showPage(0) : showPage(current + 1);
-}
-
-function prev() {
-  current <= 0 ? showPage(slides.length - 1) : showPage(current - 1);
-}
-</script>
-
-</body>
-</html>
