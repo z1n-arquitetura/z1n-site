@@ -68,6 +68,18 @@
             border-radius: 8px;
             cursor: pointer;
         }
+        .status {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.95);
+            padding: 30px 40px;
+            border-radius: 12px;
+            text-align: center;
+            z-index: 9999;
+            max-width: 80%;
+        }
         #result-box {
             position: fixed;
             top: 90px;
@@ -86,7 +98,6 @@
             overflow: auto;
             font-family: monospace;
             font-size: 15px;
-            line-height: 1.5;
         }
         .close-btn {
             position: absolute;
@@ -116,18 +127,23 @@
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-        // Caminho CORRETO do PDF no seu domínio
-        const pdfUrl = 'https://z1n-arq.com.br/portfolio.pdf';
-
-        console.log("Tentando carregar PDF:", pdfUrl);
+        // Caminho direto e correto
+        const pdfUrl = "https://z1n-arq.com.br/portfolio.pdf";
 
         const slider = document.getElementById('slider');
         let slides = [];
         let allLinks = [];
         let current = 0;
 
+        // Mensagem inicial
+        const statusMsg = document.createElement('div');
+        statusMsg.className = 'status';
+        statusMsg.innerHTML = `<h2>Carregando PDF...</h2><p>Aguarde um momento</p>`;
+        slider.appendChild(statusMsg);
+
         pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
-            console.log(`✅ PDF carregado com sucesso! ${pdf.numPages} páginas`);
+            statusMsg.remove();
+            console.log(`PDF carregado com ${pdf.numPages} páginas`);
 
             for (let i = 1; i <= pdf.numPages; i++) {
                 pdf.getPage(i).then(page => {
@@ -164,22 +180,18 @@
                 });
             }
         }).catch(err => {
-            console.error("Erro:", err);
-            const errorDiv = document.createElement('div');
-            errorDiv.style.position = "absolute";
-            errorDiv.style.top = "50%";
-            errorDiv.style.left = "50%";
-            errorDiv.style.transform = "translate(-50%, -50%)";
-            errorDiv.style.background = "rgba(0,0,0,0.9)";
-            errorDiv.style.padding = "30px";
-            errorDiv.style.borderRadius = "12px";
-            errorDiv.style.textAlign = "center";
-            errorDiv.innerHTML = `
-                <h2>❌ Erro ao carregar o PDF</h2>
-                <p>URL tentada: ${pdfUrl}</p>
-                <p><strong>Verifique se o arquivo portfolio.pdf está publicado no servidor.</strong></p>
+            console.error(err);
+            statusMsg.innerHTML = `
+                <h2 style="color:#ff6666;">❌ Não foi possível carregar o PDF</h2>
+                <p>URL: ${pdfUrl}</p>
+                <p style="margin-top:15px;">Possíveis soluções:</p>
+                <ul style="text-align:left; margin:15px 0;">
+                    <li>Verifique se o arquivo <strong>portfolio.pdf</strong> está publicado corretamente no servidor.</li>
+                    <li>Tente limpar o cache do navegador (Ctrl + Shift + R).</li>
+                    <li>Confira se o PDF abre diretamente ao colar este link na barra de endereço:</li>
+                </ul>
+                <p><a href="${pdfUrl}" target="_blank" style="color:#00ff00;">${pdfUrl}</a></p>
             `;
-            slider.appendChild(errorDiv);
         });
 
         function createDraggableLink(slide, href, x, y, w, h, label, pageNum) {
@@ -198,7 +210,7 @@
                 link.style.height = ph + '%';
             };
 
-            update((x / canvas.width) * 100, (y / canvas.height) * 100, (w / canvas.width) * 100, (h / canvas.height) * 100);
+            update((x / canvas.width)*100, (y / canvas.height)*100, (w / canvas.width)*100, (h / canvas.height)*100);
 
             const rh = document.createElement('div');
             rh.className = 'resize-handle';
@@ -234,11 +246,11 @@
 
         function savePositions() {
             if (allLinks.length === 0) {
-                alert("PDF ainda não carregou completamente.");
+                alert("O PDF ainda não carregou. Verifique a mensagem na tela.");
                 return;
             }
 
-            let text = "// === POSIÇÕES AJUSTADAS - COLE NA VERSÃO FINAL ===\n\n";
+            let text = "// === POSIÇÕES AJUSTADAS ===\n\n";
 
             allLinks.forEach(item => {
                 const s = item.link.style;
@@ -266,13 +278,8 @@
             if (slides[current]) slides[current].classList.add("active");
         }
 
-        function next() {
-            current >= slides.length - 1 ? showPage(0) : showPage(current + 1);
-        }
-
-        function prev() {
-            current <= 0 ? showPage(slides.length - 1) : showPage(current - 1);
-        }
+        function next() { current >= slides.length - 1 ? showPage(0) : showPage(current + 1); }
+        function prev() { current <= 0 ? showPage(slides.length - 1) : showPage(current - 1); }
     </script>
 </body>
 </html>
