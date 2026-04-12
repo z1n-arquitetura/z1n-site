@@ -7,19 +7,11 @@
 
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
-        html, body {
-            height: 100%;
-            overflow: hidden;
-            background: #000;
-        }
-        .slider {
-            width: 100vw;
-            height: 100vh;
-            position: relative;
-        }
+        html, body { height: 100%; overflow: hidden; background: #000; }
+        
+        .slider { width: 100vw; height: 100vh; position: relative; }
         .slide {
-            width: 100%;
-            height: 100%;
+            width: 100%; height: 100%;
             position: absolute;
             display: none;
             justify-content: center;
@@ -27,18 +19,9 @@
         }
         .slide.active { display: flex; }
 
-        .slide-wrapper {
-            position: relative;
-            display: inline-block;
-            max-width: 100%;
-            max-height: 100%;
-        }
+        .slide-wrapper { position: relative; display: inline-block; max-width: 100%; max-height: 100%; }
 
-        canvas {
-            display: block;
-            max-width: 100%;
-            max-height: 100%;
-        }
+        canvas { display: block; max-width: 100%; max-height: 100%; }
 
         .link {
             position: absolute;
@@ -48,17 +31,11 @@
         }
 
         .nav {
-            position: absolute;
-            bottom: 30px;
-            z-index: 100;
-            color: white;
-            font-size: 42px;
+            position: absolute; bottom: 30px; z-index: 100;
+            color: white; font-size: 42px;
             background: rgba(0,0,0,0.7);
-            border: none;
-            border-radius: 50%;
-            width: 65px;
-            height: 65px;
-            cursor: pointer;
+            border: none; border-radius: 50%;
+            width: 65px; height: 65px; cursor: pointer;
         }
         .prev { left: 20px; }
         .next { right: 20px; }
@@ -77,78 +54,63 @@
 
         const pdfUrl = 'https://z1n-arq.com.br/portfolio.pdf';
 
-        const slider = document.getElementById('slider');
         let slides = [];
         let current = 0;
 
         pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
-            console.log("PDF carregado com", pdf.numPages, "páginas");
+            console.log("PDF OK -", pdf.numPages, "páginas");
 
             for (let i = 1; i <= pdf.numPages; i++) {
                 pdf.getPage(i).then(page => {
-                    const pageIndex = i;
-                    const viewportBase = page.getViewport({ scale: 1.0 });
-
-                    const scale = Math.min(
-                        (window.innerWidth * 0.96) / viewportBase.width,
-                        (window.innerHeight * 0.92) / viewportBase.height
-                    );
-
-                    const viewport = page.getViewport({ scale: scale });
+                    const viewportBase = page.getViewport({ scale: 1 });
+                    const scale = Math.min((innerWidth*0.96)/viewportBase.width, (innerHeight*0.92)/viewportBase.height);
+                    const viewport = page.getViewport({ scale });
 
                     const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
                     canvas.width = viewport.width;
                     canvas.height = viewport.height;
+                    const ctx = canvas.getContext('2d');
 
                     const wrapper = document.createElement('div');
                     wrapper.className = 'slide-wrapper';
 
                     const slide = document.createElement('div');
                     slide.className = 'slide';
-
                     wrapper.appendChild(canvas);
                     slide.appendChild(wrapper);
-                    slider.appendChild(slide);
+                    document.getElementById('slider').appendChild(slide);
                     slides.push(slide);
 
-                    // Renderiza o canvas
                     page.render({ canvasContext: ctx, viewport }).promise.then(() => {
+                        // === SUAS POSIÇÕES EXATAS ===
+                        if (i === 1) {
+                            addLink(wrapper, "https://wa.me/5516991128533", 0, 1400, 420, 214, viewportBase);
+                            addLink(wrapper, "tel:+5516991128533", 483, 1453, 1049, 153, viewportBase);
+                        }
+                        if (i === 6) {
+                            addLink(wrapper, "https://wa.me/5516991128533", 0, 1787, 420, 214, viewportBase);
+                            addLink(wrapper, "tel:+5516991128533", 531, 1812, 1028, 168, viewportBase);
+                        }
+                        if (i === pdf.numPages) {
+                            addLink(wrapper, "https://wa.me/5516991128533", 633, 1606, 378, 199, viewportBase);
+                            addLink(wrapper, "tel:+5516991128533", 195, 1311, 1280, 260, viewportBase);
+                        }
 
-                        // === POSIÇÕES EXATAS QUE VOCÊ AJUSTOU ===
-                        if (pageIndex === 1) {
-                            createLink(wrapper, "https://wa.me/5516991128533", 0, 1400, 420, 214, viewportBase);
-                            createLink(wrapper, "tel:+5516991128533", 483, 1453, 1049, 153, viewportBase);
-                        }
-                        if (pageIndex === 6) {
-                            createLink(wrapper, "https://wa.me/5516991128533", 0, 1787, 420, 214, viewportBase);
-                            createLink(wrapper, "tel:+5516991128533", 531, 1812, 1028, 168, viewportBase);
-                        }
-                        if (pageIndex === pdf.numPages) {   // última página (8)
-                            createLink(wrapper, "https://wa.me/5516991128533", 633, 1606, 378, 199, viewportBase);
-                            createLink(wrapper, "tel:+5516991128533", 195, 1311, 1280, 260, viewportBase);
-                        }
-
-                        // Ativa a primeira página só depois de tudo renderizado
-                        if (slides.length === pdf.numPages && slides[0]) {
-                            slides[0].classList.add("active");
-                        }
+                        // Ativa a primeira página
+                        if (i === 1) slide.classList.add("active");
                     });
                 });
             }
-        }).catch(err => alert("Erro ao carregar PDF"));
+        }).catch(() => alert("Erro ao carregar PDF"));
 
-        function createLink(wrapper, href, x, y, w, h, viewportBase) {
+        function addLink(wrapper, href, x, y, w, h, viewportBase) {
             const link = document.createElement('a');
             link.href = href;
-            link.target = '_blank';
-            link.className = 'link';
-
+            link.target = "_blank";
             link.style.left   = (x / viewportBase.width * 100) + '%';
             link.style.top    = (y / viewportBase.height * 100) + '%';
             link.style.width  = (w / viewportBase.width * 100) + '%';
             link.style.height = (h / viewportBase.height * 100) + '%';
-
             wrapper.appendChild(link);
         }
 
