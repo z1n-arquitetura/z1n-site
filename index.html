@@ -5,18 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Z1N Arquiteturas</title>
 
-    <meta property="og:title" content="Z1N Arquiteturas">
-    <meta property="og:description" content="Projetos exclusivos">
-    <meta property="og:image" content="https://z1n-arquitetura.github.io/z1n-site/og-image.jpg">
-    <meta property="og:url" content="https://z1n-arq.com.br/">
-
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         html, body {
             height: 100%;
             overflow: hidden;
             background: #000;
-            touch-action: manipulation;
         }
         .slider {
             width: 100vw;
@@ -35,7 +29,6 @@
 
         .slide-wrapper {
             position: relative;
-            display: inline-block;
             max-width: 100%;
             max-height: 100%;
         }
@@ -44,16 +37,14 @@
             display: block;
             max-width: 100%;
             max-height: 100%;
-            box-shadow: 0 0 30px rgba(0,0,0,0.9);
         }
 
         .link {
             position: absolute;
             z-index: 9999;
-            border: 3px solid rgba(255, 0, 0, 0.7);
-            background: rgba(255, 0, 0, 0.15);
+            border: 3px solid red;
+            background: rgba(255,0,0,0.2);
             pointer-events: all;
-            cursor: pointer;
         }
 
         .nav {
@@ -62,7 +53,7 @@
             z-index: 100;
             color: white;
             font-size: 42px;
-            background: rgba(0,0,0,0.75);
+            background: rgba(0,0,0,0.7);
             border: none;
             border-radius: 50%;
             width: 65px;
@@ -84,17 +75,15 @@
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-        let pdfUrl = 'portfolio.pdf';
-        if (location.hostname.includes('github.io') || location.hostname.includes('z1n-arq')) {
-            pdfUrl = 'https://z1n-arquitetura.github.io/z1n-site/portfolio.pdf';
-        }
+        // FORÇANDO o PDF do GitHub (mais confiável no momento)
+        const pdfUrl = 'https://z1n-arquitetura.github.io/z1n-site/portfolio.pdf';
 
         const slider = document.getElementById('slider');
         let slides = [];
         let current = 0;
 
         pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
-            console.log(`PDF carregado com ${pdf.numPages} páginas`);
+            console.log("PDF carregado com", pdf.numPages, "páginas");
 
             for (let i = 1; i <= pdf.numPages; i++) {
                 pdf.getPage(i).then(page => {
@@ -102,8 +91,8 @@
                     const viewportBase = page.getViewport({ scale: 1 });
 
                     const scale = Math.min(
-                        (window.innerWidth * 0.96) / viewportBase.width,
-                        (window.innerHeight * 0.92) / viewportBase.height
+                        (window.innerWidth * 0.95) / viewportBase.width,
+                        (window.innerHeight * 0.90) / viewportBase.height
                     );
 
                     const viewport = page.getViewport({ scale });
@@ -125,47 +114,40 @@
                     slides.push(slide);
 
                     page.render({ canvasContext: ctx, viewport }).promise.then(() => {
-                        createLinks(wrapper, pageIndex, viewportBase);
+                        if (pageIndex === 1) {
+                            createLink(wrapper, "https://wa.me/5516991128533", 1050, 680, 200, 140, viewportBase);
+                            createLink(wrapper, "tel:+5516991128533", 1220, 740, 500, 100, viewportBase);
+                        }
+                        if (pageIndex === 6) {
+                            createLink(wrapper, "https://wa.me/5516991128533", 1050, 860, 200, 140, viewportBase);
+                            createLink(wrapper, "tel:+5516991128533", 1220, 910, 480, 110, viewportBase);
+                        }
+                        if (pageIndex === slides.length) {
+                            createLink(wrapper, "https://wa.me/5516991128533", 1300, 780, 180, 130, viewportBase);
+                            createLink(wrapper, "tel:+5516991128533", 1080, 640, 610, 170, viewportBase);
+                        }
 
                         if (slides.length === 1) slide.classList.add("active");
                     });
                 });
             }
         }).catch(err => {
-            console.error("Erro ao carregar PDF:", err);
-            alert("Erro ao carregar o PDF. Verifique se o arquivo portfolio.pdf está no lugar correto.");
+            console.error("Erro PDF:", err);
+            alert("Ainda não conseguiu carregar o PDF.\nVerifique se o link https://z1n-arquitetura.github.io/z1n-site/portfolio.pdf abre no navegador.");
         });
 
-        function createLinks(wrapper, pageIndex, viewportBase) {
-            const configs = [];
+        function createLink(wrapper, href, x, y, w, h, viewportBase) {
+            const link = document.createElement('a');
+            link.href = href;
+            link.target = '_blank';
+            link.className = 'link';
 
-            if (pageIndex === 1) {
-                configs.push({ href: "https://wa.me/5516991128533", x: 1050, y: 680, w: 180, h: 130 });
-                configs.push({ href: "tel:+5516991128533", x: 1220, y: 740, w: 490, h: 90 });
-            }
-            if (pageIndex === 6) {
-                configs.push({ href: "https://wa.me/5516991128533", x: 1050, y: 860, w: 180, h: 130 });
-                configs.push({ href: "tel:+5516991128533", x: 1220, y: 910, w: 480, h: 100 });
-            }
-            if (pageIndex === slides.length) {
-                configs.push({ href: "https://wa.me/5516991128533", x: 1300, y: 780, w: 160, h: 120 });
-                configs.push({ href: "tel:+5516991128533", x: 1080, y: 640, w: 610, h: 160 });
-            }
+            link.style.left = (x / viewportBase.width * 100) + '%';
+            link.style.top = (y / viewportBase.height * 100) + '%';
+            link.style.width = (w / viewportBase.width * 100) + '%';
+            link.style.height = (h / viewportBase.height * 100) + '%';
 
-            configs.forEach(data => {
-                const link = document.createElement('a');
-                link.href = data.href;
-                link.target = '_blank';
-                link.rel = 'noopener';
-                link.className = 'link';
-
-                link.style.left = (data.x / viewportBase.width * 100) + '%';
-                link.style.top = (data.y / viewportBase.height * 100) + '%';
-                link.style.width = (data.w / viewportBase.width * 100) + '%';
-                link.style.height = (data.h / viewportBase.height * 100) + '%';
-
-                wrapper.appendChild(link);
-            });
+            wrapper.appendChild(link);
         }
 
         function showPage(index) {
