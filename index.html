@@ -1,4 +1,10 @@
-<!DOCTYPE html>
+Entendi. O problema persiste porque o drag & drop não está funcionando direito no seu caso (provavelmente por causa de como o wrapper e o canvas são renderizados no mobile/desktop, ou eventos de mouse não propagando bem).
+Vamos resolver de forma mais simples e confiável:
+Vou te dar um código muito mais leve para o modo edição.
+Os retângulos vermelhos vão aparecer em posições iniciais bem centralizadas (para você conseguir ver e arrastar facilmente).
+O arrasto agora usa um método mais simples e robusto.
+Substitua todo o index.html por este código:
+HTML<!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
@@ -7,83 +13,78 @@
 
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
-        html, body {
-            height: 100%;
-            overflow: hidden;
-            background: #111;
-            color: #0f0;
-            font-family: Arial, sans-serif;
-        }
+        html, body { height: 100%; overflow: hidden; background: #000; }
         .slider { width: 100vw; height: 100vh; position: relative; }
-        .slide {
-            width: 100%; height: 100%;
-            position: absolute;
-            display: none;
-            justify-content: center;
-            align-items: center;
+        .slide { 
+            width: 100%; height: 100%; 
+            position: absolute; 
+            display: none; 
+            justify-content: center; 
+            align-items: center; 
         }
         .slide.active { display: flex; }
 
-        .slide-wrapper {
-            position: relative;
-            display: inline-block;
-            max-width: 100%;
-            max-height: 100%;
+        .slide-wrapper { 
+            position: relative; 
+            display: inline-block; 
+            max-width: 100%; 
+            max-height: 100%; 
         }
 
-        canvas {
-            display: block;
-            max-width: 100%;
-            max-height: 100%;
+        canvas { 
+            display: block; 
+            max-width: 100%; 
+            max-height: 100%; 
             box-shadow: 0 0 40px rgba(0,0,0,0.95);
         }
 
         .link {
             position: absolute;
             z-index: 9999;
-            border: 3px solid #ff0000;
-            background: rgba(255,0,0,0.18);
+            border: 4px solid #ff0000;
+            background: rgba(255, 0, 0, 0.20);
             cursor: move;
-            user-select: none;
-            box-shadow: 0 0 8px rgba(255,0,0,0.6);
+            touch-action: none;
         }
 
         #debug {
             position: fixed;
             top: 10px;
             left: 10px;
-            background: rgba(0,0,0,0.92);
-            padding: 12px;
+            background: rgba(0,0,0,0.95);
+            color: #0f0;
+            padding: 12px 15px;
             border-radius: 6px;
-            font-size: 13px;
+            font-size: 14px;
             z-index: 10000;
-            max-width: 420px;
-            border: 1px solid #0f0;
+            max-width: 90%;
         }
         #debug button {
-            margin-top: 8px;
-            padding: 8px 14px;
+            margin-top: 10px;
+            padding: 10px 16px;
             background: #0066ff;
             color: white;
             border: none;
-            border-radius: 4px;
-            cursor: pointer;
+            border-radius: 5px;
+            font-size: 15px;
         }
     </style>
 </head>
 <body>
 
     <div id="debug">
-        <strong>🔧 Modo Edição Ativo</strong><br>
-        Arraste os retângulos vermelhos para posicionar os links.<br>
+        <strong>🔧 MODO EDIÇÃO</strong><br>
+        Arraste os quadrados vermelhos para cima das áreas de WhatsApp e Telefone.<br>
         Página: <span id="pageNum">1</span> / <span id="totalPages">?</span><br><br>
-        <div id="coords" style="margin:8px 0; line-height:1.4;"></div>
-        <button id="copyBtn">📋 Copiar código das posições ajustadas</button>
+        <div id="coords">Clique e arraste um link para ver coordenadas</div>
+        <button id="copyBtn">📋 Copiar todas as posições</button>
     </div>
 
     <div class="slider" id="slider"></div>
-    <button style="position:absolute; bottom:30px; left:20px; z-index:1000; width:65px; height:65px; font-size:42px; background:rgba(0,0,0,0.8); color:white; border:none; border-radius:50%; cursor:pointer;" onclick="prev()">←</button>
-    <button style="position:absolute; bottom:30px; right:20px; z-index:1000; width:65px; height:65px; font-size:42px; background:rgba(0,0,0,0.8); color:white; border:none; border-radius:50%; cursor:pointer;" onclick="next()">→</button>
+
+    <!-- Botões de navegação -->
+    <button onclick="prev()" style="position:absolute;bottom:25px;left:20px;z-index:1000;width:70px;height:70px;font-size:50px;background:rgba(0,0,0,0.8);color:white;border:none;border-radius:50%;">←</button>
+    <button onclick="next()" style="position:absolute;bottom:25px;right:20px;z-index:1000;width:70px;height:70px;font-size:50px;background:rgba(0,0,0,0.8);color:white;border:none;border-radius:50%;">→</button>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
@@ -98,21 +99,22 @@
         const slider = document.getElementById('slider');
         let slides = [];
         let current = 0;
-        let linkConfigs = { 1: [], 6: [], last: [] };
 
-        // Coordenadas iniciais mais centralizadas para aparecerem na tela
-        linkConfigs[1] = [
-            { id: "wa1",  href: "https://wa.me/5516991128533", x: 1050, y: 700, w: 180, h: 140 },
-            { id: "tel1", href: "tel:+5516991128533",       x: 1200, y: 750, w: 500, h: 100 }
-        ];
-        linkConfigs[6] = [
-            { id: "wa6",  href: "https://wa.me/5516991128533", x: 1050, y: 850, w: 180, h: 140 },
-            { id: "tel6", href: "tel:+5516991128533",       x: 1200, y: 900, w: 480, h: 110 }
-        ];
-        linkConfigs.last = [
-            { id: "waLast",  href: "https://wa.me/5516991128533", x: 1300, y: 780, w: 160, h: 120 },
-            { id: "telLast", href: "tel:+5516991128533",       x: 1100, y: 650, w: 620, h: 170 }
-        ];
+        // Posições iniciais bem visíveis (centralizadas) - você vai mover
+        const initialLinks = {
+            1: [
+                {id:"wa1", href:"https://wa.me/5516991128533", x:900, y:650, w:200, h:150},
+                {id:"tel1", href:"tel:+5516991128533", x:1150, y:720, w:450, h:90}
+            ],
+            6: [
+                {id:"wa6", href:"https://wa.me/5516991128533", x:900, y:850, w:200, h:150},
+                {id:"tel6", href:"tel:+5516991128533", x:1150, y:900, w:450, h:100}
+            ],
+            last: [
+                {id:"waLast", href:"https://wa.me/5516991128533", x:1250, y:750, w:180, h:130},
+                {id:"telLast", href:"tel:+5516991128533", x:1050, y:620, w:550, h:160}
+            ]
+        };
 
         pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
             document.getElementById('totalPages').textContent = pdf.numPages;
@@ -120,11 +122,11 @@
             for (let i = 1; i <= pdf.numPages; i++) {
                 pdf.getPage(i).then(page => {
                     const pageIndex = i;
-                    const viewportBase = page.getViewport({ scale: 1.0 });
+                    const viewportBase = page.getViewport({ scale: 1 });
 
                     const scale = Math.min(
-                        (window.innerWidth * 0.96) / viewportBase.width,
-                        (window.innerHeight * 0.92) / viewportBase.height
+                        (window.innerWidth * 0.94) / viewportBase.width,
+                        (window.innerHeight * 0.90) / viewportBase.height
                     );
 
                     const viewport = page.getViewport({ scale });
@@ -132,7 +134,6 @@
                     const canvas = document.createElement('canvas');
                     canvas.width = viewport.width;
                     canvas.height = viewport.height;
-                    const ctx = canvas.getContext('2d');
 
                     const wrapper = document.createElement('div');
                     wrapper.className = 'slide-wrapper';
@@ -144,31 +145,30 @@
                     slide.appendChild(wrapper);
                     slider.appendChild(slide);
 
-                    slides.push({ slide, wrapper, viewportBase, pageIndex });
+                    slides.push({slide, wrapper, viewportBase, pageIndex});
 
-                    page.render({ canvasContext: ctx, viewport }).promise.then(() => {
-                        createEditableLinks(wrapper, pageIndex, viewportBase);
+                    page.render({canvasContext: canvas.getContext('2d'), viewport}).promise.then(() => {
+                        createLinks(wrapper, pageIndex, viewportBase);
                         if (slides.length === 1) slide.classList.add("active");
                     });
                 });
             }
-        }).catch(err => console.error("Erro PDF:", err));
+        });
 
-        function createEditableLinks(wrapper, pageIndex, viewportBase) {
+        function createLinks(wrapper, pageIndex, viewportBase) {
             let configs = [];
-            if (pageIndex === 1) configs = linkConfigs[1];
-            else if (pageIndex === 6) configs = linkConfigs[6];
-            else if (pageIndex === slides.length) configs = linkConfigs.last;
+            if (pageIndex === 1) configs = initialLinks[1];
+            else if (pageIndex === 6) configs = initialLinks[6];
+            else if (pageIndex === slides.length) configs = initialLinks.last;
 
             configs.forEach(cfg => {
                 const link = document.createElement('a');
-                link.href = cfg.href;
                 link.className = 'link';
                 link.dataset.id = cfg.id;
+                link.href = cfg.href;   // só para referência
 
-                // Posição inicial
                 link.style.left = (cfg.x / viewportBase.width * 100) + '%';
-                link.style.top = (cfg.y / viewportBase.height * 100) + '%';
+                link.style.top  = (cfg.y / viewportBase.height * 100) + '%';
                 link.style.width = (cfg.w / viewportBase.width * 100) + '%';
                 link.style.height = (cfg.h / viewportBase.height * 100) + '%';
 
@@ -178,95 +178,97 @@
         }
 
         function makeDraggable(el, viewportBase) {
-            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            let offsetX, offsetY;
 
-            el.onmousedown = dragMouseDown;
-
-            function dragMouseDown(e) {
+            function startDrag(e) {
                 e.preventDefault();
-                pos3 = e.clientX;
-                pos4 = e.clientY;
-                document.onmouseup = closeDragElement;
-                document.onmousemove = elementDrag;
-                el.style.borderColor = "#ffff00";
+                const rect = el.getBoundingClientRect();
+                offsetX = (e.type === "touchstart" ? e.touches[0].clientX : e.clientX) - rect.left;
+                offsetY = (e.type === "touchstart" ? e.touches[0].clientY : e.clientY) - rect.top;
+
+                document.addEventListener('mousemove', doDrag);
+                document.addEventListener('touchmove', doDrag);
+                document.addEventListener('mouseup', stopDrag);
+                document.addEventListener('touchend', stopDrag);
             }
 
-            function elementDrag(e) {
-                e.preventDefault();
-                pos1 = pos3 - e.clientX;
-                pos2 = pos4 - e.clientY;
-                pos3 = e.clientX;
-                pos4 = e.clientY;
+            function doDrag(e) {
+                const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+                const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
 
-                let newTop = el.offsetTop - pos2;
-                let newLeft = el.offsetLeft - pos1;
+                let newLeft = clientX - offsetX - el.parentElement.getBoundingClientRect().left;
+                let newTop  = clientY - offsetY - el.parentElement.getBoundingClientRect().top;
 
-                // Limites
-                newLeft = Math.max(0, Math.min(wrapper.offsetWidth - el.offsetWidth, newLeft));
-                newTop = Math.max(0, Math.min(wrapper.offsetHeight - el.offsetHeight, newTop));
+                const wrapperW = el.parentElement.offsetWidth;
+                const wrapperH = el.parentElement.offsetHeight;
 
-                el.style.top = (newTop / wrapper.offsetHeight * 100) + '%';
-                el.style.left = (newLeft / wrapper.offsetWidth * 100) + '%';
+                newLeft = Math.max(0, Math.min(wrapperW - el.offsetWidth, newLeft));
+                newTop  = Math.max(0, Math.min(wrapperH - el.offsetHeight, newTop));
 
-                updateCoords(el, viewportBase);
+                el.style.left = (newLeft / wrapperW * 100) + '%';
+                el.style.top  = (newTop / wrapperH * 100) + '%';
+
+                showCoords(el, viewportBase);
             }
 
-            function closeDragElement() {
-                document.onmouseup = null;
-                document.onmousemove = null;
-                el.style.borderColor = "#ff0000";
+            function stopDrag() {
+                document.removeEventListener('mousemove', doDrag);
+                document.removeEventListener('touchmove', doDrag);
+                document.removeEventListener('mouseup', stopDrag);
+                document.removeEventListener('touchend', stopDrag);
             }
+
+            el.addEventListener('mousedown', startDrag);
+            el.addEventListener('touchstart', startDrag);
         }
 
-        function updateCoords(el, viewportBase) {
+        function showCoords(el, viewportBase) {
             const leftPct = parseFloat(el.style.left);
             const topPct = parseFloat(el.style.top);
             const wPct = parseFloat(el.style.width);
             const hPct = parseFloat(el.style.height);
 
-            const x = Math.round(leftPct / 100 * viewportBase.width);
-            const y = Math.round(topPct / 100 * viewportBase.height);
-            const w = Math.round(wPct / 100 * viewportBase.width);
-            const h = Math.round(hPct / 100 * viewportBase.height);
+            const x = Math.round((leftPct / 100) * viewportBase.width);
+            const y = Math.round((topPct / 100) * viewportBase.height);
+            const w = Math.round((wPct / 100) * viewportBase.width);
+            const h = Math.round((hPct / 100) * viewportBase.height);
 
             document.getElementById('coords').innerHTML = `
-                <strong>Coordenadas atuais:</strong><br>
-                x: ${x}  y: ${y}<br>
-                largura: ${w}  altura: ${h}
+                x: <b>${x}</b>  y: <b>${y}</b><br>
+                largura: <b>${w}</b>  altura: <b>${h}</b>
             `;
         }
 
-        document.getElementById('copyBtn').onclick = () => {
-            let output = "/* Posições ajustadas no modo edição */\n\n";
-            Object.keys(linkConfigs).forEach(key => {
-                output += `// Página ${key === 'last' ? 'última' : key}\n`;
-                linkConfigs[key].forEach(cfg => {
+        document.getElementById('copyBtn').addEventListener('click', () => {
+            let result = "/* Posições finais ajustadas por você */\n\n";
+            Object.keys(initialLinks).forEach(key => {
+                result += `// Página ${key === 'last' ? 'última' : key}\n`;
+                initialLinks[key].forEach(cfg => {
                     const el = document.querySelector(`[data-id="${cfg.id}"]`);
                     if (el) {
-                        const leftPct = parseFloat(el.style.left) || 0;
-                        const topPct = parseFloat(el.style.top) || 0;
+                        const leftPct = parseFloat(el.style.left) || 50;
+                        const topPct = parseFloat(el.style.top) || 50;
                         const wPct = parseFloat(el.style.width) || 10;
                         const hPct = parseFloat(el.style.height) || 10;
 
-                        const x = Math.round(leftPct / 100 * 1700); // largura aproximada do PDF
+                        const x = Math.round(leftPct / 100 * 1700);
                         const y = Math.round(topPct / 100 * 2200);
                         const w = Math.round(wPct / 100 * 1700);
                         const h = Math.round(hPct / 100 * 2200);
 
-                        output += `{ href: "${cfg.href}", x: ${x}, y: ${y}, w: ${w}, h: ${h} },\n`;
+                        result += `{ href: "${cfg.href}", x: ${x}, y: ${y}, w: ${w}, h: ${h} },\n`;
                     }
                 });
             });
-            navigator.clipboard.writeText(output).then(() => {
-                alert("✅ Código copiado para a área de transferência!\n\nCole aqui ou envie para mim.");
-            });
-        };
+            navigator.clipboard.writeText(result);
+            alert("✅ Copiado! Cole aqui na conversa.");
+        });
 
-        function showPage(index) {
+        function showPage(idx) {
             slides.forEach(s => s.slide.classList.remove("active"));
-            if (slides[index]) slides[index].slide.classList.add("active");
-            document.getElementById('pageNum').textContent = slides[index] ? slides[index].pageIndex : 1;
-            current = index;
+            if (slides[idx]) slides[idx].slide.classList.add("active");
+            document.getElementById('pageNum').textContent = slides[idx] ? slides[idx].pageIndex : 1;
+            current = idx;
         }
 
         function next() { current = (current + 1) % slides.length; showPage(current); }
