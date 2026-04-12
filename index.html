@@ -12,10 +12,27 @@
         .swiper-slide { display: flex; justify-content: center; align-items: center; position: relative; }
         .swiper-slide img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
-        .seta { position: fixed; bottom: 10px; z-index: 1000; color: rgba(255, 255, 255, 0.15); font-size: 14px; cursor: pointer; padding: 15px; }
-        #prev { left: 5px; } #next { right: 5px; }
+        /* SETAS MÍNIMAS NOS CANTOS */
+        .seta {
+            position: fixed;
+            bottom: 10px;
+            z-index: 1000;
+            color: rgba(255, 255, 255, 0.15);
+            font-size: 14px; 
+            cursor: pointer;
+            padding: 15px;
+            user-select: none;
+        }
+        #prev { left: 5px; }
+        #next { right: 5px; }
 
-        .link-final { position: absolute; display: block; z-index: 999; background: rgba(255, 255, 255, 0); }
+        /* LINKS TOTALMENTE INVISÍVEIS */
+        .link-final {
+            position: absolute;
+            display: block;
+            z-index: 999;
+            background: rgba(255, 255, 255, 0);
+        }
     </style>
 </head>
 <body>
@@ -25,10 +42,8 @@
             
             <div class="swiper-slide">
                 <img src="p1.png">
-                <a href="https://wa.me/5516991128533" target="_blank" class="link-final" 
-                   style="width: 20px; height: 25px; top: 61.4%; left: 39.2%;"></a>
-                <a href="tel:+5516991128533" class="link-final" 
-                   style="width: 20px; height: 25px; top: 61.4%; left: 43%;"></a>
+                <a href="tel:+5516991128533" class="link-final" style="width:72.8px; height:16.0px; top:65.2%; left:43.2%;"></a>
+                <a href="https://wa.me/5516991128533" target="_blank" class="link-final" style="width:16.3px; height:18.9px; top:62.6%; left:23.3%;"></a>
             </div>
 
             <div class="swiper-slide"><img src="p2.png"></div>
@@ -38,20 +53,16 @@
 
             <div class="swiper-slide">
                 <img src="p6.png">
-                <a href="https://wa.me/5516991128533" target="_blank" class="link-final" 
-                   style="width: 20px; height: 25px; top: 50%; left: 50%;"></a>
-                <a href="tel:+5516991128533" class="link-final" 
-                   style="width: 20px; height: 25px; top: 50%; left: 55%;"></a>
+                <a href="tel:+5516991128533" class="link-final" style="width:70.9px; height:15.7px; top:81.1%; left:38.4%;"></a>
+                <a href="https://wa.me/5516991128533" target="_blank" class="link-final" style="width:17.7px; height:14.4px; top:81.1%; left:24.6%;"></a>
             </div>
 
             <div class="swiper-slide"><img src="p7.png"></div>
 
             <div class="swiper-slide">
                 <img src="p8.png">
-                <a href="https://wa.me/5516991128533" target="_blank" class="link-final" 
-                   style="width: 20px; height: 25px; top: 50%; left: 50%;"></a>
-                <a href="tel:+5516991128533" class="link-final" 
-                   style="width: 20px; height: 25px; top: 50%; left: 55%;"></a>
+                <a href="tel:+5516991128533" class="link-final" style="width:100px; height:23.2px; top:57.4%; left:38.9%;"></a>
+                <a href="https://wa.me/5516991128533" target="_blank" class="link-final" style="width:20.3px; height:15.6px; top:72.8%; left:47.2%;"></a>
             </div>
 
         </div>
