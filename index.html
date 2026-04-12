@@ -1,130 +1,206 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Z1N Arquiteturas</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Z1N Arquiteturas</title>
 
-    <style>
-        * { margin:0; padding:0; box-sizing:border-box; }
-        html, body { height: 100%; overflow: hidden; background: #000; }
-        
-        .slider { width: 100vw; height: 100vh; position: relative; }
-        .slide {
-            width: 100%; height: 100%;
-            position: absolute;
-            display: none;
-            justify-content: center;
-            align-items: center;
-        }
-        .slide.active { display: flex; }
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height: 100%; overflow: hidden; background: #000; }
 
-        .slide-wrapper { position: relative; display: inline-block; max-width: 100%; max-height: 100%; }
+.slider {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+}
 
-        canvas { display: block; max-width: 100%; max-height: 100%; }
+.slide {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
 
-        .link {
-            position: absolute;
-            z-index: 9999;
-            background: transparent;
-            pointer-events: all;
-        }
+.slide.active { display: flex; }
 
-        .nav {
-            position: absolute; bottom: 30px; z-index: 100;
-            color: white; font-size: 42px;
-            background: rgba(0,0,0,0.7);
-            border: none; border-radius: 50%;
-            width: 65px; height: 65px; cursor: pointer;
-        }
-        .prev { left: 20px; }
-        .next { right: 20px; }
-    </style>
+.slide-wrapper {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+canvas {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+/* LINKS CLICÁVEIS */
+.link {
+    position: absolute;
+    z-index: 9999;
+}
+
+/* DEBUG VISUAL (deixe true pra ajustar, depois coloque false) */
+.debug .link {
+    background: rgba(255,0,0,0.3);
+}
+
+/* BOTÕES */
+.nav {
+    position: absolute;
+    bottom: 30px;
+    z-index: 100;
+    color: white;
+    font-size: 42px;
+    background: rgba(0,0,0,0.7);
+    border: none;
+    border-radius: 50%;
+    width: 65px;
+    height: 65px;
+    cursor: pointer;
+}
+
+.prev { left: 20px; }
+.next { right: 20px; }
+</style>
 </head>
-<body>
 
-    <div class="slider" id="slider"></div>
-    <button class="nav prev" onclick="prev()">←</button>
-    <button class="nav next" onclick="next()">→</button>
+<body class="debug"> <!-- REMOVA "debug" depois -->
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<div class="slider" id="slider"></div>
 
-    <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+<button class="nav prev" onclick="prev()">←</button>
+<button class="nav next" onclick="next()">→</button>
 
-        const pdfUrl = 'https://z1n-arq.com.br/portfolio.pdf';
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
-        let slides = [];
-        let current = 0;
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-        pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
-            console.log("PDF OK -", pdf.numPages, "páginas");
+const pdfUrl = 'https://z1n-arq.com.br/portfolio.pdf';
 
-            for (let i = 1; i <= pdf.numPages; i++) {
-                pdf.getPage(i).then(page => {
-                    const viewportBase = page.getViewport({ scale: 1 });
-                    const scale = Math.min((innerWidth*0.96)/viewportBase.width, (innerHeight*0.92)/viewportBase.height);
-                    const viewport = page.getViewport({ scale });
+let slides = [];
+let current = 0;
 
-                    const canvas = document.createElement('canvas');
-                    canvas.width = viewport.width;
-                    canvas.height = viewport.height;
-                    const ctx = canvas.getContext('2d');
+/* =========================
+   MAPA DE LINKS POR PÁGINA
+   ========================= */
+const hotspots = {
+  1: [
+    // WhatsApp
+    { href: "https://wa.me/5516991128533", left: 5, top: 58, w: 18, h: 10 },
 
-                    const wrapper = document.createElement('div');
-                    wrapper.className = 'slide-wrapper';
+    // Telefone
+    { href: "tel:+5516991128533", left: 78, top: 58, w: 12, h: 10 },
 
-                    const slide = document.createElement('div');
-                    slide.className = 'slide';
-                    wrapper.appendChild(canvas);
-                    slide.appendChild(wrapper);
-                    document.getElementById('slider').appendChild(slide);
-                    slides.push(slide);
+    // Texto central
+    { href: "https://wa.me/5516991128533", left: 25, top: 56, w: 50, h: 12 },
+  ],
 
-                    page.render({ canvasContext: ctx, viewport }).promise.then(() => {
-                        // === SUAS POSIÇÕES EXATAS ===
-                        if (i === 1) {
-                            addLink(wrapper, "https://wa.me/5516991128533", 0, 1400, 420, 214, viewportBase);
-                            addLink(wrapper, "tel:+5516991128533", 483, 1453, 1049, 153, viewportBase);
-                        }
-                        if (i === 6) {
-                            addLink(wrapper, "https://wa.me/5516991128533", 0, 1787, 420, 214, viewportBase);
-                            addLink(wrapper, "tel:+5516991128533", 531, 1812, 1028, 168, viewportBase);
-                        }
-                        if (i === pdf.numPages) {
-                            addLink(wrapper, "https://wa.me/5516991128533", 633, 1606, 378, 199, viewportBase);
-                            addLink(wrapper, "tel:+5516991128533", 195, 1311, 1280, 260, viewportBase);
-                        }
+  6: [
+    { href: "https://wa.me/5516991128533", left: 5, top: 70, w: 18, h: 10 },
+    { href: "tel:+5516991128533", left: 75, top: 70, w: 15, h: 10 },
+  ],
 
-                        // Ativa a primeira página
-                        if (i === 1) slide.classList.add("active");
+  8: [
+    { href: "https://wa.me/5516991128533", left: 40, top: 75, w: 20, h: 10 },
+    { href: "tel:+5516991128533", left: 20, top: 65, w: 60, h: 12 },
+  ]
+};
+
+/* ========================= */
+
+pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+
+        pdf.getPage(i).then(page => {
+
+            const viewportBase = page.getViewport({ scale: 1 });
+
+            const scale = Math.min(
+                (innerWidth * 0.96) / viewportBase.width,
+                (innerHeight * 0.92) / viewportBase.height
+            );
+
+            const viewport = page.getViewport({ scale });
+
+            const canvas = document.createElement('canvas');
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+
+            const ctx = canvas.getContext('2d');
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'slide-wrapper';
+
+            const slide = document.createElement('div');
+            slide.className = 'slide';
+
+            wrapper.appendChild(canvas);
+            slide.appendChild(wrapper);
+            document.getElementById('slider').appendChild(slide);
+
+            slides.push(slide);
+
+            page.render({ canvasContext: ctx, viewport }).promise.then(() => {
+
+                /* 🔥 AQUI ENTRA AUTOMÁTICO POR PÁGINA */
+                if (hotspots[i]) {
+                    hotspots[i].forEach(area => {
+                        addLink(wrapper, area);
                     });
-                });
-            }
-        }).catch(() => alert("Erro ao carregar PDF"));
+                }
 
-        function addLink(wrapper, href, x, y, w, h, viewportBase) {
-            const link = document.createElement('a');
-            link.href = href;
-            link.target = "_blank";
-            link.style.left   = (x / viewportBase.width * 100) + '%';
-            link.style.top    = (y / viewportBase.height * 100) + '%';
-            link.style.width  = (w / viewportBase.width * 100) + '%';
-            link.style.height = (h / viewportBase.height * 100) + '%';
-            wrapper.appendChild(link);
-        }
+                if (i === 1) slide.classList.add("active");
+            });
+        });
+    }
 
-        function next() {
-            current = (current + 1) % slides.length;
-            slides.forEach(s => s.classList.remove("active"));
-            slides[current].classList.add("active");
-        }
+}).catch(() => alert("Erro ao carregar PDF"));
 
-        function prev() {
-            current = (current - 1 + slides.length) % slides.length;
-            slides.forEach(s => s.classList.remove("active"));
-            slides[current].classList.add("active");
-        }
-    </script>
+/* =========================
+   FUNÇÃO DE LINK (%)
+   ========================= */
+function addLink(wrapper, area) {
+    const link = document.createElement('a');
+
+    link.href = area.href;
+    link.target = "_blank";
+    link.className = "link";
+
+    link.style.left   = area.left + "%";
+    link.style.top    = area.top + "%";
+    link.style.width  = area.w + "%";
+    link.style.height = area.h + "%";
+
+    wrapper.appendChild(link);
+}
+
+/* =========================
+   NAVEGAÇÃO
+   ========================= */
+function next() {
+    current = (current + 1) % slides.length;
+    updateSlide();
+}
+
+function prev() {
+    current = (current - 1 + slides.length) % slides.length;
+    updateSlide();
+}
+
+function updateSlide() {
+    slides.forEach(s => s.classList.remove("active"));
+    slides[current].classList.add("active");
+}
+</script>
+
 </body>
 </html>
