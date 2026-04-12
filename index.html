@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfólio | Z1N</title>
-    
+    <title>Z1N | Portfólio</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body, html { height: 100%; background: #000; overflow: hidden; font-family: sans-serif; }
@@ -15,46 +13,29 @@
         .swiper-slide { display: flex; justify-content: center; align-items: center; position: relative; }
         .swiper-slide img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
-        /* Estilização das setas na parte inferior */
-        .navegacao-inferior {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 40px;
-            z-index: 100;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 10px 20px;
-            border-radius: 30px;
-            backdrop-filter: blur(5px);
-        }
-
+        /* SETAS MÍNIMAS NOS CANTOS INFERIORES */
         .seta {
-            color: #fff;
+            position: fixed;
+            bottom: 15px;
+            z-index: 1000;
+            color: rgba(255, 255, 255, 0.4); /* Cor suave para não distrair */
+            font-size: 18px; /* Tamanho pequeno, aprox. 5mm */
             cursor: pointer;
-            font-size: 24px;
             user-select: none;
-            transition: 0.3s;
+            padding: 10px;
         }
+        #prev { left: 10px; }
+        #next { right: 10px; }
 
-        .seta:hover { opacity: 0.5; }
-
-        /* Estilo opcional para link dentro da imagem (ex: na última página) */
-        .link-area {
+        /* LINKS INVISÍVEIS E EDITÁVEIS */
+        .link-invisivel {
             position: absolute;
-            bottom: 15%; /* Ajuste conforme a posição do seu design no PNG */
-            display: flex;
-            gap: 10px;
-        }
-        .btn-contato {
-            padding: 10px 20px;
-            background: #25d366;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            font-size: 12px;
+            display: block;
+            background: rgba(255, 0, 0, 0); /* Mude para 0.2 se quiser ver a caixa enquanto edita */
+            z-index: 999;
+            /* TAMANHO DA ÁREA CLICÁVEL - AJUSTE AQUI */
+            width: 150px; 
+            height: 60px;
         }
     </style>
 </head>
@@ -62,39 +43,43 @@
 
     <div class="swiper">
         <div class="swiper-wrapper">
-            <div class="swiper-slide"><img src="p1.png"></div>
+            <div class="swiper-slide">
+                <img src="p1.png">
+                <a href="https://wa.me/55NUMERO" target="_blank" class="link-invisivel" style="top: 80%; left: 50%; transform: translateX(-50%);"></a>
+            </div>
+
             <div class="swiper-slide"><img src="p2.png"></div>
             <div class="swiper-slide"><img src="p3.png"></div>
             <div class="swiper-slide"><img src="p4.png"></div>
             <div class="swiper-slide"><img src="p5.png"></div>
-            <div class="swiper-slide"><img src="p6.png"></div>
+
+            <div class="swiper-slide">
+                <img src="p6.png">
+                <a href="https://wa.me/55NUMERO" target="_blank" class="link-invisivel" style="top: 75%; left: 50%; transform: translateX(-50%);"></a>
+            </div>
+
             <div class="swiper-slide"><img src="p7.png"></div>
-            
+
             <div class="swiper-slide">
                 <img src="p8.png">
-                <div class="link-area">
-                    <a href="https://wa.me/55NUMERO" target="_blank" class="btn-contato">WhatsApp</a>
-                    <a href="tel:+55NUMERO" class="btn-contato" style="background:#333;">Ligar</a>
-                </div>
+                <a href="https://wa.me/55NUMERO" target="_blank" class="link-invisivel" style="top: 70%; left: 30%;"></a>
+                <a href="tel:+55NUMERO" class="link-invisivel" style="top: 70%; left: 60%;"></a>
             </div>
         </div>
     </div>
 
-    <div class="navegacao-inferior">
-        <div class="seta" id="prev">&#10094;</div> <div class="seta" id="next">&#10095;</div> </div>
+    <div class="seta" id="prev">&#10094;</div>
+    <div class="seta" id="next">&#10095;</div>
 
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
         const swiper = new Swiper('.swiper', {
             direction: 'horizontal',
-            loop: true, // SLIDE SEM FIM (INFINITO)
-            grabCursor: true, // Mostra a mãozinha do mouse
-            mousewheel: true, // Movimentação pelo scroll do mouse
-            keyboard: true,   // Movimentação pelas setas do teclado
-            navigation: {
-                nextEl: '#next',
-                prevEl: '#prev',
-            },
+            loop: true,
+            grabCursor: true,
+            mousewheel: true,
+            keyboard: true,
+            navigation: { nextEl: '#next', prevEl: '#prev' },
         });
     </script>
 </body>
