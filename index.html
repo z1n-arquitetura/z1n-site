@@ -39,15 +39,13 @@ canvas {
     max-height: 100%;
 }
 
-/* LINKS CLICÁVEIS */
+/* LINKS */
 .link {
     position: absolute;
     z-index: 9999;
-}
-
-/* DEBUG VISUAL (deixe true pra ajustar, depois coloque false) */
-.debug .link {
     background: rgba(255,0,0,0.3);
+    border: 2px solid red;
+    cursor: move;
 }
 
 /* BOTÕES */
@@ -70,7 +68,7 @@ canvas {
 </style>
 </head>
 
-<body class="debug"> <!-- REMOVA "debug" depois -->
+<body>
 
 <div class="slider" id="slider"></div>
 
@@ -88,18 +86,11 @@ const pdfUrl = 'https://z1n-arq.com.br/portfolio.pdf';
 let slides = [];
 let current = 0;
 
-/* =========================
-   MAPA DE LINKS POR PÁGINA
-   ========================= */
+/* 🔥 HOTSPOTS (você vai ajustar depois visualmente) */
 const hotspots = {
   1: [
-    // WhatsApp
     { href: "https://wa.me/5516991128533", left: 5, top: 58, w: 18, h: 10 },
-
-    // Telefone
     { href: "tel:+5516991128533", left: 78, top: 58, w: 12, h: 10 },
-
-    // Texto central
     { href: "https://wa.me/5516991128533", left: 25, top: 56, w: 50, h: 12 },
   ],
 
@@ -113,8 +104,6 @@ const hotspots = {
     { href: "tel:+5516991128533", left: 20, top: 65, w: 60, h: 12 },
   ]
 };
-
-/* ========================= */
 
 pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
 
@@ -151,7 +140,6 @@ pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
 
             page.render({ canvasContext: ctx, viewport }).promise.then(() => {
 
-                /* 🔥 AQUI ENTRA AUTOMÁTICO POR PÁGINA */
                 if (hotspots[i]) {
                     hotspots[i].forEach(area => {
                         addLink(wrapper, area);
@@ -165,9 +153,9 @@ pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
 
 }).catch(() => alert("Erro ao carregar PDF"));
 
-/* =========================
-   FUNÇÃO DE LINK (%)
-   ========================= */
+/* ========================= */
+/* 🔥 LINK COM DRAG E RESIZE */
+/* ========================= */
 function addLink(wrapper, area) {
     const link = document.createElement('a');
 
@@ -181,11 +169,66 @@ function addLink(wrapper, area) {
     link.style.height = area.h + "%";
 
     wrapper.appendChild(link);
+
+    makeDraggable(link, wrapper);
 }
 
-/* =========================
-   NAVEGAÇÃO
-   ========================= */
+/* DRAG + RESIZE */
+function makeDraggable(el, parent) {
+    let isDragging = false;
+    let startX, startY, startLeft, startTop;
+
+    el.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        startLeft = parseFloat(el.style.left);
+        startTop = parseFloat(el.style.top);
+        e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+
+        const rect = parent.getBoundingClientRect();
+
+        let dx = (e.clientX - startX) / rect.width * 100;
+        let dy = (e.clientY - startY) / rect.height * 100;
+
+        el.style.left = (startLeft + dx) + "%";
+        el.style.top  = (startTop + dy) + "%";
+    });
+
+    document.addEventListener('mouseup', () => {
+        if (isDragging) {
+            isDragging = false;
+
+            console.log({
+                left: parseFloat(el.style.left),
+                top: parseFloat(el.style.top),
+                width: parseFloat(el.style.width),
+                height: parseFloat(el.style.height)
+            });
+        }
+    });
+
+    /* RESIZE com scroll */
+    el.addEventListener('wheel', (e) => {
+        e.preventDefault();
+
+        let w = parseFloat(el.style.width);
+        let h = parseFloat(el.style.height);
+
+        const delta = e.deltaY > 0 ? -1 : 1;
+
+        el.style.width  = (w + delta) + "%";
+        el.style.height = (h + delta) + "%";
+    });
+}
+
+/* ========================= */
+/* NAVEGAÇÃO */
+/* ========================= */
 function next() {
     current = (current + 1) % slides.length;
     updateSlide();
