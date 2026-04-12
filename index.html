@@ -5,11 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Z1N Arquiteturas</title>
 
-    <meta property="og:title" content="Z1N Arquiteturas">
-    <meta property="og:description" content="Projetos exclusivos">
-    <meta property="og:image" content="https://z1n-arq.com.br/og-image.jpg">
-    <meta property="og:url" content="https://z1n-arq.com.br/">
-
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         html, body {
@@ -50,7 +45,6 @@
             z-index: 9999;
             background: transparent;
             pointer-events: all;
-            cursor: pointer;
         }
 
         .nav {
@@ -59,7 +53,7 @@
             z-index: 100;
             color: white;
             font-size: 42px;
-            background: rgba(0,0,0,0.75);
+            background: rgba(0,0,0,0.7);
             border: none;
             border-radius: 50%;
             width: 65px;
@@ -88,19 +82,19 @@
         let current = 0;
 
         pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
-            console.log("✅ PDF carregado com", pdf.numPages, "páginas");
+            console.log("PDF carregado com", pdf.numPages, "páginas");
 
             for (let i = 1; i <= pdf.numPages; i++) {
                 pdf.getPage(i).then(page => {
                     const pageIndex = i;
-                    const viewportBase = page.getViewport({ scale: 1 });
+                    const viewportBase = page.getViewport({ scale: 1.0 });
 
                     const scale = Math.min(
                         (window.innerWidth * 0.96) / viewportBase.width,
                         (window.innerHeight * 0.92) / viewportBase.height
                     );
 
-                    const viewport = page.getViewport({ scale });
+                    const viewport = page.getViewport({ scale: scale });
 
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
@@ -118,82 +112,57 @@
                     slider.appendChild(slide);
                     slides.push(slide);
 
-                    // Renderiza o PDF primeiro
+                    // Renderiza o canvas
                     page.render({ canvasContext: ctx, viewport }).promise.then(() => {
-                        createLinks(wrapper, pageIndex, viewportBase);
 
-                        // Ativa a primeira página só depois de tudo pronto
-                        if (slides.length === 1) {
-                            slide.classList.add("active");
+                        // === POSIÇÕES EXATAS QUE VOCÊ AJUSTOU ===
+                        if (pageIndex === 1) {
+                            createLink(wrapper, "https://wa.me/5516991128533", 0, 1400, 420, 214, viewportBase);
+                            createLink(wrapper, "tel:+5516991128533", 483, 1453, 1049, 153, viewportBase);
+                        }
+                        if (pageIndex === 6) {
+                            createLink(wrapper, "https://wa.me/5516991128533", 0, 1787, 420, 214, viewportBase);
+                            createLink(wrapper, "tel:+5516991128533", 531, 1812, 1028, 168, viewportBase);
+                        }
+                        if (pageIndex === pdf.numPages) {   // última página (8)
+                            createLink(wrapper, "https://wa.me/5516991128533", 633, 1606, 378, 199, viewportBase);
+                            createLink(wrapper, "tel:+5516991128533", 195, 1311, 1280, 260, viewportBase);
+                        }
+
+                        // Ativa a primeira página só depois de tudo renderizado
+                        if (slides.length === pdf.numPages && slides[0]) {
+                            slides[0].classList.add("active");
                         }
                     });
                 });
             }
-        }).catch(err => {
-            console.error("Erro PDF:", err);
-            alert("Erro ao carregar o PDF.");
-        });
+        }).catch(err => alert("Erro ao carregar PDF"));
 
-        function createLinks(wrapper, pageIndex, viewportBase) {
-            let configs = [];
+        function createLink(wrapper, href, x, y, w, h, viewportBase) {
+            const link = document.createElement('a');
+            link.href = href;
+            link.target = '_blank';
+            link.className = 'link';
 
-            if (pageIndex === 1) {
-                configs = [
-                    { href: "https://wa.me/5516991128533", x: 0,   y: 1350, w: 420, h: 214 },
-                    { href: "tel:+5516991128533",       x: 483, y: 1420, w: 1049, h: 153 }
-                ];
-            } 
-            else if (pageIndex === 6) {
-                configs = [
-                    { href: "https://wa.me/5516991128533", x: 0,   y: 1750, w: 420, h: 214 },
-                    { href: "tel:+5516991128533",       x: 531, y: 1780, w: 1028, h: 168 }
-                ];
-            } 
-            else if (pageIndex === slides.length) {   // Página 8 (última)
-                configs = [
-                    { href: "https://wa.me/5516991128533", x: 633, y: 1520, w: 378, h: 199 },   // WA mais para cima
-                    { href: "tel:+5516991128533",       x: 195, y: 1220, w: 1280, h: 260 }    // Telefone mais para cima
-                ];
-            }
+            link.style.left   = (x / viewportBase.width * 100) + '%';
+            link.style.top    = (y / viewportBase.height * 100) + '%';
+            link.style.width  = (w / viewportBase.width * 100) + '%';
+            link.style.height = (h / viewportBase.height * 100) + '%';
 
-            configs.forEach(data => {
-                const link = document.createElement('a');
-                link.href = data.href;
-                link.target = '_blank';
-                link.rel = 'noopener';
-                link.className = 'link';
-
-                const left = (data.x / viewportBase.width) * 100;
-                const top = (data.y / viewportBase.height) * 100;
-                const width = (data.w / viewportBase.width) * 100;
-                const height = (data.h / viewportBase.height) * 100;
-
-                link.style.left = left + '%';
-                link.style.top = top + '%';
-                link.style.width = width + '%';
-                link.style.height = height + '%';
-
-                wrapper.appendChild(link);
-            });
-        }
-
-        function showPage(index) {
-            slides.forEach(s => s.classList.remove("active"));
-            if (slides[index]) slides[index].classList.add("active");
-            current = index;
+            wrapper.appendChild(link);
         }
 
         function next() {
             current = (current + 1) % slides.length;
-            showPage(current);
+            slides.forEach(s => s.classList.remove("active"));
+            slides[current].classList.add("active");
         }
 
         function prev() {
             current = (current - 1 + slides.length) % slides.length;
-            showPage(current);
+            slides.forEach(s => s.classList.remove("active"));
+            slides[current].classList.add("active");
         }
-
-        window.addEventListener('resize', () => location.reload());
     </script>
 </body>
 </html>
