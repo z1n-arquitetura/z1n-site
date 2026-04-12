@@ -3,77 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Z1N | Portfólio</title>
+    <title>Z1N | Designer Mode</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <script src="https://unpkg.com/interactjs/dist/interact.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body, html { height: 100%; background: #000; overflow: hidden; font-family: sans-serif; }
-
         .swiper { width: 100%; height: 100vh; }
         .swiper-slide { display: flex; justify-content: center; align-items: center; position: relative; }
-        .swiper-slide img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .swiper-slide img { max-width: 100%; max-height: 100%; object-fit: contain; pointer-events: none; }
 
-        /* SETAS MÍNIMAS (5mm) NOS CANTOS EXTREMOS */
-        .seta {
-            position: fixed;
-            bottom: 10px;
-            z-index: 1000;
-            color: rgba(255, 255, 255, 0.3);
-            font-size: 16px; 
-            cursor: pointer;
-            padding: 15px;
-        }
-        #prev { left: 5px; }
-        #next { right: 5px; }
+        /* SETAS QUASE INVISÍVEIS */
+        .seta { position: fixed; bottom: 5px; z-index: 1000; color: rgba(255,255,255,0.1); font-size: 14px; cursor: pointer; padding: 10px; }
+        #prev { left: 0; } #next { right: 0; }
 
-        /* MODO DE EDIÇÃO: CAMPOS VISÍVEIS */
-        .link-invisivel {
+        /* CAMPOS EDITÁVEIS (ARRASTÁVEIS E REDIMENSIONÁVEIS) */
+        .link-editor {
             position: absolute;
-            display: block;
+            background: rgba(255, 255, 0, 0.4);
+            border: 2px dashed yellow;
             z-index: 999;
-            /*--- AJUSTE VISUAL ---*/
-            background: rgba(255, 255, 0, 0.4); /* AMARELO PARA VISUALIZAR */
-            border: 1px solid yellow;
-            /*----------------------*/
+            touch-action: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: black;
+            font-weight: bold;
+        }
+
+        #log-area {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            color: #0f0;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 11px;
+            z-index: 2000;
+            max-width: 300px;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
 
+    <div id="log-area">Ajuste os campos e copie os dados abaixo para o seu código final.</div>
+
     <div class="swiper">
         <div class="swiper-wrapper">
-            
-            <div class="swiper-slide">
-                <img src="p1.png">
-                <a href="https://wa.me/55NUMERO" target="_blank" class="link-invisivel" 
-                   style="width: 200px; height: 80px; top: 70%; left: 50%; transform: translateX(-50%);">
-                </a>
-            </div>
-
+            <div class="swiper-slide"><img src="p1.png"><div class="link-editor" id="link1" style="width:150px; height:50px; top:50%; left:50%;">PAG 1</div></div>
             <div class="swiper-slide"><img src="p2.png"></div>
             <div class="swiper-slide"><img src="p3.png"></div>
             <div class="swiper-slide"><img src="p4.png"></div>
             <div class="swiper-slide"><img src="p5.png"></div>
-
-            <div class="swiper-slide">
-                <img src="p6.png">
-                <a href="https://wa.me/55NUMERO" target="_blank" class="link-invisivel" 
-                   style="width: 180px; height: 60px; top: 60%; left: 45%;">
-                </a>
-            </div>
-
+            <div class="swiper-slide"><img src="p6.png"><div class="link-editor" id="link6" style="width:150px; height:50px; top:50%; left:50%;">PAG 6</div></div>
             <div class="swiper-slide"><img src="p7.png"></div>
-
-            <div class="swiper-slide">
-                <img src="p8.png">
-                <a href="https://wa.me/55NUMERO" target="_blank" class="link-invisivel" 
-                   style="width: 150px; height: 50px; top: 80%; left: 25%;">
-                </a>
-                <a href="tel:+55NUMERO" class="link-invisivel" 
-                   style="width: 150px; height: 50px; top: 80%; left: 55%;">
-                </a>
-            </div>
-
+            <div class="swiper-slide"><img src="p8.png"><div class="link-editor" id="link8" style="width:150px; height:50px; top:50%; left:50%;">PAG 8</div></div>
         </div>
     </div>
 
@@ -82,14 +69,43 @@
 
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
-        const swiper = new Swiper('.swiper', {
-            direction: 'horizontal',
-            loop: true,
-            grabCursor: true,
-            mousewheel: true,
-            keyboard: true,
-            navigation: { nextEl: '#next', prevEl: '#prev' },
+        const swiper = new Swiper('.swiper', { direction: 'horizontal', loop: true, navigation: { nextEl: '#next', prevEl: '#prev' } });
+
+        // Lógica de Arrastar e Dimensionar
+        interact('.link-editor').draggable({
+            listeners: { move (event) {
+                var target = event.target;
+                var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+                var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+                target.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
+                target.setAttribute('data-x', x);
+                target.setAttribute('data-y', y);
+                updateLog();
+            }}
+        }).resizable({
+            edges: { left: true, right: true, bottom: true, top: true },
+            listeners: { move (event) {
+                var target = event.target;
+                var x = (parseFloat(target.getAttribute('data-x')) || 0);
+                var y = (parseFloat(target.getAttribute('data-y')) || 0);
+                target.style.width = event.rect.width + 'px';
+                target.style.height = event.rect.height + 'px';
+                x += event.deltaRect.left;
+                y += event.deltaRect.top;
+                target.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+                target.setAttribute('data-x', x);
+                target.setAttribute('data-y', y);
+                updateLog();
+            }}
         });
+
+        function updateLog() {
+            let log = "VALORES PARA O INDEX:<br>";
+            document.querySelectorAll('.link-editor').forEach(el => {
+                log += `${el.id}: W:${el.style.width} H:${el.style.height} T:${el.style.top} L:${el.style.left} Transf:${el.style.transform}<br>`;
+            });
+            document.getElementById('log-area').innerHTML = log;
+        }
     </script>
 </body>
 </html>
