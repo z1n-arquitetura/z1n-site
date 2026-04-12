@@ -1,249 +1,331 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Z1N Arquiteturas</title>
-
-<style>
-* { margin:0; padding:0; box-sizing:border-box; }
-html, body { height: 100%; overflow: hidden; background: #000; }
-
-.slider {
-    width: 100vw;
-    height: 100vh;
-    position: relative;
-}
-
-.slide {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    display: none;
-    justify-content: center;
-    align-items: center;
-}
-
-.slide.active { display: flex; }
-
-.slide-wrapper {
-    position: relative;
-    display: inline-block;
-    max-width: 100%;
-    max-height: 100%;
-}
-
-canvas {
-    display: block;
-    max-width: 100%;
-    max-height: 100%;
-}
-
-/* LINKS */
-.link {
-    position: absolute;
-    z-index: 9999;
-    background: rgba(255,0,0,0.3);
-    border: 2px solid red;
-    cursor: move;
-}
-
-/* BOTÕES */
-.nav {
-    position: absolute;
-    bottom: 30px;
-    z-index: 100;
-    color: white;
-    font-size: 42px;
-    background: rgba(0,0,0,0.7);
-    border: none;
-    border-radius: 50%;
-    width: 65px;
-    height: 65px;
-    cursor: pointer;
-}
-
-.prev { left: 20px; }
-.next { right: 20px; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Z1N Arquitetura - Assessoria especializada em arquitetura estratégica, projetos residenciais, comerciais e consultoria técnica. Ribeirão Preto - SP">
+    <meta name="keywords" content="arquitetura, projetos, consultoria, residencial, comercial, Ribeirão Preto">
+    <meta name="author" content="José Luís Navarro - Z1N Arquitetura">
+    <title>Z1N Arquitetura - Assessoria Especializada</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
-
 <body>
+    <!-- NAVEGAÇÃO -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">Z1N</div>
+            <button class="nav-toggle" id="navToggle">☰</button>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#sobre">Sobre</a></li>
+                <li><a href="#servicos">Serviços</a></li>
+                <li><a href="#portfolio">Portfolio</a></li>
+                <li><a href="#contato">Contato</a></li>
+            </ul>
+        </div>
+    </nav>
 
-<div class="slider" id="slider"></div>
+    <!-- HOME / CAPA -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1 class="fade-in">JOSÉ LUÍS NAVARRO</h1>
+            <p class="subtitle fade-in">ASSESSORIA ESPECIALIZADA EM ARQUITETURA</p>
+            <p class="cau fade-in">CAU 1.5569-1 | ARQUITETO</p>
+            <p class="description fade-in">
+                Arquitetura estratégica para evitar erros, atrasos em aprovações e prejuízo na obra.<br>
+                Decisões técnicas corretas no início evitam custos invisíveis no final.
+            </p>
+            <div class="cta-buttons">
+                <a href="tel:+5516991128533" class="btn btn-primary">📞 16.9911.28533</a>
+                <a href="https://wa.me/5516991128533" class="btn btn-secondary">💬 WhatsApp</a>
+            </div>
+            <p class="location">📍 Ribeirão Preto - SP</p>
+        </div>
+    </section>
 
-<button class="nav prev" onclick="prev()">←</button>
-<button class="nav next" onclick="next()">→</button>
+    <!-- SOBRE -->
+    <section id="sobre" class="about">
+        <div class="container">
+            <h2>Sobre José Luís Navarro</h2>
+            <div class="about-content">
+                <p>Arquitetura não começa no desenho.</p>
+                <p>Começa na análise técnica da intenção dos Clientes, na leitura do cenário e na definição da melhor estratégia para o projeto.</p>
+                <p><strong>Projetos pensados para aprovação, não apenas para apresentação.</strong></p>
+                <p>Atuação em Ribeirão Preto e região com foco técnico, segurança jurídica e eficiência construtiva.</p>
+                <h3>Diferencial Técnico</h3>
+                <ul>
+                    <li>✓ Integração entre projeto, legislação e execução</li>
+                    <li>✓ Atuação preventiva (Redução de retrabalho)</li>
+                    <li>✓ Apoio técnico em processos de aprovação</li>
+                    <li>✓ Comunicação objetiva com cliente e equipe</li>
+                </ul>
+            </div>
+        </div>
+    </section>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- SERVIÇOS - PROJETOS -->
+    <section id="servicos" class="services">
+        <div class="container">
+            <h2>Serviços - Projetos</h2>
+            <div class="services-grid">
+                <div class="service-card">
+                    <h3>Residenciais</h3>
+                    <p>Projetos de casas e apartamentos com foco em funcionalidade e bem-estar</p>
+                </div>
+                <div class="service-card">
+                    <h3>Comerciais</h3>
+                    <p>Espaços comerciais otimizados para o melhor desempenho do negócio</p>
+                </div>
+                <div class="service-card">
+                    <h3>Institucionais</h3>
+                    <p>Projetos para instituições com conformidade técnica e legal</p>
+                </div>
+                <div class="service-card">
+                    <h3>Retrofit</h3>
+                    <p>Reformas e revitalizações com modernização de espaços</p>
+                </div>
+                <div class="service-card">
+                    <h3>Design</h3>
+                    <p>Soluções de design interior e exterior integradas ao projeto</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-<script>
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    <!-- SERVIÇOS - CONSULTORIAS -->
+    <section class="consultoria">
+        <div class="container">
+            <h2>Serviços - Consultorias</h2>
+            <div class="services-grid">
+                <div class="service-card">
+                    <h3>Oficiais</h3>
+                    <p>Regularizações e documentação junto aos órgãos competentes</p>
+                </div>
+                <div class="service-card">
+                    <h3>Viabilidade Técnica</h3>
+                    <p>Análise e valorização de propriedades</p>
+                </div>
+                <div class="service-card">
+                    <h3>Conceito</h3>
+                    <p>Definição de identidade espacial e estratégia de projeto</p>
+                </div>
+                <div class="service-card">
+                    <h3>Planejamento</h3>
+                    <p>Gestão de obras e cronograma executivo</p>
+                </div>
+                <div class="service-card">
+                    <h3>Acessibilidade</h3>
+                    <p>Conformidade com normas de acessibilidade ABNT</p>
+                </div>
+                <div class="service-card">
+                    <h3>Apoio Jurídico</h3>
+                    <p>Suporte técnico em demandas judiciais</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-const pdfUrl = 'https://z1n-arq.com.br/portfolio.pdf';
+    <!-- SERVIÇOS - DESENVOLVIMENTO -->
+    <section class="desenvolvimento">
+        <div class="container">
+            <h2>Serviços - Desenvolvimento</h2>
+            <div class="services-grid">
+                <div class="service-card">
+                    <h3>Eficiência Energética</h3>
+                    <p>Projetos com otimização de consumo e sustentabilidade</p>
+                </div>
+                <div class="service-card">
+                    <h3>Sustentabilidade</h3>
+                    <p>Práticas sustentáveis integradas ao projeto</p>
+                </div>
+                <div class="service-card">
+                    <h3>Ergonometria</h3>
+                    <p>Espaços otimizados para conforto e funcionalidade</p>
+                </div>
+                <div class="service-card">
+                    <h3>Biofilia</h3>
+                    <p>Integração da natureza nos espaços construídos</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-let slides = [];
-let current = 0;
+    <!-- COMO TRABALHAMOS -->
+    <section class="processo">
+        <div class="container">
+            <h2>Como Trabalhamos</h2>
+            <div class="processo-steps">
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <h3>Análise Inicial</h3>
+                </div>
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <h3>Direcionamento Técnico</h3>
+                </div>
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <h3>Desenvolvimento Projetual</h3>
+                </div>
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <h3>Aprovação Legal</h3>
+                </div>
+                <div class="step">
+                    <span class="step-number">5</span>
+                    <h3>Acompanhamento Estratégico</h3>
+                </div>
+            </div>
+            <p class="processo-text">Atendimentos realizados de forma personalizada, conforme análise técnica de cada demanda.</p>
+        </div>
+    </section>
 
-/* 🔥 HOTSPOTS (você vai ajustar depois visualmente) */
-const hotspots = {
-  1: [
-    { href: "https://wa.me/5516991128533", left: 5, top: 58, w: 18, h: 10 },
-    { href: "tel:+5516991128533", left: 78, top: 58, w: 12, h: 10 },
-    { href: "https://wa.me/5516991128533", left: 25, top: 56, w: 50, h: 12 },
-  ],
+    <!-- PORTFOLIO -->
+    <section id="portfolio" class="portfolio">
+        <div class="container">
+            <h2>Portfolio de Projetos</h2>
+            <div class="projetos-grid">
+                <!-- PÁGINA 1 -->
+                <div class="projeto-card">
+                    <img src="images/projetos/placeholder.jpg" alt="Reforma Garagem">
+                    <h3>Reforma Garagem</h3>
+                    <p>35,00 M²</p>
+                </div>
+                <div class="projeto-card">
+                    <img src="images/projetos/placeholder.jpg" alt="Residência">
+                    <h3>Residência</h3>
+                    <p>185,00 M²</p>
+                </div>
+                <div class="projeto-card">
+                    <img src="images/projetos/placeholder.jpg" alt="Residência">
+                    <h3>Residência</h3>
+                    <p>198,00 M²</p>
+                </div>
+                <div class="projeto-card">
+                    <img src="images/projetos/placeholder.jpg" alt="Reforma/Ampliação Hotel">
+                    <h3>Reforma/Ampliação Hotel</h3>
+                    <p>1.258,00 M²</p>
+                </div>
+                <div class="projeto-card">
+                    <img src="images/projetos/placeholder.jpg" alt="Restaurante">
+                    <h3>Restaurante Delfinópolis MG</h3>
+                    <p>198,00 M²</p>
+                </div>
+                <div class="projeto-card">
+                    <img src="images/projetos/placeholder.jpg" alt="AARL USP-RP">
+                    <h3>AARL - USP-RP</h3>
+                    <p>1.169,00 M² | Ginásio Poli-Esportivo + Convivência</p>
+                </div>
 
-  6: [
-    { href: "https://wa.me/5516991128533", left: 5, top: 70, w: 18, h: 10 },
-    { href: "tel:+5516991128533", left: 75, top: 70, w: 15, h: 10 },
-  ],
+                <!-- PÁGINA 2 -->
+                <div class="projeto-card">
+                    <img src="images/projetos/placeholder.jpg" alt="Chácara de Lazer">
+                    <h3>Chácara de Lazer</h3>
+                    <p>840,52 M² | Implantação 4.475,75 M²</p>
+                </div>
+                <div class="projeto-card">
+                    <img src="images/projetos/placeholder.jpg" alt="Residência">
+                    <h3>Residência</h3>
+                    <p>586,12 M²</p>
+                </div>
+                <div class="projeto-card">
+                    <img src="images/projetos/placeholder.jpg" alt="Residência">
+                    <h3>Residência</h3>
+                    <p>212,10 M²</p>
+                </div>
+                <div class="projeto-card">
+                    <img src="images/projetos/placeholder.jpg" alt="Residência">
+                    <h3>Residência</h3>
+                    <p>108,29 M²</p>
+                </div>
+                <div class="projeto-card">
+                    <img src="images/projetos/placeholder.jpg" alt="Salgaderia">
+                    <h3>Salgaderia</h3>
+                    <p>85,00 M²</p>
+                </div>
+                <div class="projeto-card">
+                    <img src="images/projetos/placeholder.jpg" alt="Residência">
+                    <h3>Residência</h3>
+                    <p>368,54 M²</p>
+                </div>
 
-  8: [
-    { href: "https://wa.me/5516991128533", left: 40, top: 75, w: 20, h: 10 },
-    { href: "tel:+5516991128533", left: 20, top: 65, w: 60, h: 12 },
-  ]
-};
+                <!-- PÁGINA 3 -->
+                <div class="projeto-card">
+                    <img src="images/projetos/placeholder.jpg" alt="Residência">
+                    <h3>Residência</h3>
+                    <p>108,00 M²</p>
+                </div>
+                <div class="projeto-card">
+                    <img src="images/projetos/placeholder.jpg" alt="Galpão Com. / Kitinets">
+                    <h3>Galpão Com. / Kitinets</h3>
+                    <p>285 M²</p>
+                </div>
+                <div class="projeto-card">
+                    <img src="images/projetos/placeholder.jpg" alt="Salão para Mercearia">
+                    <h3>Salão para Mercearia - Distrib. - Escrit. Com.</h3>
+                    <p>400,50 M²</p>
+                </div>
+                <div class="projeto-card">
+                    <img src="images/projetos/placeholder.jpg" alt="L.S.F. + Assoc. Prof.">
+                    <h3>L.S.F. + Assoc. Prof. Sertãozinho SP</h3>
+                    <p>830,00 M²</p>
+                </div>
+                <div class="projeto-card">
+                    <img src="images/projetos/placeholder.jpg" alt="Bar / Lanches">
+                    <h3>Bar / Lanches</h3>
+                    <p>106,00 M² | Implantação 978,665 M²</p>
+                </div>
+                <div class="projeto-card">
+                    <img src="images/projetos/placeholder.jpg" alt="Residência">
+                    <h3>Residência</h3>
+                    <p>250,00 M²</p>
+                </div>
+                <div class="projeto-card">
+                    <img src="images/projetos/placeholder.jpg" alt="Reforma Resid.">
+                    <h3>Reforma Resid.</h3>
+                    <p>186,00 M²</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
+    <!-- CONTATO -->
+    <section id="contato" class="contact">
+        <div class="container">
+            <h2>Entre em Contato</h2>
+            <div class="contact-content">
+                <p class="tagline">Solicite uma análise técnica do seu projeto</p>
+                <div class="contact-buttons">
+                    <a href="https://wa.me/5516991128533" class="btn btn-whatsapp">
+                        💬 WhatsApp: 16.9911.28533
+                    </a>
+                    <a href="tel:+5516991128533" class="btn btn-phone">
+                        ☎️ Telefone: 16.9911.28533
+                    </a>
+                    <a href="mailto:z1n.arquiteturas@gmail.com" class="btn btn-email">
+                        ✉️ Email: z1n.arquiteturas@gmail.com
+                    </a>
+                </div>
+                <div class="social-links">
+                    <a href="https://www.instagram.com/zeluis_z1n/" target="_blank">Instagram</a>
+                    <a href="https://linkedin.com/in/ze-navarro-8298b428" target="_blank">LinkedIn</a>
+                </div>
+                <p class="final-message">
+                    <strong>Evite retrabalho. Um bom planejamento reduz custo e aumenta o valor do seu investimento.</strong>
+                </p>
+                <p class="experience">
+                    <strong>Experiência técnica, visão estratégica e compromisso profissional.</strong>
+                </p>
+            </div>
+        </div>
+    </section>
 
-    for (let i = 1; i <= pdf.numPages; i++) {
+    <!-- FOOTER -->
+    <footer>
+        <p>&copy; 2024 Z1N Arquitetura | José Luís Navarro | CAU 1.5569-1</p>
+        <p>Ribeirão Preto - SP | Consultoria e Projetos Arquitetônicos</p>
+    </footer>
 
-        pdf.getPage(i).then(page => {
-
-            const viewportBase = page.getViewport({ scale: 1 });
-
-            const scale = Math.min(
-                (innerWidth * 0.96) / viewportBase.width,
-                (innerHeight * 0.92) / viewportBase.height
-            );
-
-            const viewport = page.getViewport({ scale });
-
-            const canvas = document.createElement('canvas');
-            canvas.width = viewport.width;
-            canvas.height = viewport.height;
-
-            const ctx = canvas.getContext('2d');
-
-            const wrapper = document.createElement('div');
-            wrapper.className = 'slide-wrapper';
-
-            const slide = document.createElement('div');
-            slide.className = 'slide';
-
-            wrapper.appendChild(canvas);
-            slide.appendChild(wrapper);
-            document.getElementById('slider').appendChild(slide);
-
-            slides.push(slide);
-
-            page.render({ canvasContext: ctx, viewport }).promise.then(() => {
-
-                if (hotspots[i]) {
-                    hotspots[i].forEach(area => {
-                        addLink(wrapper, area);
-                    });
-                }
-
-                if (i === 1) slide.classList.add("active");
-            });
-        });
-    }
-
-}).catch(() => alert("Erro ao carregar PDF"));
-
-/* ========================= */
-/* 🔥 LINK COM DRAG E RESIZE */
-/* ========================= */
-function addLink(wrapper, area) {
-    const link = document.createElement('a');
-
-    link.href = area.href;
-    link.target = "_blank";
-    link.className = "link";
-
-    link.style.left   = area.left + "%";
-    link.style.top    = area.top + "%";
-    link.style.width  = area.w + "%";
-    link.style.height = area.h + "%";
-
-    wrapper.appendChild(link);
-
-    makeDraggable(link, wrapper);
-}
-
-/* DRAG + RESIZE */
-function makeDraggable(el, parent) {
-    let isDragging = false;
-    let startX, startY, startLeft, startTop;
-
-    el.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        startX = e.clientX;
-        startY = e.clientY;
-        startLeft = parseFloat(el.style.left);
-        startTop = parseFloat(el.style.top);
-        e.preventDefault();
-    });
-
-    document.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-
-        const rect = parent.getBoundingClientRect();
-
-        let dx = (e.clientX - startX) / rect.width * 100;
-        let dy = (e.clientY - startY) / rect.height * 100;
-
-        el.style.left = (startLeft + dx) + "%";
-        el.style.top  = (startTop + dy) + "%";
-    });
-
-    document.addEventListener('mouseup', () => {
-        if (isDragging) {
-            isDragging = false;
-
-            console.log({
-                left: parseFloat(el.style.left),
-                top: parseFloat(el.style.top),
-                width: parseFloat(el.style.width),
-                height: parseFloat(el.style.height)
-            });
-        }
-    });
-
-    /* RESIZE com scroll */
-    el.addEventListener('wheel', (e) => {
-        e.preventDefault();
-
-        let w = parseFloat(el.style.width);
-        let h = parseFloat(el.style.height);
-
-        const delta = e.deltaY > 0 ? -1 : 1;
-
-        el.style.width  = (w + delta) + "%";
-        el.style.height = (h + delta) + "%";
-    });
-}
-
-/* ========================= */
-/* NAVEGAÇÃO */
-/* ========================= */
-function next() {
-    current = (current + 1) % slides.length;
-    updateSlide();
-}
-
-function prev() {
-    current = (current - 1 + slides.length) % slides.length;
-    updateSlide();
-}
-
-function updateSlide() {
-    slides.forEach(s => s.classList.remove("active"));
-    slides[current].classList.add("active");
-}
-</script>
-
+    <script src="js/script.js"></script>
 </body>
 </html>
