@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Z1N Arquiteturas</title>
 
+    <meta property="og:title" content="Z1N Arquiteturas">
+    <meta property="og:description" content="Projetos exclusivos">
+    <meta property="og:image" content="https://z1n-arq.com.br/og-image.jpg">
+    <meta property="og:url" content="https://z1n-arq.com.br/">
+
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         html, body {
@@ -45,6 +50,7 @@
             border: 3px solid red;
             background: rgba(255,0,0,0.2);
             pointer-events: all;
+            cursor: pointer;
         }
 
         .nav {
@@ -75,15 +81,15 @@
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-        // FORÇANDO o PDF do GitHub (mais confiável no momento)
-        const pdfUrl = 'https://z1n-arquitetura.github.io/z1n-site/portfolio.pdf';
+        // Usando o PDF direto do seu domínio
+        const pdfUrl = 'https://z1n-arq.com.br/portfolio.pdf';
 
         const slider = document.getElementById('slider');
         let slides = [];
         let current = 0;
 
         pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
-            console.log("PDF carregado com", pdf.numPages, "páginas");
+            console.log("✅ PDF carregado com", pdf.numPages, "páginas");
 
             for (let i = 1; i <= pdf.numPages; i++) {
                 pdf.getPage(i).then(page => {
@@ -91,8 +97,8 @@
                     const viewportBase = page.getViewport({ scale: 1 });
 
                     const scale = Math.min(
-                        (window.innerWidth * 0.95) / viewportBase.width,
-                        (window.innerHeight * 0.90) / viewportBase.height
+                        (window.innerWidth * 0.96) / viewportBase.width,
+                        (window.innerHeight * 0.92) / viewportBase.height
                     );
 
                     const viewport = page.getViewport({ scale });
@@ -114,17 +120,18 @@
                     slides.push(slide);
 
                     page.render({ canvasContext: ctx, viewport }).promise.then(() => {
+                        // Links ajustados (testados para ficar mais próximos)
                         if (pageIndex === 1) {
-                            createLink(wrapper, "https://wa.me/5516991128533", 1050, 680, 200, 140, viewportBase);
-                            createLink(wrapper, "tel:+5516991128533", 1220, 740, 500, 100, viewportBase);
+                            createLink(wrapper, "https://wa.me/5516991128533", 1020, 690, 190, 130, viewportBase);
+                            createLink(wrapper, "tel:+5516991128533", 1200, 740, 510, 95, viewportBase);
                         }
                         if (pageIndex === 6) {
-                            createLink(wrapper, "https://wa.me/5516991128533", 1050, 860, 200, 140, viewportBase);
-                            createLink(wrapper, "tel:+5516991128533", 1220, 910, 480, 110, viewportBase);
+                            createLink(wrapper, "https://wa.me/5516991128533", 1020, 870, 190, 130, viewportBase);
+                            createLink(wrapper, "tel:+5516991128533", 1200, 915, 490, 105, viewportBase);
                         }
                         if (pageIndex === slides.length) {
-                            createLink(wrapper, "https://wa.me/5516991128533", 1300, 780, 180, 130, viewportBase);
-                            createLink(wrapper, "tel:+5516991128533", 1080, 640, 610, 170, viewportBase);
+                            createLink(wrapper, "https://wa.me/5516991128533", 1280, 790, 170, 125, viewportBase);
+                            createLink(wrapper, "tel:+5516991128533", 1060, 650, 600, 165, viewportBase);
                         }
 
                         if (slides.length === 1) slide.classList.add("active");
@@ -133,13 +140,14 @@
             }
         }).catch(err => {
             console.error("Erro PDF:", err);
-            alert("Ainda não conseguiu carregar o PDF.\nVerifique se o link https://z1n-arquitetura.github.io/z1n-site/portfolio.pdf abre no navegador.");
+            alert("Erro ao carregar o PDF. Verifique se https://z1n-arq.com.br/portfolio.pdf abre diretamente.");
         });
 
         function createLink(wrapper, href, x, y, w, h, viewportBase) {
             const link = document.createElement('a');
             link.href = href;
             link.target = '_blank';
+            link.rel = 'noopener';
             link.className = 'link';
 
             link.style.left = (x / viewportBase.width * 100) + '%';
