@@ -48,7 +48,6 @@
         .link {
             position: absolute;
             z-index: 9999;
-            /* Bordas removidas na versão final */
             background: transparent;
             pointer-events: all;
             cursor: pointer;
@@ -60,7 +59,7 @@
             z-index: 100;
             color: white;
             font-size: 42px;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.75);
             border: none;
             border-radius: 50%;
             width: 65px;
@@ -119,10 +118,14 @@
                     slider.appendChild(slide);
                     slides.push(slide);
 
+                    // Renderiza o PDF primeiro
                     page.render({ canvasContext: ctx, viewport }).promise.then(() => {
                         createLinks(wrapper, pageIndex, viewportBase);
 
-                        if (slides.length === 1) slide.classList.add("active");
+                        // Ativa a primeira página só depois de tudo pronto
+                        if (slides.length === 1) {
+                            slide.classList.add("active");
+                        }
                     });
                 });
             }
@@ -136,20 +139,20 @@
 
             if (pageIndex === 1) {
                 configs = [
-                    { href: "https://wa.me/5516991128533", x: 0, y: 1400, w: 420, h: 214 },
-                    { href: "tel:+5516991128533", x: 483, y: 1453, w: 1049, h: 153 }
+                    { href: "https://wa.me/5516991128533", x: 0,   y: 1350, w: 420, h: 214 },
+                    { href: "tel:+5516991128533",       x: 483, y: 1420, w: 1049, h: 153 }
                 ];
             } 
             else if (pageIndex === 6) {
                 configs = [
-                    { href: "https://wa.me/5516991128533", x: 0, y: 1787, w: 420, h: 214 },
-                    { href: "tel:+5516991128533", x: 531, y: 1812, w: 1028, h: 168 }
+                    { href: "https://wa.me/5516991128533", x: 0,   y: 1750, w: 420, h: 214 },
+                    { href: "tel:+5516991128533",       x: 531, y: 1780, w: 1028, h: 168 }
                 ];
             } 
-            else if (pageIndex === slides.length) {
+            else if (pageIndex === slides.length) {   // Página 8 (última)
                 configs = [
-                    { href: "https://wa.me/5516991128533", x: 633, y: 1606, w: 378, h: 199 },
-                    { href: "tel:+5516991128533", x: 195, y: 1311, w: 1280, h: 260 }
+                    { href: "https://wa.me/5516991128533", x: 633, y: 1520, w: 378, h: 199 },   // WA mais para cima
+                    { href: "tel:+5516991128533",       x: 195, y: 1220, w: 1280, h: 260 }    // Telefone mais para cima
                 ];
             }
 
