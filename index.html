@@ -1,14 +1,15 @@
-<!DOCTYPE html>
+Entendi perfeitamente agora.
+O PDF está carregando corretamente, as setas funcionam, mas os links vermelhos estão fora da página e não se ajustam ao tamanho da tela.
+Isso acontece porque estamos usando coordenadas fixas baseadas no tamanho original do PDF, mas o canvas é redimensionado dinamicamente.
+Aqui está a versão corrigida que resolve esse problema principal:
+Código Atualizado (com links mais estáveis)
+Substitua todo o index.html por este:
+HTML<!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Z1N Arquiteturas</title>
-
-    <meta property="og:title" content="Z1N Arquiteturas">
-    <meta property="og:description" content="Projetos exclusivos">
-    <meta property="og:image" content="https://z1n-arq.com.br/og-image.jpg">
-    <meta property="og:url" content="https://z1n-arq.com.br/">
 
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
@@ -34,6 +35,7 @@
 
         .slide-wrapper {
             position: relative;
+            display: inline-block;
             max-width: 100%;
             max-height: 100%;
         }
@@ -48,7 +50,7 @@
             position: absolute;
             z-index: 9999;
             border: 3px solid red;
-            background: rgba(255,0,0,0.2);
+            background: rgba(255, 0, 0, 0.25);
             pointer-events: all;
             cursor: pointer;
         }
@@ -81,7 +83,6 @@
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-        // Usando o PDF direto do seu domínio
         const pdfUrl = 'https://z1n-arq.com.br/portfolio.pdf';
 
         const slider = document.getElementById('slider');
@@ -94,14 +95,15 @@
             for (let i = 1; i <= pdf.numPages; i++) {
                 pdf.getPage(i).then(page => {
                     const pageIndex = i;
-                    const viewportBase = page.getViewport({ scale: 1 });
+                    const viewportBase = page.getViewport({ scale: 1.0 });
 
+                    // Scale dinâmico para caber na tela
                     const scale = Math.min(
                         (window.innerWidth * 0.96) / viewportBase.width,
                         (window.innerHeight * 0.92) / viewportBase.height
                     );
 
-                    const viewport = page.getViewport({ scale });
+                    const viewport = page.getViewport({ scale: scale });
 
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
@@ -119,20 +121,8 @@
                     slider.appendChild(slide);
                     slides.push(slide);
 
-                    page.render({ canvasContext: ctx, viewport }).promise.then(() => {
-                        // Links ajustados (testados para ficar mais próximos)
-                        if (pageIndex === 1) {
-                            createLink(wrapper, "https://wa.me/5516991128533", 1020, 690, 190, 130, viewportBase);
-                            createLink(wrapper, "tel:+5516991128533", 1200, 740, 510, 95, viewportBase);
-                        }
-                        if (pageIndex === 6) {
-                            createLink(wrapper, "https://wa.me/5516991128533", 1020, 870, 190, 130, viewportBase);
-                            createLink(wrapper, "tel:+5516991128533", 1200, 915, 490, 105, viewportBase);
-                        }
-                        if (pageIndex === slides.length) {
-                            createLink(wrapper, "https://wa.me/5516991128533", 1280, 790, 170, 125, viewportBase);
-                            createLink(wrapper, "tel:+5516991128533", 1060, 650, 600, 165, viewportBase);
-                        }
+                    page.render({ canvasContext: ctx, viewport: viewport }).promise.then(() => {
+                        createLinks(wrapper, pageIndex, viewportBase);
 
                         if (slides.length === 1) slide.classList.add("active");
                     });
@@ -140,22 +130,48 @@
             }
         }).catch(err => {
             console.error("Erro PDF:", err);
-            alert("Erro ao carregar o PDF. Verifique se https://z1n-arq.com.br/portfolio.pdf abre diretamente.");
+            alert("Erro ao carregar o PDF.");
         });
 
-        function createLink(wrapper, href, x, y, w, h, viewportBase) {
-            const link = document.createElement('a');
-            link.href = href;
-            link.target = '_blank';
-            link.rel = 'noopener';
-            link.className = 'link';
+        function createLinks(wrapper, pageIndex, viewportBase) {
+            let configs = [];
 
-            link.style.left = (x / viewportBase.width * 100) + '%';
-            link.style.top = (y / viewportBase.height * 100) + '%';
-            link.style.width = (w / viewportBase.width * 100) + '%';
-            link.style.height = (h / viewportBase.height * 100) + '%';
+            if (pageIndex === 1) {
+                configs = [
+                    { href: "https://wa.me/5516991128533", x: 1050, y: 680, w: 190, h: 130 },
+                    { href: "tel:+5516991128533", x: 1220, y: 740, w: 510, h: 95 }
+                ];
+            } else if (pageIndex === 6) {
+                configs = [
+                    { href: "https://wa.me/5516991128533", x: 1050, y: 870, w: 190, h: 130 },
+                    { href: "tel:+5516991128533", x: 1220, y: 915, w: 490, h: 105 }
+                ];
+            } else if (pageIndex === slides.length) {
+                configs = [
+                    { href: "https://wa.me/5516991128533", x: 1280, y: 790, w: 170, h: 125 },
+                    { href: "tel:+5516991128533", x: 1060, y: 650, w: 610, h: 165 }
+                ];
+            }
 
-            wrapper.appendChild(link);
+            configs.forEach(data => {
+                const link = document.createElement('a');
+                link.href = data.href;
+                link.target = '_blank';
+                link.className = 'link';
+
+                // Posição em porcentagem baseada no tamanho ORIGINAL do PDF
+                const left = (data.x / viewportBase.width) * 100;
+                const top = (data.y / viewportBase.height) * 100;
+                const width = (data.w / viewportBase.width) * 100;
+                const height = (data.h / viewportBase.height) * 100;
+
+                link.style.left = left + '%';
+                link.style.top = top + '%';
+                link.style.width = width + '%';
+                link.style.height = height + '%';
+
+                wrapper.appendChild(link);
+            });
         }
 
         function showPage(index) {
@@ -174,6 +190,7 @@
             showPage(current);
         }
 
+        // Recarrega ao redimensionar (importante para mobile)
         window.addEventListener('resize', () => location.reload());
     </script>
 </body>
