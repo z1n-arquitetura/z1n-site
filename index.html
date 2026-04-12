@@ -45,16 +45,21 @@
             display: block;
             max-width: 100%;
             max-height: 100%;
-            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            box-shadow: 0 0 30px rgba(0,0,0,0.9);
         }
 
         .link {
             position: absolute;
             z-index: 9999;
-            background: rgba(255, 0, 0, 0.25);
-            border: 2px dashed red;
+            border: 2px solid rgba(255, 0, 0, 0.6);
+            background: rgba(255, 0, 0, 0.15);
             pointer-events: all;
             cursor: pointer;
+            transition: all 0.2s;
+        }
+        .link:hover {
+            background: rgba(255, 0, 0, 0.3);
+            border-color: red;
         }
 
         .nav {
@@ -63,13 +68,12 @@
             z-index: 100;
             color: white;
             font-size: 42px;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.75);
             border: none;
             border-radius: 50%;
             width: 65px;
             height: 65px;
             cursor: pointer;
-            user-select: none;
         }
         .prev { left: 20px; }
         .next { right: 20px; }
@@ -94,19 +98,20 @@
         const slider = document.getElementById('slider');
         let current = 0;
         let slides = [];
+        let resizeObserver;
 
         pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
-            console.log(`PDF carregado com ${pdf.numPages} páginas`);
+            console.log(`PDF carregado: ${pdf.numPages} páginas`);
 
             for (let i = 1; i <= pdf.numPages; i++) {
                 pdf.getPage(i).then(page => {
                     const pageIndex = i;
+                    const viewportBase = page.getViewport({ scale: 1.0 });
 
-                    // Calcula scale para caber na tela mantendo proporção
-                    const viewportBase = page.getViewport({ scale: 1 });
-                    const scaleX = window.innerWidth / viewportBase.width;
-                    const scaleY = window.innerHeight / viewportBase.height;
-                    const scale = Math.min(scaleX, scaleY) * 0.95; // 95% para margem
+                    // Calcula scale ideal para caber na tela
+                    const scaleX = (window.innerWidth * 0.98) / viewportBase.width;
+                    const scaleY = (window.innerHeight * 0.95) / viewportBase.height;
+                    const scale = Math.min(scaleX, scaleY);
 
                     const viewport = page.getViewport({ scale });
 
@@ -124,76 +129,76 @@
                     wrapper.appendChild(canvas);
                     slide.appendChild(wrapper);
                     slider.appendChild(slide);
-                    slides.push(slide);
+                    slides.push({ slide, wrapper, viewportBase, pageIndex });
 
-                    // Renderiza a página
-                    page.render({ canvasContext: ctx, viewport: viewport }).promise.then(() => {
-                        console.log(`Página ${pageIndex} renderizada (scale ≈ ${scale.toFixed(2)})`);
+                    page.render({ canvasContext: ctx, viewport }).promise.then(() => {
+                        createLinksForPage(wrapper, pageIndex, viewportBase);
 
-                        // Cria os links com posições em %
-                        if (pageIndex === 1) {
-                            createLink(wrapper, "https://wa.me/5516991128533", 1142, 735, 120, 120, viewportBase);
-                            createLink(wrapper, "tel:+5516991128533", 1274, 757, 488, 81, viewportBase);
-                        }
-                        if (pageIndex === 6) {
-                            createLink(wrapper, "https://wa.me/5516991128533", 1158, 918, 120, 120, viewportBase);
-                            createLink(wrapper, "tel:+5516991128533", 1284, 929, 458, 94, viewportBase);
-                        }
-                        if (pageIndex === pdf.numPages) {
-                            createLink(wrapper, "https://wa.me/5516991128533", 1383, 825, 127, 97, viewportBase);
-                            createLink(wrapper, "tel:+5516991128533", 1157, 666, 592, 151, viewportBase);
+                        if (slides.length === 1) {
+                            slide.classList.add("active");
                         }
                     });
-
-                    if (slides.length === 1) slide.classList.add("active");
                 });
             }
-        }).catch(err => {
-            console.error("Erro ao carregar PDF:", err);
-        });
+        }).catch(err => console.error("Erro PDF:", err));
 
-        function createLink(wrapper, href, x, y, w, h, viewportBase) {
-            const link = document.createElement('a');
-            link.href = href;
-            link.className = 'link';
-            link.target = '_blank';
-            link.rel = 'noopener';
+        function createLinksForPage(wrapper, pageIndex, viewportBase) {
+            const links = [];
 
-            // Calcula posição em porcentagem relativa ao PDF original (viewportBase)
-            const percentX = (x / viewportBase.width) * 100;
-            const percentY = (y / viewportBase.height) * 100;
-            const percentW = (w / viewportBase.width) * 100;
-            const percentH = (h / viewportBase.height) * 100;
+            if (pageIndex === 1) {
+                links.push({ href: "https://wa.me/5516991128533", x: 1142, y: 735, w: 120, h: 120 });
+                links.push({ href: "tel:+5516991128533", x: 1274, y: 757, w: 488, h: 81 });
+            }
+            if (pageIndex === 6) {
+                links.push({ href: "https://wa.me/5516991128533", x: 1158, y: 918, w: 120, h: 120 });
+                links.push({ href: "tel:+5516991128533", x: 1284, y: 929, w: 458, h: 94 });
+            }
+            if (pageIndex === slides.length) {  // última página
+                links.push({ href: "https://wa.me/5516991128533", x: 1383, y: 825, w: 127, h: 97 });
+                links.push({ href: "tel:+5516991128533", x: 1157, y: 666, w: 592, h: 151 });
+            }
 
-            link.style.left = percentX + '%';
-            link.style.top = percentY + '%';
-            link.style.width = percentW + '%';
-            link.style.height = percentH + '%';
+            links.forEach(linkData => {
+                const link = document.createElement('a');
+                link.href = linkData.href;
+                link.className = 'link';
+                link.target = '_blank';
+                link.rel = 'noopener';
 
-            wrapper.appendChild(link);
+                const percentX = (linkData.x / viewportBase.width) * 100;
+                const percentY = (linkData.y / viewportBase.height) * 100;
+                const percentW = (linkData.w / viewportBase.width) * 100;
+                const percentH = (linkData.h / viewportBase.height) * 100;
 
-            console.log(`Link criado na página - X:${percentX.toFixed(1)}% Y:${percentY.toFixed(1)}% W:${percentW.toFixed(1)}% H:${percentH.toFixed(1)}%`);
+                link.style.left = `${percentX}%`;
+                link.style.top = `${percentY}%`;
+                link.style.width = `${percentW}%`;
+                link.style.height = `${percentH}%`;
+
+                wrapper.appendChild(link);
+                console.log(`Link página ${pageIndex}: ${percentX.toFixed(1)}% ${percentY.toFixed(1)}%`);
+            });
         }
 
         function showPage(index) {
-            if (slides[current]) slides[current].classList.remove("active");
+            slides.forEach(s => s.slide.classList.remove("active"));
+            if (slides[index]) slides[index].slide.classList.add("active");
             current = index;
-            if (slides[current]) slides[current].classList.add("active");
         }
 
         function next() {
-            current >= slides.length - 1 ? showPage(0) : showPage(current + 1);
+            current = (current + 1) % slides.length;
+            showPage(current);
         }
 
         function prev() {
-            current <= 0 ? showPage(slides.length - 1) : showPage(current - 1);
+            current = (current - 1 + slides.length) % slides.length;
+            showPage(current);
         }
 
-        // Recalcula posições ao redimensionar a janela (importante no mobile)
+        // Recalcula posições quando a tela muda de tamanho (ex: girar celular)
         window.addEventListener('resize', () => {
-            console.log("Janela redimensionada - recarregue a página para ajustar melhor");
-            // Se quiser recalcular sem recarregar, é possível, mas mais complexo.
-            // Por enquanto, recomendo recarregar em caso de mudança grande de orientação.
+            location.reload(); // Mais simples e confiável por enquanto
         });
     </script>
 </body>
