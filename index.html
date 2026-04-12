@@ -2,65 +2,52 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Z1N | Designer Mode</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Z1N | Ajuste de Links</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-    <script src="https://unpkg.com/interactjs/dist/interact.min.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; }
         body, html { height: 100%; background: #000; overflow: hidden; font-family: sans-serif; }
         .swiper { width: 100%; height: 100vh; }
         .swiper-slide { display: flex; justify-content: center; align-items: center; position: relative; }
         .swiper-slide img { max-width: 100%; max-height: 100%; object-fit: contain; pointer-events: none; }
 
-        /* SETAS QUASE INVISÍVEIS */
-        .seta { position: fixed; bottom: 5px; z-index: 1000; color: rgba(255,255,255,0.1); font-size: 14px; cursor: pointer; padding: 10px; }
+        /* PAINEL DE CONTROLE (SÓ PARA VOCÊ AJUSTAR) */
+        #painel {
+            position: fixed; top: 0; left: 0; width: 100%; background: rgba(0,0,0,0.9);
+            color: #fff; pading: 10px; z-index: 9999; font-size: 10px; border-bottom: 1px solid #333;
+            display: flex; flex-direction: column; align-items: center; padding: 10px;
+        }
+
+        /* ÁREA DO LINK EDITÁVEL */
+        .link-editavel {
+            position: absolute; background: rgba(255, 255, 0, 0.4);
+            border: 2px dashed #fff; z-index: 1000; display: flex;
+            align-items: center; justify-content: center; color: #000; font-weight: bold;
+        }
+
+        /* SETAS MÍNIMAS NOS CANTOS */
+        .seta { position: fixed; bottom: 5px; z-index: 5000; color: rgba(255,255,255,0.2); font-size: 12px; cursor: pointer; padding: 15px; }
         #prev { left: 0; } #next { right: 0; }
-
-        /* CAMPOS EDITÁVEIS (ARRASTÁVEIS E REDIMENSIONÁVEIS) */
-        .link-editor {
-            position: absolute;
-            background: rgba(255, 255, 0, 0.4);
-            border: 2px dashed yellow;
-            z-index: 999;
-            touch-action: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            color: black;
-            font-weight: bold;
-        }
-
-        #log-area {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            background: rgba(0,0,0,0.8);
-            color: #0f0;
-            padding: 10px;
-            font-family: monospace;
-            font-size: 11px;
-            z-index: 2000;
-            max-width: 300px;
-            border-radius: 5px;
-        }
     </style>
 </head>
 <body>
 
-    <div id="log-area">Ajuste os campos e copie os dados abaixo para o seu código final.</div>
+    <div id="painel">
+        <p>1. Arraste os blocos amarelos. 2. Use os dedos para redimensionar (se estiver no celular).</p>
+        <div id="resultado" style="margin-top:5px; color:#0f0;">Mova um bloco para ver as coordenadas...</div>
+    </div>
 
     <div class="swiper">
         <div class="swiper-wrapper">
-            <div class="swiper-slide"><img src="p1.png"><div class="link-editor" id="link1" style="width:150px; height:50px; top:50%; left:50%;">PAG 1</div></div>
+            <div class="swiper-slide"><img src="p1.png"><div class="link-editavel" id="l1" style="width:100px; height:50px; top:50%; left:50%;">LINK 1</div></div>
             <div class="swiper-slide"><img src="p2.png"></div>
             <div class="swiper-slide"><img src="p3.png"></div>
             <div class="swiper-slide"><img src="p4.png"></div>
             <div class="swiper-slide"><img src="p5.png"></div>
-            <div class="swiper-slide"><img src="p6.png"><div class="link-editor" id="link6" style="width:150px; height:50px; top:50%; left:50%;">PAG 6</div></div>
+            <div class="swiper-slide"><img src="p6.png"><div class="link-editavel" id="l6" style="width:100px; height:50px; top:50%; left:50%;">LINK 6</div></div>
             <div class="swiper-slide"><img src="p7.png"></div>
-            <div class="swiper-slide"><img src="p8.png"><div class="link-editor" id="link8" style="width:150px; height:50px; top:50%; left:50%;">PAG 8</div></div>
+            <div class="swiper-slide"><img src="p8.png"><div class="link-editavel" id="l8" style="width:100px; height:50px; top:50%; left:50%;">LINK 8</div></div>
         </div>
     </div>
 
@@ -68,43 +55,45 @@
     <div class="seta" id="next">&#10095;</div>
 
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+    
     <script>
         const swiper = new Swiper('.swiper', { direction: 'horizontal', loop: true, navigation: { nextEl: '#next', prevEl: '#prev' } });
 
-        // Lógica de Arrastar e Dimensionar
-        interact('.link-editor').draggable({
-            listeners: { move (event) {
-                var target = event.target;
-                var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-                var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
-                target.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
-                target.setAttribute('data-x', x);
-                target.setAttribute('data-y', y);
-                updateLog();
+        interact('.link-editavel')
+          .draggable({
+            listeners: { move(event) {
+                const target = event.target;
+                const parent = target.parentElement;
+                let x = (parseFloat(target.dataset.x) || 0) + event.dx;
+                let y = (parseFloat(target.dataset.y) || 0) + event.dy;
+                target.style.transform = `translate(${x}px, ${y}px)`;
+                target.dataset.x = x; target.dataset.y = y;
+                mostrarCoords(target);
             }}
-        }).resizable({
+          })
+          .resizable({
             edges: { left: true, right: true, bottom: true, top: true },
-            listeners: { move (event) {
-                var target = event.target;
-                var x = (parseFloat(target.getAttribute('data-x')) || 0);
-                var y = (parseFloat(target.getAttribute('data-y')) || 0);
+            listeners: { move(event) {
+                let target = event.target;
+                let x = (parseFloat(target.dataset.x) || 0);
+                let y = (parseFloat(target.dataset.y) || 0);
                 target.style.width = event.rect.width + 'px';
                 target.style.height = event.rect.height + 'px';
-                x += event.deltaRect.left;
-                y += event.deltaRect.top;
-                target.style.transform = 'translate(' + x + 'px,' + y + 'px)';
-                target.setAttribute('data-x', x);
-                target.setAttribute('data-y', y);
-                updateLog();
+                x += event.deltaRect.left; y += event.deltaRect.top;
+                target.style.transform = `translate(${x}px,${y}px)`;
+                target.dataset.x = x; target.dataset.y = y;
+                mostrarCoords(target);
             }}
-        });
+          });
 
-        function updateLog() {
-            let log = "VALORES PARA O INDEX:<br>";
-            document.querySelectorAll('.link-editor').forEach(el => {
-                log += `${el.id}: W:${el.style.width} H:${el.style.height} T:${el.style.top} L:${el.style.left} Transf:${el.style.transform}<br>`;
-            });
-            document.getElementById('log-area').innerHTML = log;
+        function mostrarCoords(el) {
+            const rect = el.getBoundingClientRect();
+            const parent = el.parentElement.getBoundingClientRect();
+            const topPerc = ((rect.top / parent.height) * 100).toFixed(1);
+            const leftPerc = ((rect.left / parent.width) * 100).toFixed(1);
+            document.getElementById('resultado').innerHTML = 
+                `CÓDIGO: style="width:${el.style.width}; height:${el.style.height}; top:${topPerc}%; left:${leftPerc}%;"`;
         }
     </script>
 </body>
