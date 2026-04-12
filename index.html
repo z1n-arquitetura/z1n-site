@@ -4,14 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Z1N Arquiteturas</title>
+
+    <meta property="og:title" content="Z1N Arquiteturas">
+    <meta property="og:description" content="Projetos exclusivos">
+    <meta property="og:image" content="https://z1n-arquitetura.github.io/z1n-site/og-image.jpg">
+    <meta property="og:url" content="https://z1n-arquitetura.github.io/z1n-site/">
+    <meta property="og:type" content="website">
+
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         html, body {
             height: 100%;
             overflow: hidden;
             background: #000;
-            color: white;
-            font-family: Arial, sans-serif;
+            touch-action: manipulation;
         }
         .slider {
             width: 100vw;
@@ -19,160 +25,123 @@
             position: relative;
         }
         .slide {
-            position: relative;
             width: 100%;
             height: 100%;
+            position: absolute;
             display: none;
             justify-content: center;
             align-items: center;
         }
         .slide.active { display: flex; }
-        canvas {
+
+        .slide-wrapper {
+            position: relative;
+            display: inline-block;
             max-width: 100%;
             max-height: 100%;
-            display: block;
         }
+
+        canvas {
+            display: block;
+            max-width: 100%;
+            max-height: 100%;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+        }
+
         .link {
             position: absolute;
-            z-index: 10000;
-            background: rgba(255, 0, 0, 0.45);
-            border: 3px dashed red;
-            color: white;
-            font-size: 14px;
-            padding: 8px 12px;
-            text-align: center;
-            cursor: move;
-        }
-        .resize-handle {
-            position: absolute;
-            bottom: -8px;
-            right: -8px;
-            width: 18px;
-            height: 18px;
-            background: red;
-            border: 2px solid white;
-            border-radius: 50%;
-            cursor: nwse-resize;
-        }
-        .save-btn {
-            position: fixed;
-            top: 15px;
-            right: 15px;
-            z-index: 99999;
-            background: #00ff00;
-            color: black;
-            font-weight: bold;
-            font-size: 17px;
-            padding: 14px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-        .status {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.95);
-            padding: 30px 40px;
-            border-radius: 12px;
-            text-align: center;
             z-index: 9999;
-            max-width: 80%;
-        }
-        #result-box {
-            position: fixed;
-            top: 90px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 92%;
-            max-width: 850px;
-            background: #1a1a1a;
-            border: 3px solid #0f0;
-            color: #0f0;
-            padding: 20px;
-            border-radius: 12px;
-            z-index: 999999;
-            display: none;
-            max-height: 75vh;
-            overflow: auto;
-            font-family: monospace;
-            font-size: 15px;
-        }
-        .close-btn {
-            position: absolute;
-            top: 12px;
-            right: 15px;
-            background: red;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
+            background: rgba(255, 0, 0, 0.25);
+            border: 2px dashed red;
+            pointer-events: all;
             cursor: pointer;
         }
+
+        .nav {
+            position: absolute;
+            bottom: 30px;
+            z-index: 100;
+            color: white;
+            font-size: 42px;
+            background: rgba(0,0,0,0.7);
+            border: none;
+            border-radius: 50%;
+            width: 65px;
+            height: 65px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .prev { left: 20px; }
+        .next { right: 20px; }
     </style>
 </head>
 <body>
+
     <div class="slider" id="slider"></div>
     <button class="nav prev" onclick="prev()">←</button>
     <button class="nav next" onclick="next()">→</button>
-    <button class="save-btn" onclick="savePositions()">💾 SALVAR POSIÇÕES</button>
-
-    <div id="result-box">
-        <button class="close-btn" onclick="closeResult()">Fechar</button>
-        <pre id="code-output"></pre>
-    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-        // Caminho direto e correto
-        const pdfUrl = "https://z1n-arq.com.br/portfolio.pdf";
+        let pdfUrl = 'portfolio.pdf';
+        if (location.hostname.includes('github.io')) {
+            pdfUrl = 'https://z1n-arquitetura.github.io/z1n-site/portfolio.pdf';
+        }
 
         const slider = document.getElementById('slider');
-        let slides = [];
-        let allLinks = [];
         let current = 0;
-
-        // Mensagem inicial
-        const statusMsg = document.createElement('div');
-        statusMsg.className = 'status';
-        statusMsg.innerHTML = `<h2>Carregando PDF...</h2><p>Aguarde um momento</p>`;
-        slider.appendChild(statusMsg);
+        let slides = [];
 
         pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
-            statusMsg.remove();
             console.log(`PDF carregado com ${pdf.numPages} páginas`);
 
             for (let i = 1; i <= pdf.numPages; i++) {
                 pdf.getPage(i).then(page => {
-                    const viewport = page.getViewport({ scale: 2.0 });
+                    const pageIndex = i;
+
+                    // Calcula scale para caber na tela mantendo proporção
+                    const viewportBase = page.getViewport({ scale: 1 });
+                    const scaleX = window.innerWidth / viewportBase.width;
+                    const scaleY = window.innerHeight / viewportBase.height;
+                    const scale = Math.min(scaleX, scaleY) * 0.95; // 95% para margem
+
+                    const viewport = page.getViewport({ scale });
+
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
                     canvas.width = viewport.width;
                     canvas.height = viewport.height;
 
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'slide-wrapper';
+
                     const slide = document.createElement('div');
                     slide.className = 'slide';
-                    slide.appendChild(canvas);
+
+                    wrapper.appendChild(canvas);
+                    slide.appendChild(wrapper);
                     slider.appendChild(slide);
                     slides.push(slide);
 
+                    // Renderiza a página
                     page.render({ canvasContext: ctx, viewport: viewport }).promise.then(() => {
-                        if (i === 1 || i === 6 || i === pdf.numPages) {
-                            if (i === 1) {
-                                createDraggableLink(slide, "https://wa.me/5516991128533", 1050, 680, 240, 170, "WhatsApp", i);
-                                createDraggableLink(slide, "tel:+5516991128533", 1120, 720, 570, 160, "Telefone", i);
-                            }
-                            if (i === 6) {
-                                createDraggableLink(slide, "https://wa.me/5516991128533", 1070, 850, 230, 170, "WhatsApp", i);
-                                createDraggableLink(slide, "tel:+5516991128533", 1150, 890, 560, 160, "Telefone", i);
-                            }
-                            if (i === pdf.numPages) {
-                                createDraggableLink(slide, "https://wa.me/5516991128533", 1360, 790, 170, 140, "WhatsApp", i);
-                                createDraggableLink(slide, "tel:+5516991128533", 1110, 630, 660, 200, "Telefone", i);
-                            }
+                        console.log(`Página ${pageIndex} renderizada (scale ≈ ${scale.toFixed(2)})`);
+
+                        // Cria os links com posições em %
+                        if (pageIndex === 1) {
+                            createLink(wrapper, "https://wa.me/5516991128533", 1142, 735, 120, 120, viewportBase);
+                            createLink(wrapper, "tel:+5516991128533", 1274, 757, 488, 81, viewportBase);
+                        }
+                        if (pageIndex === 6) {
+                            createLink(wrapper, "https://wa.me/5516991128533", 1158, 918, 120, 120, viewportBase);
+                            createLink(wrapper, "tel:+5516991128533", 1284, 929, 458, 94, viewportBase);
+                        }
+                        if (pageIndex === pdf.numPages) {
+                            createLink(wrapper, "https://wa.me/5516991128533", 1383, 825, 127, 97, viewportBase);
+                            createLink(wrapper, "tel:+5516991128533", 1157, 666, 592, 151, viewportBase);
                         }
                     });
 
@@ -180,96 +149,30 @@
                 });
             }
         }).catch(err => {
-            console.error(err);
-            statusMsg.innerHTML = `
-                <h2 style="color:#ff6666;">❌ Não foi possível carregar o PDF</h2>
-                <p>URL: ${pdfUrl}</p>
-                <p style="margin-top:15px;">Possíveis soluções:</p>
-                <ul style="text-align:left; margin:15px 0;">
-                    <li>Verifique se o arquivo <strong>portfolio.pdf</strong> está publicado corretamente no servidor.</li>
-                    <li>Tente limpar o cache do navegador (Ctrl + Shift + R).</li>
-                    <li>Confira se o PDF abre diretamente ao colar este link na barra de endereço:</li>
-                </ul>
-                <p><a href="${pdfUrl}" target="_blank" style="color:#00ff00;">${pdfUrl}</a></p>
-            `;
+            console.error("Erro ao carregar PDF:", err);
         });
 
-        function createDraggableLink(slide, href, x, y, w, h, label, pageNum) {
+        function createLink(wrapper, href, x, y, w, h, viewportBase) {
             const link = document.createElement('a');
             link.href = href;
             link.className = 'link';
             link.target = '_blank';
-            link.textContent = label;
+            link.rel = 'noopener';
 
-            const canvas = slide.querySelector('canvas');
+            // Calcula posição em porcentagem relativa ao PDF original (viewportBase)
+            const percentX = (x / viewportBase.width) * 100;
+            const percentY = (y / viewportBase.height) * 100;
+            const percentW = (w / viewportBase.width) * 100;
+            const percentH = (h / viewportBase.height) * 100;
 
-            const update = (px, py, pw, ph) => {
-                link.style.left = px + '%';
-                link.style.top = py + '%';
-                link.style.width = pw + '%';
-                link.style.height = ph + '%';
-            };
+            link.style.left = percentX + '%';
+            link.style.top = percentY + '%';
+            link.style.width = percentW + '%';
+            link.style.height = percentH + '%';
 
-            update((x / canvas.width)*100, (y / canvas.height)*100, (w / canvas.width)*100, (h / canvas.height)*100);
+            wrapper.appendChild(link);
 
-            const rh = document.createElement('div');
-            rh.className = 'resize-handle';
-            link.appendChild(rh);
-
-            let dragging = false, resizing = false, sx, sy, spx, spy, spw, sph;
-
-            link.addEventListener('mousedown', e => {
-                sx = e.clientX; sy = e.clientY;
-                spx = parseFloat(link.style.left) || 0;
-                spy = parseFloat(link.style.top) || 0;
-                spw = parseFloat(link.style.width) || 0;
-                sph = parseFloat(link.style.height) || 0;
-                if (e.target === rh) resizing = true;
-                else dragging = true;
-            });
-
-            document.addEventListener('mousemove', e => {
-                if (!dragging && !resizing) return;
-                const rect = canvas.getBoundingClientRect();
-                const dx = ((e.clientX - sx) / rect.width) * 100;
-                const dy = ((e.clientY - sy) / rect.height) * 100;
-
-                if (dragging) update(spx + dx, spy + dy, spw, sph);
-                else if (resizing) update(spx, spy, Math.max(80, spw + dx), Math.max(40, sph + dy));
-            });
-
-            document.addEventListener('mouseup', () => { dragging = resizing = false; });
-
-            slide.appendChild(link);
-            allLinks.push({link, canvas, href, label, pageNum});
-        }
-
-        function savePositions() {
-            if (allLinks.length === 0) {
-                alert("O PDF ainda não carregou. Verifique a mensagem na tela.");
-                return;
-            }
-
-            let text = "// === POSIÇÕES AJUSTADAS ===\n\n";
-
-            allLinks.forEach(item => {
-                const s = item.link.style;
-                const c = item.canvas;
-                const x = Math.round((parseFloat(s.left) || 0) / 100 * c.width);
-                const y = Math.round((parseFloat(s.top) || 0) / 100 * c.height);
-                const w = Math.round((parseFloat(s.width) || 0) / 100 * c.width);
-                const h = Math.round((parseFloat(s.height) || 0) / 100 * c.height);
-
-                text += `// Página ${item.pageNum} - ${item.label}\n`;
-                text += `createLink(slide, "${item.href}", ${x}, ${y}, ${w}, ${h});\n\n`;
-            });
-
-            document.getElementById('code-output').textContent = text;
-            document.getElementById('result-box').style.display = 'block';
-        }
-
-        function closeResult() {
-            document.getElementById('result-box').style.display = 'none';
+            console.log(`Link criado na página - X:${percentX.toFixed(1)}% Y:${percentY.toFixed(1)}% W:${percentW.toFixed(1)}% H:${percentH.toFixed(1)}%`);
         }
 
         function showPage(index) {
@@ -278,8 +181,20 @@
             if (slides[current]) slides[current].classList.add("active");
         }
 
-        function next() { current >= slides.length - 1 ? showPage(0) : showPage(current + 1); }
-        function prev() { current <= 0 ? showPage(slides.length - 1) : showPage(current - 1); }
+        function next() {
+            current >= slides.length - 1 ? showPage(0) : showPage(current + 1);
+        }
+
+        function prev() {
+            current <= 0 ? showPage(slides.length - 1) : showPage(current - 1);
+        }
+
+        // Recalcula posições ao redimensionar a janela (importante no mobile)
+        window.addEventListener('resize', () => {
+            console.log("Janela redimensionada - recarregue a página para ajustar melhor");
+            // Se quiser recalcular sem recarregar, é possível, mas mais complexo.
+            // Por enquanto, recomendo recarregar em caso de mudança grande de orientação.
+        });
     </script>
 </body>
 </html>
