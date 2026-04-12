@@ -1,331 +1,201 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Z1N Arquitetura - Assessoria especializada em arquitetura estratégica, projetos residenciais, comerciais e consultoria técnica. Ribeirão Preto - SP">
-    <meta name="keywords" content="arquitetura, projetos, consultoria, residencial, comercial, Ribeirão Preto">
-    <meta name="author" content="José Luís Navarro - Z1N Arquitetura">
-    <title>Z1N Arquitetura - Assessoria Especializada</title>
-    <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Z1N Arquiteturas</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
+html,body{
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#000;
+}
+
+/* SLIDER CONTROLADO (SEM SCROLL NATIVO) */
+.slider{
+  display:flex;
+  width:100vw;
+  height:100dvh;
+  will-change: transform;
+  transition: transform .32s ease;
+  touch-action: pan-y; /* evita conflito com vertical */
+}
+
+.slide{
+  min-width:100vw;
+  height:100dvh;
+  position:relative;
+}
+
+canvas{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+
+/* LINKS */
+.link{
+  position:absolute;
+  background:transparent;
+  z-index:10;
+}
+
+/* DEBUG opcional: ative se quiser ver caixas
+.link{ background:rgba(255,0,0,.2); border:1px dashed #fff; }
+*/
+</style>
 </head>
+
 <body>
-    <!-- NAVEGAÇÃO -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo">Z1N</div>
-            <button class="nav-toggle" id="navToggle">☰</button>
-            <ul class="nav-menu" id="navMenu">
-                <li><a href="#home">Home</a></li>
-                <li><a href="#sobre">Sobre</a></li>
-                <li><a href="#servicos">Serviços</a></li>
-                <li><a href="#portfolio">Portfolio</a></li>
-                <li><a href="#contato">Contato</a></li>
-            </ul>
-        </div>
-    </nav>
 
-    <!-- HOME / CAPA -->
-    <section id="home" class="hero">
-        <div class="hero-content">
-            <h1 class="fade-in">JOSÉ LUÍS NAVARRO</h1>
-            <p class="subtitle fade-in">ASSESSORIA ESPECIALIZADA EM ARQUITETURA</p>
-            <p class="cau fade-in">CAU 1.5569-1 | ARQUITETO</p>
-            <p class="description fade-in">
-                Arquitetura estratégica para evitar erros, atrasos em aprovações e prejuízo na obra.<br>
-                Decisões técnicas corretas no início evitam custos invisíveis no final.
-            </p>
-            <div class="cta-buttons">
-                <a href="tel:+5516991128533" class="btn btn-primary">📞 16.9911.28533</a>
-                <a href="https://wa.me/5516991128533" class="btn btn-secondary">💬 WhatsApp</a>
-            </div>
-            <p class="location">📍 Ribeirão Preto - SP</p>
-        </div>
-    </section>
+<div class="slider" id="slider"></div>
 
-    <!-- SOBRE -->
-    <section id="sobre" class="about">
-        <div class="container">
-            <h2>Sobre José Luís Navarro</h2>
-            <div class="about-content">
-                <p>Arquitetura não começa no desenho.</p>
-                <p>Começa na análise técnica da intenção dos Clientes, na leitura do cenário e na definição da melhor estratégia para o projeto.</p>
-                <p><strong>Projetos pensados para aprovação, não apenas para apresentação.</strong></p>
-                <p>Atuação em Ribeirão Preto e região com foco técnico, segurança jurídica e eficiência construtiva.</p>
-                <h3>Diferencial Técnico</h3>
-                <ul>
-                    <li>✓ Integração entre projeto, legislação e execução</li>
-                    <li>✓ Atuação preventiva (Redução de retrabalho)</li>
-                    <li>✓ Apoio técnico em processos de aprovação</li>
-                    <li>✓ Comunicação objetiva com cliente e equipe</li>
-                </ul>
-            </div>
-        </div>
-    </section>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
-    <!-- SERVIÇOS - PROJETOS -->
-    <section id="servicos" class="services">
-        <div class="container">
-            <h2>Serviços - Projetos</h2>
-            <div class="services-grid">
-                <div class="service-card">
-                    <h3>Residenciais</h3>
-                    <p>Projetos de casas e apartamentos com foco em funcionalidade e bem-estar</p>
-                </div>
-                <div class="service-card">
-                    <h3>Comerciais</h3>
-                    <p>Espaços comerciais otimizados para o melhor desempenho do negócio</p>
-                </div>
-                <div class="service-card">
-                    <h3>Institucionais</h3>
-                    <p>Projetos para instituições com conformidade técnica e legal</p>
-                </div>
-                <div class="service-card">
-                    <h3>Retrofit</h3>
-                    <p>Reformas e revitalizações com modernização de espaços</p>
-                </div>
-                <div class="service-card">
-                    <h3>Design</h3>
-                    <p>Soluções de design interior e exterior integradas ao projeto</p>
-                </div>
-            </div>
-        </div>
-    </section>
+<script>
+const slider = document.getElementById('slider');
 
-    <!-- SERVIÇOS - CONSULTORIAS -->
-    <section class="consultoria">
-        <div class="container">
-            <h2>Serviços - Consultorias</h2>
-            <div class="services-grid">
-                <div class="service-card">
-                    <h3>Oficiais</h3>
-                    <p>Regularizações e documentação junto aos órgãos competentes</p>
-                </div>
-                <div class="service-card">
-                    <h3>Viabilidade Técnica</h3>
-                    <p>Análise e valorização de propriedades</p>
-                </div>
-                <div class="service-card">
-                    <h3>Conceito</h3>
-                    <p>Definição de identidade espacial e estratégia de projeto</p>
-                </div>
-                <div class="service-card">
-                    <h3>Planejamento</h3>
-                    <p>Gestão de obras e cronograma executivo</p>
-                </div>
-                <div class="service-card">
-                    <h3>Acessibilidade</h3>
-                    <p>Conformidade com normas de acessibilidade ABNT</p>
-                </div>
-                <div class="service-card">
-                    <h3>Apoio Jurídico</h3>
-                    <p>Suporte técnico em demandas judiciais</p>
-                </div>
-            </div>
-        </div>
-    </section>
+let index = 0;
+let startX = 0;
+let isDown = false;
 
-    <!-- SERVIÇOS - DESENVOLVIMENTO -->
-    <section class="desenvolvimento">
-        <div class="container">
-            <h2>Serviços - Desenvolvimento</h2>
-            <div class="services-grid">
-                <div class="service-card">
-                    <h3>Eficiência Energética</h3>
-                    <p>Projetos com otimização de consumo e sustentabilidade</p>
-                </div>
-                <div class="service-card">
-                    <h3>Sustentabilidade</h3>
-                    <p>Práticas sustentáveis integradas ao projeto</p>
-                </div>
-                <div class="service-card">
-                    <h3>Ergonometria</h3>
-                    <p>Espaços otimizados para conforto e funcionalidade</p>
-                </div>
-                <div class="service-card">
-                    <h3>Biofilia</h3>
-                    <p>Integração da natureza nos espaços construídos</p>
-                </div>
-            </div>
-        </div>
-    </section>
+// ===== SWIPE COM LIMIAR (ANTI "PULAR PÁGINAS") =====
+function goTo(i){
+  const total = slider.children.length;
+  index = Math.max(0, Math.min(total-1, i));
+  slider.style.transform = `translateX(-${index * 100}vw)`;
+}
 
-    <!-- COMO TRABALHAMOS -->
-    <section class="processo">
-        <div class="container">
-            <h2>Como Trabalhamos</h2>
-            <div class="processo-steps">
-                <div class="step">
-                    <span class="step-number">1</span>
-                    <h3>Análise Inicial</h3>
-                </div>
-                <div class="step">
-                    <span class="step-number">2</span>
-                    <h3>Direcionamento Técnico</h3>
-                </div>
-                <div class="step">
-                    <span class="step-number">3</span>
-                    <h3>Desenvolvimento Projetual</h3>
-                </div>
-                <div class="step">
-                    <span class="step-number">4</span>
-                    <h3>Aprovação Legal</h3>
-                </div>
-                <div class="step">
-                    <span class="step-number">5</span>
-                    <h3>Acompanhamento Estratégico</h3>
-                </div>
-            </div>
-            <p class="processo-text">Atendimentos realizados de forma personalizada, conforme análise técnica de cada demanda.</p>
-        </div>
-    </section>
+function onStart(x){
+  startX = x;
+  isDown = true;
+}
 
-    <!-- PORTFOLIO -->
-    <section id="portfolio" class="portfolio">
-        <div class="container">
-            <h2>Portfolio de Projetos</h2>
-            <div class="projetos-grid">
-                <!-- PÁGINA 1 -->
-                <div class="projeto-card">
-                    <img src="images/projetos/placeholder.jpg" alt="Reforma Garagem">
-                    <h3>Reforma Garagem</h3>
-                    <p>35,00 M²</p>
-                </div>
-                <div class="projeto-card">
-                    <img src="images/projetos/placeholder.jpg" alt="Residência">
-                    <h3>Residência</h3>
-                    <p>185,00 M²</p>
-                </div>
-                <div class="projeto-card">
-                    <img src="images/projetos/placeholder.jpg" alt="Residência">
-                    <h3>Residência</h3>
-                    <p>198,00 M²</p>
-                </div>
-                <div class="projeto-card">
-                    <img src="images/projetos/placeholder.jpg" alt="Reforma/Ampliação Hotel">
-                    <h3>Reforma/Ampliação Hotel</h3>
-                    <p>1.258,00 M²</p>
-                </div>
-                <div class="projeto-card">
-                    <img src="images/projetos/placeholder.jpg" alt="Restaurante">
-                    <h3>Restaurante Delfinópolis MG</h3>
-                    <p>198,00 M²</p>
-                </div>
-                <div class="projeto-card">
-                    <img src="images/projetos/placeholder.jpg" alt="AARL USP-RP">
-                    <h3>AARL - USP-RP</h3>
-                    <p>1.169,00 M² | Ginásio Poli-Esportivo + Convivência</p>
-                </div>
+function onEnd(x){
+  if(!isDown) return;
+  isDown = false;
 
-                <!-- PÁGINA 2 -->
-                <div class="projeto-card">
-                    <img src="images/projetos/placeholder.jpg" alt="Chácara de Lazer">
-                    <h3>Chácara de Lazer</h3>
-                    <p>840,52 M² | Implantação 4.475,75 M²</p>
-                </div>
-                <div class="projeto-card">
-                    <img src="images/projetos/placeholder.jpg" alt="Residência">
-                    <h3>Residência</h3>
-                    <p>586,12 M²</p>
-                </div>
-                <div class="projeto-card">
-                    <img src="images/projetos/placeholder.jpg" alt="Residência">
-                    <h3>Residência</h3>
-                    <p>212,10 M²</p>
-                </div>
-                <div class="projeto-card">
-                    <img src="images/projetos/placeholder.jpg" alt="Residência">
-                    <h3>Residência</h3>
-                    <p>108,29 M²</p>
-                </div>
-                <div class="projeto-card">
-                    <img src="images/projetos/placeholder.jpg" alt="Salgaderia">
-                    <h3>Salgaderia</h3>
-                    <p>85,00 M²</p>
-                </div>
-                <div class="projeto-card">
-                    <img src="images/projetos/placeholder.jpg" alt="Residência">
-                    <h3>Residência</h3>
-                    <p>368,54 M²</p>
-                </div>
+  const diff = startX - x;
 
-                <!-- PÁGINA 3 -->
-                <div class="projeto-card">
-                    <img src="images/projetos/placeholder.jpg" alt="Residência">
-                    <h3>Residência</h3>
-                    <p>108,00 M²</p>
-                </div>
-                <div class="projeto-card">
-                    <img src="images/projetos/placeholder.jpg" alt="Galpão Com. / Kitinets">
-                    <h3>Galpão Com. / Kitinets</h3>
-                    <p>285 M²</p>
-                </div>
-                <div class="projeto-card">
-                    <img src="images/projetos/placeholder.jpg" alt="Salão para Mercearia">
-                    <h3>Salão para Mercearia - Distrib. - Escrit. Com.</h3>
-                    <p>400,50 M²</p>
-                </div>
-                <div class="projeto-card">
-                    <img src="images/projetos/placeholder.jpg" alt="L.S.F. + Assoc. Prof.">
-                    <h3>L.S.F. + Assoc. Prof. Sertãozinho SP</h3>
-                    <p>830,00 M²</p>
-                </div>
-                <div class="projeto-card">
-                    <img src="images/projetos/placeholder.jpg" alt="Bar / Lanches">
-                    <h3>Bar / Lanches</h3>
-                    <p>106,00 M² | Implantação 978,665 M²</p>
-                </div>
-                <div class="projeto-card">
-                    <img src="images/projetos/placeholder.jpg" alt="Residência">
-                    <h3>Residência</h3>
-                    <p>250,00 M²</p>
-                </div>
-                <div class="projeto-card">
-                    <img src="images/projetos/placeholder.jpg" alt="Reforma Resid.">
-                    <h3>Reforma Resid.</h3>
-                    <p>186,00 M²</p>
-                </div>
-            </div>
-        </div>
-    </section>
+  // LIMIAR MAIOR = MENOS SENSÍVEL (ajustado)
+  const threshold = 80;
 
-    <!-- CONTATO -->
-    <section id="contato" class="contact">
-        <div class="container">
-            <h2>Entre em Contato</h2>
-            <div class="contact-content">
-                <p class="tagline">Solicite uma análise técnica do seu projeto</p>
-                <div class="contact-buttons">
-                    <a href="https://wa.me/5516991128533" class="btn btn-whatsapp">
-                        💬 WhatsApp: 16.9911.28533
-                    </a>
-                    <a href="tel:+5516991128533" class="btn btn-phone">
-                        ☎️ Telefone: 16.9911.28533
-                    </a>
-                    <a href="mailto:z1n.arquiteturas@gmail.com" class="btn btn-email">
-                        ✉️ Email: z1n.arquiteturas@gmail.com
-                    </a>
-                </div>
-                <div class="social-links">
-                    <a href="https://www.instagram.com/zeluis_z1n/" target="_blank">Instagram</a>
-                    <a href="https://linkedin.com/in/ze-navarro-8298b428" target="_blank">LinkedIn</a>
-                </div>
-                <p class="final-message">
-                    <strong>Evite retrabalho. Um bom planejamento reduz custo e aumenta o valor do seu investimento.</strong>
-                </p>
-                <p class="experience">
-                    <strong>Experiência técnica, visão estratégica e compromisso profissional.</strong>
-                </p>
-            </div>
-        </div>
-    </section>
+  if(Math.abs(diff) > threshold){
+    if(diff > 0) goTo(index + 1);
+    else goTo(index - 1);
+  }else{
+    goTo(index); // volta para a página atual
+  }
+}
 
-    <!-- FOOTER -->
-    <footer>
-        <p>&copy; 2024 Z1N Arquitetura | José Luís Navarro | CAU 1.5569-1</p>
-        <p>Ribeirão Preto - SP | Consultoria e Projetos Arquitetônicos</p>
-    </footer>
+// touch
+document.addEventListener("touchstart", e=>{
+  onStart(e.touches[0].clientX);
+}, {passive:true});
 
-    <script src="js/script.js"></script>
+document.addEventListener("touchend", e=>{
+  onEnd(e.changedTouches[0].clientX);
+});
+
+// mouse
+document.addEventListener("mousedown", e=>{
+  onStart(e.clientX);
+});
+document.addEventListener("mouseup", e=>{
+  onEnd(e.clientX);
+});
+
+// ===== PDF =====
+pdfjsLib.getDocument('../z1n-site/portfolio.pdf')
+
+for(let i=1;i<=pdf.numPages;i++){
+
+pdf.getPage(i).then(page=>{
+
+const v = page.getViewport({scale:2});
+
+const canvas = document.createElement('canvas');
+canvas.width = v.width;
+canvas.height = v.height;
+
+const ctx = canvas.getContext('2d');
+
+const slide = document.createElement('div');
+slide.className="slide";
+
+slide.appendChild(canvas);
+slider.appendChild(slide);
+
+page.render({canvasContext:ctx,viewport:v});
+
+// ===== FUNÇÃO LINK =====
+function link(href, top, left, width, height){
+  const el = document.createElement('a');
+
+  el.href = href;
+
+  if(href.includes("wa.me")){
+    el.target = "_blank";
+    el.rel = "noopener";
+  }
+
+  el.className="link";
+
+  // POSIÇÃO DIRETA (SEM CALC)
+  el.style.top = top;
+  el.style.left = left;
+  el.style.width = width;
+  el.style.height = height;
+
+  // BLOQUEIA DUPLO CLIQUE (SWIPE vs CLICK)
+  let moved = false;
+
+  el.addEventListener("touchstart", () => {
+    moved = false;
+  });
+
+  el.addEventListener("touchmove", () => {
+    moved = true;
+  });
+
+  el.addEventListener("click", (e) => {
+    if(moved){
+      e.preventDefault();
+    }
+  });
+
+  slide.appendChild(el);
+}
+
+// ===== POSIÇÕES AJUSTADAS =====
+
+// PÁGINA 1
+if(i===1){
+  link("tel:+5516991128533","72%","36%","34%","6%");
+  link("https://wa.me/5516991128533","83%","45%","10%","10%");
+}
+
+// PÁGINA 6
+if(i===6){
+  link("https://wa.me/5516991128533","85%","32%","36%","8%");
+}
+
+// PÁGINA 8
+if(i===8){
+  link("tel:+5516991128533","70%","32%","36%","6%");
+link("https://wa.me/5516991128533","82%","44%","12%","10%");
+}
+
+});
+
+}
+
+});
+</script>
+
 </body>
 </html>
