@@ -1,10 +1,4 @@
-Entendi. O problema persiste porque o drag & drop não está funcionando direito no seu caso (provavelmente por causa de como o wrapper e o canvas são renderizados no mobile/desktop, ou eventos de mouse não propagando bem).
-Vamos resolver de forma mais simples e confiável:
-Vou te dar um código muito mais leve para o modo edição.
-Os retângulos vermelhos vão aparecer em posições iniciais bem centralizadas (para você conseguir ver e arrastar facilmente).
-O arrasto agora usa um método mais simples e robusto.
-Substitua todo o index.html por este código:
-HTML<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
