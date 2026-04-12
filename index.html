@@ -3,13 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Z1N Arquiteturas</title>
-
-    <meta property="og:title" content="Z1N Arquiteturas">
-    <meta property="og:description" content="Projetos exclusivos">
-    <meta property="og:image" content="https://z1n-arquitetura.github.io/z1n-site/og-image.jpg">
-    <meta property="og:url" content="https://z1n-arquitetura.github.io/z1n-site/">
-    <meta property="og:type" content="website">
+    <title>Z1N Arquiteturas - Modo Edição</title>
 
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
@@ -17,7 +11,8 @@
             height: 100%;
             overflow: hidden;
             background: #000;
-            touch-action: manipulation;
+            font-family: Arial, sans-serif;
+            touch-action: none;
         }
         .slider {
             width: 100vw;
@@ -51,24 +46,34 @@
         .link {
             position: absolute;
             z-index: 9999;
-            border: 2px solid rgba(255, 0, 0, 0.6);
+            border: 3px solid #ff0000;
             background: rgba(255, 0, 0, 0.15);
-            pointer-events: all;
-            cursor: pointer;
-            transition: all 0.2s;
+            cursor: move;
+            user-select: none;
+            min-width: 20px;
+            min-height: 20px;
         }
-        .link:hover {
-            background: rgba(255, 0, 0, 0.3);
-            border-color: red;
+
+        .link-info {
+            position: absolute;
+            background: rgba(0,0,0,0.85);
+            color: #0f0;
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            pointer-events: none;
+            top: -22px;
+            left: 0;
+            white-space: nowrap;
         }
 
         .nav {
             position: absolute;
             bottom: 30px;
-            z-index: 100;
+            z-index: 1000;
             color: white;
             font-size: 42px;
-            background: rgba(0,0,0,0.75);
+            background: rgba(0,0,0,0.8);
             border: none;
             border-radius: 50%;
             width: 65px;
@@ -77,9 +82,39 @@
         }
         .prev { left: 20px; }
         .next { right: 20px; }
+
+        #debug {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.9);
+            color: #0f0;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 13px;
+            z-index: 10000;
+            max-width: 380px;
+        }
+        button#copyBtn {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: #0066ff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
+
+    <div id="debug">
+        <strong>Modo Edição Ativo</strong><br>
+        Arraste os retângulos vermelhos para ajustar.<br>
+        Página: <span id="pageNum">1</span> | Total: <span id="totalPages">?</span>
+        <div id="coords"></div>
+        <button id="copyBtn">Copiar código das posições</button>
+    </div>
 
     <div class="slider" id="slider"></div>
     <button class="nav prev" onclick="prev()">←</button>
@@ -98,20 +133,36 @@
         const slider = document.getElementById('slider');
         let current = 0;
         let slides = [];
-        let resizeObserver;
+        let currentLinks = [];
+
+        // Configuração inicial aproximada (você vai ajustar)
+        let linkConfigs = {
+            1: [
+                { id: "wa1", href: "https://wa.me/5516991128533", x: 1142, y: 735, w: 120, h: 120 },
+                { id: "tel1", href: "tel:+5516991128533", x: 1274, y: 757, w: 488, h: 81 }
+            ],
+            6: [
+                { id: "wa6", href: "https://wa.me/5516991128533", x: 1158, y: 918, w: 120, h: 120 },
+                { id: "tel6", href: "tel:+5516991128533", x: 1284, y: 929, w: 458, h: 94 }
+            ],
+            last: [
+                { id: "waLast", href: "https://wa.me/5516991128533", x: 1383, y: 825, w: 127, h: 97 },
+                { id: "telLast", href: "tel:+5516991128533", x: 1157, y: 666, w: 592, h: 151 }
+            ]
+        };
 
         pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
             console.log(`PDF carregado: ${pdf.numPages} páginas`);
+            document.getElementById('totalPages').textContent = pdf.numPages;
 
             for (let i = 1; i <= pdf.numPages; i++) {
                 pdf.getPage(i).then(page => {
                     const pageIndex = i;
-                    const viewportBase = page.getViewport({ scale: 1.0 });
+                    const viewportBase = page.getViewport({ scale: 1 });
 
-                    // Calcula scale ideal para caber na tela
-                    const scaleX = (window.innerWidth * 0.98) / viewportBase.width;
-                    const scaleY = (window.innerHeight * 0.95) / viewportBase.height;
-                    const scale = Math.min(scaleX, scaleY);
+                    const scaleX = window.innerWidth / viewportBase.width;
+                    const scaleY = window.innerHeight / viewportBase.height;
+                    const scale = Math.min(scaleX, scaleY) * 0.95;
 
                     const viewport = page.getViewport({ scale });
 
@@ -129,77 +180,160 @@
                     wrapper.appendChild(canvas);
                     slide.appendChild(wrapper);
                     slider.appendChild(slide);
+
                     slides.push({ slide, wrapper, viewportBase, pageIndex });
 
                     page.render({ canvasContext: ctx, viewport }).promise.then(() => {
-                        createLinksForPage(wrapper, pageIndex, viewportBase);
-
-                        if (slides.length === 1) {
-                            slide.classList.add("active");
-                        }
+                        loadLinksForPage(wrapper, pageIndex, viewportBase);
+                        if (slides.length === 1) slide.classList.add("active");
                     });
                 });
             }
-        }).catch(err => console.error("Erro PDF:", err));
+        }).catch(err => console.error(err));
 
-        function createLinksForPage(wrapper, pageIndex, viewportBase) {
-            const links = [];
+        function loadLinksForPage(wrapper, pageIndex, viewportBase) {
+            currentLinks = [];
+            let configs = [];
 
-            if (pageIndex === 1) {
-                links.push({ href: "https://wa.me/5516991128533", x: 1142, y: 735, w: 120, h: 120 });
-                links.push({ href: "tel:+5516991128533", x: 1274, y: 757, w: 488, h: 81 });
-            }
-            if (pageIndex === 6) {
-                links.push({ href: "https://wa.me/5516991128533", x: 1158, y: 918, w: 120, h: 120 });
-                links.push({ href: "tel:+5516991128533", x: 1284, y: 929, w: 458, h: 94 });
-            }
-            if (pageIndex === slides.length) {  // última página
-                links.push({ href: "https://wa.me/5516991128533", x: 1383, y: 825, w: 127, h: 97 });
-                links.push({ href: "tel:+5516991128533", x: 1157, y: 666, w: 592, h: 151 });
-            }
+            if (pageIndex === 1) configs = linkConfigs[1];
+            else if (pageIndex === 6) configs = linkConfigs[6];
+            else if (pageIndex === slides.length) configs = linkConfigs.last;
 
-            links.forEach(linkData => {
+            configs.forEach(cfg => {
                 const link = document.createElement('a');
-                link.href = linkData.href;
+                link.href = cfg.href;
                 link.className = 'link';
-                link.target = '_blank';
-                link.rel = 'noopener';
+                link.dataset.id = cfg.id;
 
-                const percentX = (linkData.x / viewportBase.width) * 100;
-                const percentY = (linkData.y / viewportBase.height) * 100;
-                const percentW = (linkData.w / viewportBase.width) * 100;
-                const percentH = (linkData.h / viewportBase.height) * 100;
+                updateLinkPosition(link, cfg, viewportBase);
 
-                link.style.left = `${percentX}%`;
-                link.style.top = `${percentY}%`;
-                link.style.width = `${percentW}%`;
-                link.style.height = `${percentH}%`;
+                // Torna arrastável
+                makeDraggable(link, viewportBase, pageIndex);
 
                 wrapper.appendChild(link);
-                console.log(`Link página ${pageIndex}: ${percentX.toFixed(1)}% ${percentY.toFixed(1)}%`);
+                currentLinks.push(link);
             });
         }
 
+        function updateLinkPosition(link, cfg, viewportBase) {
+            const left = (cfg.x / viewportBase.width) * 100;
+            const top = (cfg.y / viewportBase.height) * 100;
+            const width = (cfg.w / viewportBase.width) * 100;
+            const height = (cfg.h / viewportBase.height) * 100;
+
+            link.style.left = `${left}%`;
+            link.style.top = `${top}%`;
+            link.style.width = `${width}%`;
+            link.style.height = `${height}%`;
+        }
+
+        function makeDraggable(el, viewportBase, pageIndex) {
+            let isDragging = false;
+            let startX, startY, startLeft, startTop, startW, startH;
+
+            el.addEventListener('mousedown', e => {
+                if (e.button !== 0) return;
+                isDragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+
+                const rect = el.getBoundingClientRect();
+                const wrapperRect = el.parentElement.getBoundingClientRect();
+
+                startLeft = parseFloat(el.style.left) || 0;
+                startTop = parseFloat(el.style.top) || 0;
+                startW = parseFloat(el.style.width) || 10;
+                startH = parseFloat(el.style.height) || 10;
+
+                el.style.zIndex = 10000;
+                document.getElementById('coords').innerHTML = `Arrastando...`;
+            });
+
+            document.addEventListener('mousemove', e => {
+                if (!isDragging) return;
+
+                const dx = (e.clientX - startX) / window.innerWidth * 100;
+                const dy = (e.clientY - startY) / window.innerHeight * 100;
+
+                let newLeft = startLeft + dx;
+                let newTop = startTop + dy;
+
+                newLeft = Math.max(0, Math.min(95, newLeft));
+                newTop = Math.max(0, Math.min(95, newTop));
+
+                el.style.left = newLeft + '%';
+                el.style.top = newTop + '%';
+
+                updateDebugInfo(el, viewportBase);
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    saveCurrentPositions();
+                }
+            });
+        }
+
+        function updateDebugInfo(el, viewportBase) {
+            const left = parseFloat(el.style.left);
+            const top = parseFloat(el.style.top);
+            const w = parseFloat(el.style.width);
+            const h = parseFloat(el.style.height);
+
+            const x = Math.round((left / 100) * viewportBase.width);
+            const y = Math.round((top / 100) * viewportBase.height);
+            const ww = Math.round((w / 100) * viewportBase.width);
+            const hh = Math.round((h / 100) * viewportBase.height);
+
+            document.getElementById('coords').innerHTML = `
+                x: ${x} | y: ${y}<br>
+                w: ${ww} | h: ${hh}
+            `;
+        }
+
+        function saveCurrentPositions() {
+            // Aqui você pode expandir para salvar automaticamente se quiser
+            console.log("Posições atualizadas - use o botão Copiar");
+        }
+
+        document.getElementById('copyBtn').addEventListener('click', () => {
+            let code = '/* Posições ajustadas manualmente */\n';
+            Object.keys(linkConfigs).forEach(key => {
+                code += `// Página ${key}\n`;
+                linkConfigs[key].forEach(link => {
+                    const el = document.querySelector(`[data-id="${link.id}"]`);
+                    if (el) {
+                        const left = parseFloat(el.style.left);
+                        const top = parseFloat(el.style.top);
+                        const w = parseFloat(el.style.width);
+                        const h = parseFloat(el.style.height);
+                        const x = Math.round((left / 100) * 1700); // aproximado do PDF
+                        const y = Math.round((top / 100) * 2200);
+                        const ww = Math.round((w / 100) * 1700);
+                        const hh = Math.round((h / 100) * 2200);
+
+                        code += `{ href: "${link.href}", x: ${x}, y: ${y}, w: ${ww}, h: ${hh} },\n`;
+                    }
+                });
+            });
+            navigator.clipboard.writeText(code);
+            alert("Código copiado! Cole no console ou me envie.");
+        });
+
         function showPage(index) {
             slides.forEach(s => s.slide.classList.remove("active"));
-            if (slides[index]) slides[index].slide.classList.add("active");
+            if (slides[index]) {
+                slides[index].slide.classList.add("active");
+                document.getElementById('pageNum').textContent = slides[index].pageIndex;
+            }
             current = index;
         }
 
-        function next() {
-            current = (current + 1) % slides.length;
-            showPage(current);
-        }
+        function next() { current = (current + 1) % slides.length; showPage(current); }
+        function prev() { current = (current - 1 + slides.length) % slides.length; showPage(current); }
 
-        function prev() {
-            current = (current - 1 + slides.length) % slides.length;
-            showPage(current);
-        }
-
-        // Recalcula posições quando a tela muda de tamanho (ex: girar celular)
-        window.addEventListener('resize', () => {
-            location.reload(); // Mais simples e confiável por enquanto
-        });
+        window.addEventListener('resize', () => location.reload());
     </script>
 </body>
 </html>
