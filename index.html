@@ -2,220 +2,187 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Z1N Arquiteturas</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+<title>Z1N Arquiteturas | Portfólio</title>
+
+<meta name="description" content="Apresentação interativa | Arq. José Luís F. Navarro">
+
+<meta property="og:title" content="Z1N Arquiteturas">
+<meta property="og:description" content="Apresentação interativa | Arq. José Luís F. Navarro">
+<meta property="og:image" content="https://z1n-arq.com.br/og-image.jpg?v=12">
+<meta property="og:url" content="https://z1n-arq.com.br/">
+<meta property="og:type" content="website">
+
+<link rel="canonical" href="https://z1n-arq.com.br/">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Z1N Arquiteturas">
+<meta name="twitter:description" content="Apresentação interativa | Arq. José Luís F. Navarro">
+<meta name="twitter:image" content="https://z1n-arq.com.br/og-image.jpg?v=12">
+
+<link rel="icon" href="favicon.png">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body, html {
+    height: 100%;
+    background: #000;
+    overflow: hidden;
+    font-family: sans-serif;
 }
 
-html,body{
-  width:100%;
-  height:100%;
-  background:#000;
-  overflow:hidden;
+/* MOBILE = STORIES */
+.swiper {
+    width: 100%;
+    height: 100dvh;
 }
 
-/* altura real do celular */
-.swiper{
-  width:100%;
-  height:calc(var(--vh) * 100);
+.swiper-slide {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.swiper-slide{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  position:relative;
+.canvas {
+    position: relative;
+    width: 100vw;
+    height: 100dvh;
 }
 
-canvas{
-  display:block;
+.canvas img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-.overlay{
-  position:absolute;
+/* DESKTOP AJUSTADO */
+@media (min-width: 768px) {
+    .canvas {
+        width: auto;
+        height: 90vh;
+        aspect-ratio: 9 / 16;
+    }
 }
 
-.link{
-  position:absolute;
-  display:block;
+/* zoom */
+.swiper-zoom-container {
+    width: 100%;
+    height: 100%;
 }
+
+/* links */
+.link-final {
+    position: absolute;
+    z-index: 10;
+}
+
+/* setas */
+.seta {
+    position: fixed;
+    bottom: 15px;
+    z-index: 1000;
+    color: rgba(255,255,255,0.6);
+    font-size: 22px;
+    cursor: pointer;
+    padding: 15px;
+}
+
+#prev { left: 5px; }
+#next { right: 5px; }
 </style>
 </head>
 
 <body>
 
 <div class="swiper">
-  <div class="swiper-wrapper" id="wrapper"></div>
+<div class="swiper-wrapper">
+
+<div class="swiper-slide">
+<div class="canvas">
+<img src="p1.png">
+
+<a href="tel:+5516991128533" class="link-final"
+style="width:50%; height:6%; top:65%; left:30%;"></a>
+
+<a href="https://wa.me/5516991128533" target="_blank" class="link-final"
+style="width:18%; height:11%; top:64%; left:6%;"></a>
+</div>
 </div>
 
+<div class="swiper-slide"><div class="canvas"><img src="p2.png"></div></div>
+
+<div class="swiper-slide">
+<div class="canvas">
+<div class="swiper-zoom-container">
+<img src="p3.png">
+</div>
+</div>
+</div>
+
+<div class="swiper-slide">
+<div class="canvas">
+<div class="swiper-zoom-container">
+<img src="p4.png">
+</div>
+</div>
+</div>
+
+<div class="swiper-slide">
+<div class="canvas">
+<div class="swiper-zoom-container">
+<img src="p5.png">
+</div>
+</div>
+</div>
+
+<div class="swiper-slide">
+<div class="canvas">
+<img src="p6.png">
+
+<a href="tel:+5516991128533" class="link-final"
+style="width:52%; height:6%; top:80%; left:28%;"></a>
+
+<a href="https://wa.me/5516991128533" target="_blank" class="link-final"
+style="width:18%; height:11%; top:78%; left:6%;"></a>
+</div>
+</div>
+
+<div class="swiper-slide"><div class="canvas"><img src="p7.png"></div></div>
+
+<div class="swiper-slide">
+<div class="canvas">
+<img src="p8.png">
+
+<a href="tel:+5516991128533" class="link-final"
+style="width:55%; height:7%; top:56%; left:27%;"></a>
+
+<a href="https://wa.me/5516991128533" target="_blank" class="link-final"
+style="width:20%; height:12%; top:67%; left:40%;"></a>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="seta" id="prev">&#10094;</div>
+<div class="seta" id="next">&#10095;</div>
+
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
 <script>
-/* trava altura real do mobile */
-function setRealViewportHeight(){
-  const vh = window.innerHeight * 0.01;
-  document.documentElement.style.setProperty('--vh', `${vh}px`);
-}
-setRealViewportHeight();
-window.addEventListener('resize', setRealViewportHeight);
-window.addEventListener('orientationchange', setRealViewportHeight);
-
-const wrapper = document.getElementById('wrapper');
-
-const swiper = new Swiper('.swiper', {
-  direction: 'horizontal',
-  loop: false,
-  speed: 350
-});
-
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
-pdfjsLib.getDocument('portfolio.pdf').promise.then(pdf=>{
-
-const slides = [];
-
-for(let i=1;i<=pdf.numPages;i++){
-
-  const slide = document.createElement('div');
-  slide.className = "swiper-slide";
-
-  const canvas = document.createElement('canvas');
-  slide.appendChild(canvas);
-
-  const overlay = document.createElement('div');
-  overlay.className = "overlay";
-  slide.appendChild(overlay);
-
-  wrapper.appendChild(slide);
-
-  slides.push({
-    canvas,
-    overlay,
-    rendered:false
-  });
-}
-
-swiper.update();
-
-function alinharOverlay(slide){
-  const canvas = slide.canvas;
-  const overlay = slide.overlay;
-
-  const canvasRect = canvas.getBoundingClientRect();
-  const slideRect = canvas.parentElement.getBoundingClientRect();
-
-  const offsetX = canvasRect.left - slideRect.left;
-  const offsetY = canvasRect.top - slideRect.top;
-
-  overlay.style.left = offsetX + "px";
-  overlay.style.top = offsetY + "px";
-}
-
-function renderPage(i){
-
-  if(!slides[i]) return;
-  if(slides[i].rendered) return;
-
-  slides[i].rendered = true;
-
-  pdf.getPage(i+1).then(async page=>{
-
-    const viewport = page.getViewport({scale:1});
-
-    const scale = Math.min(
-      window.innerWidth / viewport.width,
-      window.innerHeight / viewport.height
-    );
-
-    const scaledViewport = page.getViewport({scale});
-
-    const canvas = slides[i].canvas;
-    const ctx = canvas.getContext('2d');
-
-    canvas.width = scaledViewport.width;
-    canvas.height = scaledViewport.height;
-
-    page.render({
-      canvasContext:ctx,
-      viewport:scaledViewport
-    });
-
-    slides[i].overlay.style.width = canvas.width + "px";
-    slides[i].overlay.style.height = canvas.height + "px";
-
-    requestAnimationFrame(()=>{
-      alinharOverlay(slides[i]);
-    });
-
-    const annotations = await page.getAnnotations();
-
-    annotations.forEach(annotation => {
-
-      if(annotation.subtype === "Link" && annotation.url){
-
-        const rect = pdfjsLib.Util.normalizeRect(annotation.rect);
-
-        const x = rect[0] * scale;
-        const y = (viewport.height - rect[3]) * scale;
-        const w = (rect[2] - rect[0]) * scale;
-        const h = (rect[3] - rect[1]) * scale;
-
-        const link = document.createElement("a");
-
-        link.href = annotation.url;
-        link.target = "_blank";
-        link.rel = "noopener noreferrer";
-
-        link.className = "link";
-
-        link.style.left = x + "px";
-        link.style.top = y + "px";
-        link.style.width = w + "px";
-        link.style.height = h + "px";
-
-        slides[i].overlay.appendChild(link);
-      }
-
-    });
-
-  });
-}
-
-/* render inicial */
-renderPage(0);
-renderPage(1);
-
-/* preload inteligente */
-swiper.on('slideChange', ()=>{
-  const i = swiper.activeIndex;
-
-  renderPage(i);
-  renderPage(i+1);
-  renderPage(i-1);
-
-  setTimeout(()=>{
-    alinharOverlay(slides[i]);
-  },100);
-});
-
-/* correção final para mobile */
-window.addEventListener("resize", ()=>{
-  slides.forEach(slide=>{
-    if(slide.rendered){
-      alinharOverlay(slide);
+new Swiper('.swiper', {
+    loop: true,
+    zoom: {
+        maxRatio: 3
+    },
+    navigation: {
+        nextEl: '#next',
+        prevEl: '#prev'
     }
-  });
-});
-
 });
 </script>
 
