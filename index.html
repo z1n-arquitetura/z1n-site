@@ -6,11 +6,11 @@
 
 <title>Z1N Arquiteturas | Portfólio</title>
 
-<meta name="description" content="Apresentação interativa">
+<meta name="description" content="Apresentação interativa | Arq. José Luís F. Navarro">
 
 <meta property="og:title" content="Z1N Arquiteturas">
-<meta property="og:description" content="Apresentação interativa">
-<meta property="og:image" content="https://z1n-arq.com.br/og-image.jpg?v=11">
+<meta property="og:description" content="Apresentação interativa | Arq. José Luís F. Navarro">
+<meta property="og:image" content="https://z1n-arq.com.br/og-image.jpg?v=12">
 <meta property="og:url" content="https://z1n-arq.com.br/">
 <meta property="og:type" content="website">
 
@@ -19,7 +19,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Z1N Arquiteturas">
 <meta name="twitter:description" content="Apresentação interativa | Arq. José Luís F. Navarro">
-<meta name="twitter:image" content="https://z1n-arq.com.br/og-image.jpg?v=11">
+<meta name="twitter:image" content="https://z1n-arq.com.br/og-image.jpg?v=12">
 
 <link rel="icon" href="favicon.png">
 
@@ -35,7 +35,7 @@ body, html {
     font-family: sans-serif;
 }
 
-/* STORIES FULL */
+/* MOBILE = STORIES */
 .swiper {
     width: 100%;
     height: 100dvh;
@@ -47,18 +47,25 @@ body, html {
     align-items: center;
 }
 
-/* CORE: ocupa tela inteira mantendo proporção */
 .canvas {
     position: relative;
     width: 100vw;
     height: 100dvh;
 }
 
-/* imagem estilo STORIES */
 .canvas img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+}
+
+/* DESKTOP AJUSTADO */
+@media (min-width: 768px) {
+    .canvas {
+        width: auto;
+        height: 90vh;
+        aspect-ratio: 9 / 16;
+    }
 }
 
 /* zoom */
@@ -67,13 +74,13 @@ body, html {
     height: 100%;
 }
 
-/* links intactos */
+/* links */
 .link-final {
     position: absolute;
     z-index: 10;
 }
 
-/* setas visíveis */
+/* setas */
 .seta {
     position: fixed;
     bottom: 15px;
