@@ -5,16 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Z1N Arquiteturas</title>
 
-<!-- Open Graph -->
-<meta property="og:title" content="Z1N Arquiteturas">
-<meta property="og:description" content="José Luís F. Navarro">
-<meta property="og:image" content="https://z1n-arq.com.br/og-image.jpg">
-<meta property="og:url" content="https://z1n-arq.com.br">
-<meta property="og:type" content="website">
-<meta name="twitter:card" content="summary_large_image">
-
-<meta name="description" content="Z1N Arquiteturas">
-
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
 
 <style>
@@ -24,18 +14,14 @@
   box-sizing:border-box;
 }
 
-body{
+html,body{
   width:100%;
   height:100%;
   background:#000;
   overflow:hidden;
 }
 
-html{
-  width:100%;
-  height:100%;
-}
-
+/* altura real do celular */
 .swiper{
   width:100%;
   height:calc(var(--vh) * 100);
@@ -65,13 +51,6 @@ canvas{
 
 <body>
 
-<!-- 🔥 BLOCO ESSENCIAL PARA WHATSAPP / FACEBOOK -->
-<div style="position:absolute; left:-9999px;">
-  <h1>Z1N Arquiteturas</h1>
-  <p>José Luís F. Navarro</p>
-  <img src="https://z1n-arq.com.br/og-image.jpg" alt="Z1N Arquiteturas">
-</div>
-
 <div class="swiper">
   <div class="swiper-wrapper" id="wrapper"></div>
 </div>
@@ -80,6 +59,7 @@ canvas{
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
 <script>
+/* trava altura real do mobile */
 function setRealViewportHeight(){
   const vh = window.innerHeight * 0.01;
   document.documentElement.style.setProperty('--vh', `${vh}px`);
@@ -99,10 +79,7 @@ const swiper = new Swiper('.swiper', {
 pdfjsLib.GlobalWorkerOptions.workerSrc =
 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-pdfjsLib.getDocument({
-  url: 'portfolio.pdf',
-  rangeChunkSize: 65536
-}).promise.then(pdf=>{
+pdfjsLib.getDocument('portfolio.pdf').promise.then(pdf=>{
 
 const slides = [];
 
@@ -130,92 +107,107 @@ for(let i=1;i<=pdf.numPages;i++){
 swiper.update();
 
 function alinharOverlay(slide){
-  const canvasRect = slide.canvas.getBoundingClientRect();
-  const slideRect = slide.canvas.parentElement.getBoundingClientRect();
+  const canvas = slide.canvas;
+  const overlay = slide.overlay;
 
-  slide.overlay.style.left = (canvasRect.left - slideRect.left) + "px";
-  slide.overlay.style.top = (canvasRect.top - slideRect.top) + "px";
+  const canvasRect = canvas.getBoundingClientRect();
+  const slideRect = canvas.parentElement.getBoundingClientRect();
+
+  const offsetX = canvasRect.left - slideRect.left;
+  const offsetY = canvasRect.top - slideRect.top;
+
+  overlay.style.left = offsetX + "px";
+  overlay.style.top = offsetY + "px";
 }
 
-async function renderPage(i){
+function renderPage(i){
 
   if(!slides[i]) return;
   if(slides[i].rendered) return;
 
   slides[i].rendered = true;
 
-  const page = await pdf.getPage(i+1);
+  pdf.getPage(i+1).then(async page=>{
 
-  const viewport = page.getViewport({scale:1});
+    const viewport = page.getViewport({scale:1});
 
-  const scale = Math.min(
-    window.innerWidth / viewport.width,
-    window.innerHeight / viewport.height
-  );
+    const scale = Math.min(
+      window.innerWidth / viewport.width,
+      window.innerHeight / viewport.height
+    );
 
-  const scaledViewport = page.getViewport({scale});
+    const scaledViewport = page.getViewport({scale});
 
-  const canvas = slides[i].canvas;
-  const ctx = canvas.getContext('2d');
+    const canvas = slides[i].canvas;
+    const ctx = canvas.getContext('2d');
 
-  canvas.width = scaledViewport.width;
-  canvas.height = scaledViewport.height;
+    canvas.width = scaledViewport.width;
+    canvas.height = scaledViewport.height;
 
-  await page.render({
-    canvasContext:ctx,
-    viewport:scaledViewport
-  }).promise;
+    page.render({
+      canvasContext:ctx,
+      viewport:scaledViewport
+    });
 
-  slides[i].overlay.style.width = canvas.width + "px";
-  slides[i].overlay.style.height = canvas.height + "px";
+    slides[i].overlay.style.width = canvas.width + "px";
+    slides[i].overlay.style.height = canvas.height + "px";
 
-  alinharOverlay(slides[i]);
+    requestAnimationFrame(()=>{
+      alinharOverlay(slides[i]);
+    });
 
-  const annotations = await page.getAnnotations();
+    const annotations = await page.getAnnotations();
 
-  annotations.forEach(annotation => {
+    annotations.forEach(annotation => {
 
-    if(annotation.subtype === "Link" && annotation.url){
+      if(annotation.subtype === "Link" && annotation.url){
 
-      const rect = pdfjsLib.Util.normalizeRect(annotation.rect);
+        const rect = pdfjsLib.Util.normalizeRect(annotation.rect);
 
-      const x = rect[0] * scale;
-      const y = (viewport.height - rect[3]) * scale;
-      const w = (rect[2] - rect[0]) * scale;
-      const h = (rect[3] - rect[1]) * scale;
+        const x = rect[0] * scale;
+        const y = (viewport.height - rect[3]) * scale;
+        const w = (rect[2] - rect[0]) * scale;
+        const h = (rect[3] - rect[1]) * scale;
 
-      const link = document.createElement("a");
+        const link = document.createElement("a");
 
-      link.href = annotation.url;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
+        link.href = annotation.url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
 
-      link.className = "link";
+        link.className = "link";
 
-      link.style.left = x + "px";
-      link.style.top = y + "px";
-      link.style.width = w + "px";
-      link.style.height = h + "px";
+        link.style.left = x + "px";
+        link.style.top = y + "px";
+        link.style.width = w + "px";
+        link.style.height = h + "px";
 
-      slides[i].overlay.appendChild(link);
-    }
+        slides[i].overlay.appendChild(link);
+      }
+
+    });
 
   });
 }
 
+/* render inicial */
 renderPage(0);
 renderPage(1);
 
+/* preload inteligente */
 swiper.on('slideChange', ()=>{
   const i = swiper.activeIndex;
 
-  if(i >= 0) renderPage(i);
-  if(i + 1 < slides.length) renderPage(i + 1);
-  if(i - 1 >= 0) renderPage(i - 1);
+  renderPage(i);
+  renderPage(i+1);
+  renderPage(i-1);
 
-  alinharOverlay(slides[i]);
+  setTimeout(()=>{
+    alinharOverlay(slides[i]);
+  },100);
 });
 
+/* correção final para mobile */
 window.addEventListener("resize", ()=>{
   slides.forEach(slide=>{
     if(slide.rendered){
@@ -224,14 +216,6 @@ window.addEventListener("resize", ()=>{
   });
 });
 
-}).catch(err => {
-  document.body.innerHTML = `
-    <div style="color:white;text-align:center;padding:40px">
-      Erro ao carregar portfólio.<br>
-      <a href="portfolio.pdf" style="color:white">Baixar PDF</a>
-    </div>
-  `;
-  console.error(err);
 });
 </script>
 
