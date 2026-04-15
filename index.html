@@ -1,257 +1,231 @@
-<html lang="pt-br"><head>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Z1N Arquiteturas</title>
+<title>Z1N Arquiteturas | Arq. José Luís Navarro</title>
+
+<meta name="description" content="assessoria Especializada em Arquitetura, Arquiteto em Ribeirão Preto. Projetos residenciais, comerciais e institucionais. Apresentação interativa e atendimento direto via WhatsApp ou telefone.">
+
+<meta name="keywords" content="assessoria em arquitetura e construção, arquitetura em Ribeirão Preto, arquiteto em Ribeirão Preto, arquitetura residencial, arquitetura comercial, arquitetura comercial, adequação de interiores, projetos arquitetônicos, Aprovações e Regiularizações PMRP, Z1N Arquiteturas">
+
+<meta name="robots" content="index, follow">
+
+<link rel="canonical" href="https://z1n-arq.com.br/">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Z1N Arquiteturas | Arq. José Luís Navarro">
+<meta property="og:description" content="Projetos eficientes e personalizados. Fale direto pelo WhatsApp.">
+<meta property="og:image" content="https://z1n-arq.com.br/og-image.jpg?v=12">
+<meta property="og:url" content="https://z1n-arq.com.br/">
+<meta property="og:type" content="website">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Z1N Arquiteturas | Arq. José Luís Navarro">
+<meta name="twitter:description" content="Projetos eficientes e personalizados.">
+<meta name="twitter:image" content="https://z1n-arq.com.br/og-image.jpg?v=12">
+
+<link rel="icon" href="favicon.png">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
 <style>
-* { margin:0; padding:0; box-sizing:border-box; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-html, body {
-  overflow: hidden;
-  background: #000;
+body, html {
+    height: 100%;
+    background: #000;
+    overflow: hidden;
+    font-family: sans-serif;
 }
 
-.slider {
-  width: 100vw;
-  height: 100vh;
-  position: relative;
+/* SEO invisível */
+h1 {
+    position: absolute;
+    left: -9999px;
 }
 
-.slide {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  display: none;
-  justify-content: center;
-  align-items: center;
+/* MOBILE */
+.swiper {
+    width: 100%;
+    height: 100dvh;
 }
 
-.slide.active {
-  display: flex;
+.swiper-slide {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-canvas {
-  max-width: 100%;
-  max-height: 100%;
+.canvas {
+    position: relative;
+    width: 100vw;
+    height: 100dvh;
 }
 
-/* CAIXAS */
-.link {
-  position: absolute;
-  z-index: 99999;
-
-  border: 4px solid yellow;
-  background: rgba(255,255,0,0.5);
-
-  width: 120px;
-  height: 120px;
-
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-
-  cursor: move;
+.canvas img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-.link.wpp {
-  border-color: red;
-  background: rgba(255,0,0,0.5);
+/* DESKTOP */
+@media (min-width: 768px) {
+    .canvas {
+        width: auto;
+        height: 90vh;
+        aspect-ratio: 9 / 16;
+    }
 }
 
-/* RESIZE */
-.handle {
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  background: white;
-  right: -10px;
-  bottom: -10px;
-  cursor: nwse-resize;
+/* zoom */
+.swiper-zoom-container {
+    width: 100%;
+    height: 100%;
 }
 
-/* SETAS */
-.nav {
-  position: absolute;
-  bottom: 20px;
-  z-index: 99999;
-  color: white;
-  font-size: 32px;
-  background: none;
-  border: none;
+/* links */
+.link-final {
+    position: absolute;
+    z-index: 10;
 }
 
-.prev { left: 20px; }
-.next { right: 20px; }
-
-/* BOTÃO SALVAR */
-.save-btn {
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  z-index: 999999;
-  padding: 10px;
-  background: black;
-  color: white;
-  border: 1px solid white;
-  cursor: pointer;
+/* setas */
+.seta {
+    position: fixed;
+    bottom: 15px;
+    z-index: 1000;
+    color: rgba(255,255,255,0.6);
+    font-size: 22px;
+    cursor: pointer;
+    padding: 15px;
 }
 
+#prev { left: 5px; }
+#next { right: 5px; }
 </style>
-<style type="text/css" id="operaUserStyle">
-  video {
-    filter: -opera-shader(url(data:text/plain;base64,Ly8gaHR0cHM6Ly9naXRodWIuY29tL0dQVU9wZW4tRWZmZWN0cy9GaWRlbGl0eUZYLUNBUwovLyB2MwoKdW5pZm9ybSBzaGFkZXIgaUNodW5rOwp1bmlmb3JtIGZsb2F0MiBpTW91c2U7CnVuaWZvcm0gZmxvYXQ0IGlWaXNpYmxlUmVjdDsKdW5pZm9ybSBmbG9hdCBpQXJnc1sxXTsKCmNvbnN0IGZsb2F0IEVQU0lPTiA9IDAuMTsKY29uc3QgZmxvYXQgVl9NSU4gPSAwOwpjb25zdCBmbG9hdCBWX0xPVyA9IDAuMjU7CmNvbnN0IGZsb2F0IFZfTUVEID0gMC41Owpjb25zdCBmbG9hdCBWX0hJR0ggPSAwLjc1Owpjb25zdCBmbG9hdCBWX01BWCA9IDE7Cgpjb25zdCBmbG9hdCBUSFJFU0hPTERfQVJFQSA9IDgwMCAqIDYwMDsKY29uc3QgZmxvYXQgTUlOX0FSRUEgPSA0MDAgKiAxMDA7CmNvbnN0IGZsb2F0IE1JTl9TVFJJUCA9IDIwOwpjb25zdCBmbG9hdCBNQVJHSU4gPSAxOwoKaW5saW5lIGZsb2F0MyBwaXhlbChmbG9hdDIgeHksIGZsb2F0MiBvZmZzZXQpIHsKICAgIHJldHVybiBpQ2h1bmsuZXZhbCh4eSArIG9mZnNldCkucmdiOwp9CgppbmxpbmUgZmxvYXQzIHNoYXJwZW4oZmxvYXQyIHh5KSB7CiAgICBmbG9hdDMgZiA9CiAgICAgICAgcGl4ZWwoeHksIGZsb2F0MigtMSwgLTEpKSAqICAxICsKICAgICAgICBwaXhlbCh4eSwgZmxvYXQyKCAwLCAtMSkpICogLTEgKwogICAgICAgIHBpeGVsKHh5LCBmbG9hdDIoIDEsIC0xKSkgKiAgMSArCgogICAgICAgIHBpeGVsKHh5LCBmbG9hdDIoLTEsIDApKSAqIC0xICArCiAgICAgICAgcGl4ZWwoeHksIGZsb2F0MiggMCwgMCkpICogLTEgICsKICAgICAgICBwaXhlbCh4eSwgZmxvYXQyKCAxLCAwKSkgKiAtMSAgKwoKICAgICAgICBwaXhlbCh4eSwgZmxvYXQyKC0xLCAxKSkgKiAxICAgKwogICAgICAgIHBpeGVsKHh5LCBmbG9hdDIoIDAsIDEpKSAqIC0xICArCiAgICAgICAgcGl4ZWwoeHksIGZsb2F0MiggMSwgMSkpICogMTsKICAgIHJldHVybiBmIC8gLTE7Cn0KCmZsb2F0NCBSR1gyKGZsb2F0MiB4eSkgewogICAgZmxvYXQyIGNodW5rX3NpemUgPSBpVmlzaWJsZVJlY3Quenc7CiAgICBmbG9hdDQgY29sb3IgPSBpQ2h1bmsuZXZhbCh4eSk7CgogICAgaWYgKGNodW5rX3NpemUueCAqIGNodW5rX3NpemUueSA8IE1JTl9BUkVBKSB7CiAgICAgICAgcmV0dXJuIGNvbG9yOwogICAgfQoKICAgIGlmIChjaHVua19zaXplLnkgPCBNSU5fU1RSSVAgfHwgY2h1bmtfc2l6ZS54IDwgTUlOX1NUUklQKSB7CiAgICAgICAgcmV0dXJuIGNvbG9yOwogICAgfQoKICAgIGlmICh4eS54IDwgTUFSR0lOIHx8IHh5LnggPiAoY2h1bmtfc2l6ZS54IC0gTUFSR0lOKSB8fAogICAgICAgIHh5LnkgPCBNQVJHSU4gfHwgeHkueSA+IChjaHVua19zaXplLnkgLSBNQVJHSU4pKSB7CiAgICAgICAgcmV0dXJuIGNvbG9yOwogICAgfQoKICAgIHJldHVybiBmbG9hdDQoc2hhcnBlbih4eSksIDEpOwp9CgppbmxpbmUgZmxvYXQzIG1pbjN2KGZsb2F0MyB4LCBmbG9hdDMgeSwgZmxvYXQzIHopIHsKCXJldHVybiBtaW4oeCwgbWluKHksIHopKTsKfQoKaW5saW5lIGZsb2F0MyBtYXgzdihmbG9hdDMgeCwgZmxvYXQzIHksIGZsb2F0MyB6KSB7CglyZXR1cm4gbWF4KHgsIG1heCh5LCB6KSk7Cn0KCmZsb2F0MyBSR1gzKGZsb2F0MiB4eSwgZmxvYXQgc3RyZW5ndGgpIHsKICAgIGZsb2F0MyBhID0gcGl4ZWwoeHksIGZsb2F0MigtMSwgLTEpKTsKICAgIGZsb2F0MyBiID0gcGl4ZWwoeHksIGZsb2F0MiggMCwgLTEpKTsKICAgIGZsb2F0MyBjID0gcGl4ZWwoeHksIGZsb2F0MiggMSwgLTEpKTsKCiAgICBmbG9hdDMgZCA9IHBpeGVsKHh5LCBmbG9hdDIoLTEsIDApKTsKICAgIGZsb2F0MyBlID0gcGl4ZWwoeHksIGZsb2F0MiggMCwgMCkpOwogICAgZmxvYXQzIGYgPSBwaXhlbCh4eSwgZmxvYXQyKCAxLCAwKSk7CgogICAgZmxvYXQzIGcgPSBwaXhlbCh4eSwgZmxvYXQyKC0xLCAxKSk7CiAgICBmbG9hdDMgaCA9IHBpeGVsKHh5LCBmbG9hdDIoIDAsIDEpKTsKICAgIGZsb2F0MyBpID0gcGl4ZWwoeHksIGZsb2F0MiggMSwgMSkpOwoKICAgIGZsb2F0MyBtaW5fZGVmID0gbWluM3YoZCwgZSwgZik7CiAgICBmbG9hdDMgbWluX2JkZWZoID0gbWluM3YoYiwgbWluX2RlZiwgaCk7CiAgICBmbG9hdDMgbWluX2FiY2RmZ2hpID0gbWluM3YobWluM3YoYSwgbWluX2JkZWZoLCBjKSwgZywgaSk7CiAgICBmbG9hdDMgbWluM19mYWN0b3IgPSBtaW5fYmRlZmggKyBtaW5fYWJjZGZnaGk7CgogICAgZmxvYXQzIG1heF9kZWYgPSBtYXgzdihkLCBlLCBmKTsKICAgIGZsb2F0MyBtYXhfYmRlZmggPSBtYXgzdihiLCBtYXhfZGVmLCBoKTsKICAgIGZsb2F0MyBtYXhfYWJjZGZnaGkgPSBtYXgzdihtYXgzdihhLCBtaW5fYmRlZmgsIGMpLCBnLCBpKTsKICAgIGZsb2F0MyBtYXgzX2ZhY3RvciA9IG1heF9iZGVmaCArIG1heF9hYmNkZmdoaTsKCiAgICBmbG9hdDMgZmFjdG9yID0gMS4wIC8gbWF4M19mYWN0b3I7CgogICAgZmxvYXQzIGFtcCA9IHNhdHVyYXRlKG1pbihtaW4zX2ZhY3RvciwgMiAtIG1heDNfZmFjdG9yKSAqIGZhY3Rvcik7CiAgICBmbG9hdDMgYW1wX3NxcnQgPSBzcXJ0KGFtcCk7CgogICAgZmxvYXQgcGVhayA9IC0xLjAgLyAobWl4KDgsIDUsIHN0cmVuZ3RoKSk7CgogICAgZmxvYXQzIGNyb3NzX3dlaWdodHMgPSBhbXBfc3FydCAqIHBlYWs7CiAgICBmbG9hdDMgd2VpZ2h0cyA9IDEgLyAoMSArIDQgKiBjcm9zc193ZWlnaHRzKTsKCiAgICBmbG9hdDMgcmVzdWx0ID0gKChiICsgZCArIGYgKyBoKSAqIGNyb3NzX3dlaWdodHMgKyBlKSAqIHdlaWdodHM7CgogICAgcmV0dXJuIHNhdHVyYXRlKHJlc3VsdCk7Cn0KCmZsb2F0NCBtYWluKGZsb2F0MiB4eSkgewoKICAgIGZsb2F0NCBvcmlnaW5hbENvbG9yID0gaUNodW5rLmV2YWwoeHkpOwogICAgaWYgKG9yaWdpbmFsQ29sb3IuYSA8IDEpIHsKICAgICAgICByZXR1cm4gaUNodW5rLmV2YWwoeHkpOwogICAgfQoKICAgIGZsb2F0IGludGVuc2l0eSA9IGlBcmdzWzBdOwogICAgZmxvYXQgc3RyZW5ndGggPSAwOwogICAgZmxvYXQzIGNvbG9yOwoKICAgIGlmIChpbnRlbnNpdHkgPCBWX01JTiArIEVQU0lPTikgewogICAgICAgIHN0cmVuZ3RoID0gMC4xMDsKICAgICAgICBjb2xvciA9IFJHWDMoeHksIHN0cmVuZ3RoKTsKCiAgICB9IGVsc2UgaWYgKGludGVuc2l0eSA+IFZfTE9XIC0gRVBTSU9OICYmIGludGVuc2l0eSA8IFZfTE9XICsgRVBTSU9OKSB7CiAgICAgICAgc3RyZW5ndGggPSAwLjMzOwogICAgICAgIGNvbG9yID0gUkdYMyh4eSwgc3RyZW5ndGgpOwoKICAgIH0gZWxzZSBpZiAoaW50ZW5zaXR5ID4gVl9NRUQgLSBFUFNJT04gJiYgaW50ZW5zaXR5IDwgVl9NRUQgKyBFUFNJT04pIHsKICAgICAgICBzdHJlbmd0aCA9IDAuNTsKICAgICAgICBjb2xvciA9IFJHWDMoeHksIHN0cmVuZ3RoKTsKCiAgICB9IGVsc2UgaWYgKGludGVuc2l0eSA+IFZfSElHSCAtIEVQU0lPTiAmJiBpbnRlbnNpdHkgPCBWX0hJR0ggKyBFUFNJT04pIHsKICAgICAgICBzdHJlbmd0aCA9IDAuOTk7CiAgICAgICAgY29sb3IgPSBSR1gzKHh5LCBzdHJlbmd0aCk7CgogICAgfSBlbHNlIGlmIChpbnRlbnNpdHkgPiBWX01BWCAtIEVQU0lPTikgewogICAgICAgIHN0cmVuZ3RoID0gMTsKICAgICAgICBjb2xvciA9IFJHWDIoeHkpLnJnYjsKICAgIH0KCiAgICByZXR1cm4gZmxvYXQ0KGNvbG9yLCBvcmlnaW5hbENvbG9yLmEpOwp9) -opera-args(0.75 calc(env(-opera-accent-color-r, 255)/255) calc(env(-opera-accent-color-g, 255)/255) calc(env(-opera-accent-color-b, 255)/255)));
-  }
-</style><style type="text/css">:root img[width="728"][height="90"], :root [href="https://adstub.net/cina777/"], :root [href="https://adstub.net/arab777/"], :root [href="https://adstub.net/ratu89/"], :root [href="https://adstub.net/judi89/"], :root [href^="//mage98rquewz.com/"], :root [href^="//x4pollyxxpush.com/"], :root span[id^="ezoic-pub-ad-placeholder-"], :root ins.adsbygoogle[data-ad-slot], :root ins.adsbygoogle[data-ad-client], :root img[src^="https://s-img.adskeeper.com/"], :root guj-ad, :root gpt-ad, :root div[ow-ad-unit-wrapper], :root div[id^="zergnet-widget"], :root div[id^="vuukle-ad-"], :root div[id^="taboola-stream-"], :root div[id^="sticky_ad_"], :root div[id^="st"][style^="z-index: 999999999;"], :root div[id^="rc-widget-"], :root div[id^="mrec-leaderboard-"], :root div[id^="gpt_ad_"], :root div[id^="ezoic-pub-ad-"], :root div[id^="dfp-ad-"], :root div[id^="crt-"][style], :root div[id^="apn_native_ad_slot_"], :root div[id^="adspot-"], :root div[id^="adrotate_widgets-"], :root ps-connatix-module, :root div[id^="ad_position_"], :root div[id^="ad-div-"], :root div[id*="ScriptRoot"], :root div[id*="MarketGid"], :root [href="https://adstub.net/rusia777/"], :root div[data-id-advertdfpconf], :root div[data-dfp-id], :root hl-adsense, :root div[data-contentexchange-widget], :root div[data-alias="300x250 Ad 2"], :root div[data-adunit-path], :root div[data-adname], :root div[data-ad-placeholder], :root a[href^="https://osfultrbriolenai.info/"], :root div[class^="Adstyled__AdWrapper-"], :root a[href^="https://go.xlviiirdr.com"], :root div[class$="-adlabel"], :root display-ads, :root a[href^="https://go.grinsbest.com/"], :root citrus-ad-wrapper, :root a[href^="https://s.zlinkd.com/"], :root bottomadblock, :root amp-fx-flying-carpet, :root amp-embed[type="taboola"], :root amp-connatix-player, :root div[id^="google_dfp_"], :root ad-slot, :root a[href^="https://www.purevpn.com/"][href*="&utm_source=aff-"], :root a[href^="https://www.privateinternetaccess.com/"] > img, :root a[href^="https://www.onlineusershielder.com/"], :root a[href^="https://financeads.net/tc.php?"], :root a[href^="https://www.mrskin.com/tour"], :root a[href^="https://www.infowarsstore.com/"] > img, :root a[href^="https://ak.psaltauw.net/"], :root broadstreet-zone-container, :root a[href^="https://www.highperformancecpmgate.com/"], :root amp-ad, :root a[href^="https://www.highcpmrevenuenetwork.com/"], :root a[href^="https://www.get-express-vpn.com/offer/"], :root a[href^="https://lnkxt.bannerator.com/"], :root a[href^="https://www.geekbuying.com/dynamic-ads/"], :root [href^="https://groorsoa.net/"], :root a[href^="https://www.financeads.net/tc.php?"], :root a[href^="https://www.effectiveratecpm.com/"], :root [href^="https://www.herbanomic.com/"] > img, :root a[href^="https://www.dql2clk.com/"], :root a[href^="https://www.nutaku.net/signup/landing/"], :root a[href^="https://www.dating-finder.com/signup/?ai_d="], :root a[href^="https://explore-site.com/"], :root a[href^="https://www.brazzersnetwork.com/landing/"], :root [data-template-type="nativead"], :root a[href^="https://www.adultempire.com/"][href*="?partner_id="], :root a[href^="https://voluum.prom-xcams.com/"], :root a[href^="https://twinrdsyte.com/"], :root a[href^="https://twinrdsrv.com/"], :root a[href^="https://syndicate.contentsserved.com/"], :root div[data-alias="300x250 Ad 1"], :root a[href^="https://trk.nfl-online-streams.club/"], :root a[href^="https://tracking.avapartner.com/"], :root a[href^="https://track.wg-aff.com"], :root a[href^="https://track.ultravpn.com/"], :root a[href^="https://track.afcpatrk.com/"], :root a[href^="https://track.adform.net/"], :root a[href^="https://torguard.net/aff.php"] > img, :root [data-identity="adhesive-ad"], :root a[href^="https://tc.tradetracker.net/"] > img, :root a[href^="https://tatrck.com/"], :root [href^="https://zstacklife.com/"] img, :root a[href^="https://click.candyoffers.com/"], :root a[href^="https://t.aslnk.link/"], :root a[onmousedown^="this.href='https://paid.outbrain.com/network/redir?"], :root a[href^="https://t.ajump1.com/"], :root a[href^="https://t.adating.link/"], :root a[href^="https://go.trackitalltheway.com/"], :root [href^="https://track.fiverr.com/visit/"] > img, :root a[href^="https://syndication.exoclick.com/"], :root a[href^="https://syndication.dynsrvtbg.com/"], :root .gnt_em_vp_c[data-g-s="vp_dk"], :root div[data-ad-wrapper], :root a[href^="https://svb-analytics.trackerrr.com/"], :root a[onmousedown^="this.href='https://paid.outbrain.com/network/redir?"] + .ob_source, :root a[href^="http://www.iyalc.com/"], :root a[href^="https://claring-loccelkin.com/"], :root a[href^="https://stardomcoit.com/"], :root a[href^="https://track.aftrk5.com/"], :root a[href^="https://slkmis.com/"], :root a[href^="https://myclick-2.com/"], :root a[href^="https://sexynearme.com/"], :root [data-ad-manager-id], :root a[href^="https://s.zlinkr.com/"], :root [href="https://adstub.net/gaza88/"], :root a[href^="https://ad.doubleclick.net/"], :root a[href^="https://static.fleshlight.com/images/banners/"], :root a[href^="https://s.zlink7.com/"], :root a[href^="https://s.ma3ion.com/"], :root a[href^="https://s.eunow4u.com/"], :root a[href^="https://random-affiliate.atimaze.com/"], :root #kt_player > div[style$="display: block;"][style*="inset: 0px;"], :root [href$="/sexdating.php"], :root a[href^="https://quotationfirearmrevision.com/"], :root a[href^="https://pubads.g.doubleclick.net/"], :root a[href^="https://prf.hn/click/"][href*="/camref:"] > img, :root a[href^="https://serve.awmdelivery.com/"], :root a[href^="https://www.dating-finder.com/?ai_d="], :root a[href^="https://prf.hn/click/"][href*="/adref:"] > img, :root [href^="https://ap.octopuspop.com/click/"] > img, :root app-ad, :root a[href^="https://postback1win.com/"], :root a[href^="https://a.adtng.com/"], :root a[href^="https://playnano.online/offerwalls/?ref="], :root a[href^="https://mmwebhandler.aff-online.com/"], :root a[href^="https://www.bet365.com/"][href*="affiliate="], :root a[href^="https://pb-track.com/"], :root a[href^="https://pb-front.com/"], :root a[href^="https://paid.outbrain.com/network/redir?"], :root a[href^="https://streamate.com/landing/click/"], :root a[href^="https://upsups.click/"], :root a[href^="https://ndt5.net/"], :root a[href^="https://natour.naughtyamerica.com/track/"], :root a[href^="https://mediaserver.entainpartners.com/renderBanner.do?"], :root [data-ad-name], :root a[href^="https://loboclick.com/"], :root a[href^="https://lead1.pl/"], :root a[href^="https://landing.brazzersnetwork.com/"], :root a[href^="https://juicyads.in/"], :root a[href^="https://snowdayonline.xyz/"], :root a[href^="https://join.dreamsexworld.com/"], :root a[href^="https://join.bannedsextapes.com/track/"], :root a[href^="https://jaxofuna.com/"], :root a[href^="https://italarizege.xyz/"], :root a[href^="https://identicaldrench.com/"], :root ad-shield-ads, :root a[href^="https://hot-growngames.life/"], :root a[href^="https://helmethomicidal.com/"], :root display-ad-component, :root a[href^="https://golinks.work/"], :root a[href^="https://s.zlinkn.com/"], :root a[href^="https://go.xxxvjmp.com/"], :root a[href^="https://go.xxxjmp.com"], :root a[href^="https://zirdough.net/"], :root [class^="tile-picker__CitrusBannerContainer-sc-"], :root a[href^="https://go.xxxiijmp.com"], :root a[href^="https://go.xtbaffiliates.com/"], :root [data-role="tile-ads-module"], :root a[href^="https://go.xlviirdr.com"], :root a[href^="https://go.xlivrdr.com"], :root a[href^="https://ismlks.com/"], :root [href^="https://www.mypillow.com/"] > img, :root a[href^="https://go.xlirdr.com"], :root [data-css-class="dfp-inarticle"], :root a[href^="https://go.tmrjmp.com"], :root a[href^="https://go.markets.com/visit/?bta="], :root a[href^="https://billing.purevpn.com/aff.php"] > img, :root a[href^="https://go.hpyrdr.com/"], :root a[href^="https://lijavaxa.com/"], :root a[href^="https://go.goaserv.com/"], :root app-large-ad, :root [href^="https://turtlebids.irauctions.com/"] img, :root div[data-adunit], :root a[href^="https://go.etoro.com/"] > img, :root a[href^="https://go.dmzjmp.com"], :root a[href^="https://www.bang.com/?aff="], :root #mgb-container > #mgb, :root a[href^="https://go.admjmp.com"], :root a[href^="https://get.surfshark.net/aff_c?"][href*="&aff_id="] > img, :root a[href^="https://datewhisper.life/"], :root a[href^="https://click.linksynergy.com/fs-bin/"] > img, :root a[href^="https://get-link.xyz/"], :root a[href^="https://www.mrskin.com/account/"], :root a[href^="https://www.adskeeper.com"], :root a[data-redirect^="https://paid.outbrain.com/network/redir?"], :root [href^="https://clicks.affstrack.com/"] > img, :root a[href^="https://engine.phn.doublepimp.com/"], :root a[href^="https://dl-protect.net/"], :root a[href*=".foxqck.com/"], :root a[href^="https://ctosrd.com/"], :root a[href^="https://go.bushheel.com/"], :root a[href^="https://ctjdwm.com/"], :root [href="//sexcams.plus/"], :root a[href^="https://camfapr.com/landing/click/"], :root a[href^="https://prf.hn/click/"][href*="/creativeref:"] > img, :root a[href*="&maxads="], :root a[href^="http://www.adultempire.com/unlimited/promo?"][href*="&partner_id="], :root a[href^="https://1betandgonow.com/"], :root a[href^="https://chaturbate.com/in/?"], :root a[href^="https://t.ajrkm1.com/"], :root a[href^="https://bongacams10.com/track?"], :root a[href*=".g2afse.com/"], :root a[href^="https://bodelen.com/"], :root a[href^="//hoodingluster.com/"], :root a[href^="https://black77854.com/"], :root a[href^="https://getmatchedlocally.com/"], :root app-advertisement, :root a[href^="https://rixofa.com/"], :root a[href^="https://best-experience-cool.com/"], :root [data-taboola-options], :root a[href^="https://believessway.com/"], :root a[href^="https://Click.ggpickaff.com/"], :root a[href^="https://banners.livepartners.com/"], :root a[href^="http://revolvemockerycopper.com/"], :root a[href^="https://awptjmp.com/"], :root a[href^="https://join.sexworld3d.com/track/"], :root a[href^="https://aweptjmp.com/"], :root a[href^="https://ausoafab.net/"], :root a[href^="https://clicks.pipaffiliates.com/"], :root a[href^="https://aj1070.online/"], :root a[href^="https://a.bestcontentoperation.top/"], :root a[href^="https://adultfriendfinder.com/go/"], :root a[href^="https://ads.planetwin365affiliate.com/"], :root a[href^="https://ads.leovegas.com/"], :root a[href^="https://go.xlvirdr.com"], :root img[src^="https://images.purevpnaffiliates.com"], :root a[href^="https://porntubemate.com/"], :root a[href^="https://click.dtiserv2.com/"], :root a[href^="https://clickadilla.com/"], :root a[href^="https://a.medfoodhome.com/"], :root a[href^="https://cam4com.go2cloud.org/"], :root .nya-slot[style], :root a[href^="https://a.bestcontentweb.top/"], :root atf-ad-slot, :root a[href^="https://a2.adform.net/"], :root a[href^="https://a.candyai.love/"], :root .banner-img > .pbl, :root [data-m-ad-id], :root a[href^="https://a-ads.com/"], :root a[href^="https://1winpb.com/"], :root div[id^="optidigital-adslot"], :root [href^="https://wsup.ai/"], :root a[href^="https://123-stream.org/"], :root a[href^="https://in.rabbtrk.com/"], :root a[href^="http://www.h4trck.com/"], :root [href^="https://a.acebet.com/api/click?"], :root a[href^="http://www.friendlyduck.com/AF_"], :root a[href^="http://partners.etoro.com/"], :root [href="https://chaturbate.jjgirls.com/"] > img, :root a[href^="http://cam4com.go2cloud.org/aff_c?"], :root a[href^="https://ads.betfair.com/redirect.aspx?"], :root amp-ad-custom, :root a[href^="http://trk.globwo.online/"], :root a[onclick^="window.location.replace('https://random-affiliate.atimaze.com/"], :root a[href^="https://bongacams2.com/track?"], :root a-ad, :root a[href^="https://offhandpump.com/"], :root a[href^="http://stickingrepute.com/"], :root #slashboxes > .deals-rail, :root div[aria-label="Ads"], :root [href^="http://mypillow.com/"] > img, :root a[href^="http://bongacams.com/track?"], :root a[href^="//startgaming.net/tienda/" i], :root a[href^="https://a.medfoodsafety.com/"], :root a[href^="//go.eabids.com/"], :root a[href^=" https://www.friendlyduck.com/AF_"], :root [data-cl-spot-id], :root a[href*="/jump/next.php?r="], :root a[href^="https://go.nordvpn.net/aff"] > img, :root .\[\&_\.gdprAdTransparencyCogWheelButton\]\:\!pjra-z-\[5\], :root [href^="http://clicks.totemcash.com/"], :root a[href^="https://ad.zanox.com/ppc/"] > img, :root [data-d-ad-id], :root a[href*=".engine.adglare.net/"], :root div[id^="lazyad-"], :root a[href^="http://com-1.pro/"], :root [href^="https://www.profitablegatecpm.com/"], :root a[href*=".cfm?domain="][href*="&fp="], :root a[href^="https://ab.advertiserurl.com/aff/"], :root a[data-oburl^="https://paid.outbrain.com/network/redir?"], :root [id^="section-ad-banner"], :root [id^="ad_slider"], :root a[href^="https://www.goldenfrog.com/vyprvpn?offer_id="][href*="&aff_id="], :root a[href^="https://wmctjd.com/"], :root a[href*="//jjgirls.com/sex/Chaturbate"], :root [id^="ad-wrap-"], :root [href^="https://zone.gotrackier.com/"], :root a[href^="http://sarcasmadvisor.com/"], :root [href^="https://www.restoro.com/"], :root a[href^="https://track.totalav.com/"], :root a[href^="https://ctrdwm.com/"], :root [href^="https://www.targetingpartner.com/"], :root a[href^="https://join.virtuallust3d.com/"], :root .section-subheader > .section-hotel-prices-header, :root [href^="https://www.hostg.xyz/"] > img, :root a[href^="https://bngpt.com/"], :root a[href^="https://www.sheetmusicplus.com/"][href*="?aff_id="], :root a[href^="http://adultfriendfinder.com/go/"], :root a[href^="https://fastestvpn.com/lifetime-special-deal?a_aid="], :root a[href^="https://tour.mrskin.com/"], :root div[id^="ad-position-"], :root a[href^="https://www.toprevenuegate.com/"], :root a[href^="https://bc.game/"], :root a[href^="http://join.brokestraightboys.com/track/"], :root div[id^="div-ads-"], :root [href^="https://rapidgator.net/article/premium/ref/"], :root [href^="https://join.girlsoutwest.com/"], :root a[href^="https://activate-game.com/"], :root .scroll-fixable.rail-right > .deals-rail, :root [data-wpas-zoneid], :root a[href^="https://track.aftrk3.com/"], :root [href^="https://join3.bannedsextapes.com"], :root div[data-adzone], :root div[id^="adngin-"], :root [data-rc-widget], :root span[data-ez-ph-id], :root [href^="https://track.aftrk1.com/"], :root [href^="https://join.playboyplus.com/track/"], :root a[href^="https://go.xxxijmp.com"], :root [href^="https://istlnkcl.com/"], :root a[href^="https://trk.softonixs.xyz/"], :root a[href^="https://iqbroker.com/"][href*="?aff="], :root [href^="https://rpwmct.com/"], :root [href^="https://wct.link/click?"], :root a[href^="https://t.acam.link/"], :root a[href^="https://go.strpjmp.com/"], :root [href^="https://url.totaladblock.com/"], :root a[href^="https://go.rmishe.com/"], :root [href^="https://ilovemyfreedoms.com/landing-"], :root [href="https://adstub.net/indo666/"], :root [href^="https://glersakr.com/"], :root a[href^="https://tm-offers.gamingadult.com/"], :root [href^="https://charmingdatings.life/"], :root [data-id^="div-gpt-ad"], :root a[href^="https://tracker.loropartners.com/"], :root [href^="https://awbbjmp.com/"], :root a[href^="https://www.friendlyduck.com/AF_"], :root [href^="https://ad1.adfarm1.adition.com/"], :root a[href^="https://t.ajrkm3.com/"], :root [href^="https://aads.com/campaigns/"], :root a[href^="https://fc.lc/ref/"], :root a[href^="https://go.bbrdbr.com"], :root a[href^="http://tc.tradetracker.net/"] > img, :root a[href^="https://s.zlink3.com/"], :root a[href^="http://sneakyadministration.com/"], :root [href^="https://www.brighteonstore.com/products/"] img, :root a[href^="https://bngprm.com/"], :root [href^="https://shiftnetwork.infusionsoft.com/go/"] > img, :root [href^="http://www.mypillow.com/"] > img, :root .ob_container .item-container-obpd, :root [id^="div-gpt-ad"], :root [href="https://jdrucker.com/gold"] > img, :root a[href^="https://join.virtualtaboo.com/track/"], :root [id^="ad_sky"], :root [name^="google_ads_iframe"], :root aside[id^="adrotate_widgets-"], :root a[href^="https://www.liquidfire.mobi/"], :root DFP-AD, :root .grid > .container > #aside-promotion, :root [data-type="ad-vertical"], :root [href^="https://go.xlrdr.com"], :root a[href^="https://s.cant3am.com/"], :root [data-testid^="taboola-"], :root [data-testid^="section-AdRowBillboard"], :root a[href^="https://track.1234sd123.com/"], :root zeus-ad, :root [data-testid="prism-ad-wrapper"], :root [href^="https://ad.admitad.com/"], :root [href^="https://mypillow.com/"] > img, :root [data-testid="ad_testID"], :root [data-mobile-ad-id], :root [data-dynamic-ads], :root a[href^="https://gamingadlt.com/?offer="], :root [data-desktop-ad-id], :root a[href^="https://go.rmhfrtnd.com"], :root a[href^="https://pb-imc.com/"], :root a[href^="https://www8.smartadserver.com/"], :root topadblock, :root a[href^="//s.zlinkd.com/"], :root [href^="https://mypatriotsupply.com/"] > img, :root [data-testid="adBanner-wrapper"], :root [href^="https://mylead.global/stl/"] > img, :root a[href*=".adsrv.eacdn.com/"], :root [href^="https://antiagingbed.com/discount/"] > img, :root #teaser1[style^="width:autopx;"], :root [href^="https://www.cloudways.com/en/?id"], :root [data-asg-ins], :root [data-block-type="ad"], :root [data-ad-width], :root a[href^="https://clickins.slixa.com/"], :root [onclick*="content.ad/"], :root a[href^="https://go.cmtaffiliates.com/"], :root [href^="https://optimizedelite.com/"] > img, :root div[data-ad-region], :root AMP-AD, :root [data-ad-cls], :root a[href^="https://www.adxsrve.com/"], :root a[href^="https://click.Ggpickaff.com/"], :root [data-ez-name], :root a[href^="https://go.mnaspm.com/"], :root a[href^="https://service.bv-aff-trx.com/"], :root a[href^="https://6-partner.com/"], :root [class^="s2nPlayer"], :root [href^="https://affiliate.fastcomet.com/"] > img, :root [class^="adDisplay-module"], :root a[href^="https://adclick.g.doubleclick.net/"], :root [data-freestar-ad][id], :root AD-SLOT, :root a[href^="https://combodef.com/"], :root a[href^="https://click.hoolig.app/"], :root a[href^="https://www.googleadservices.com/pagead/aclk?"] > img, :root [data-ad-module], :root a[href^="https://a.bestcontentfood.top/"], :root #kt_player > a[target="_blank"], :root a[href^="https://go.skinstrip.net"][href*="?campaignId="], :root #teaser2[style^="width:autopx;"], :root [data-revive-zoneid], :root a[href^="https://losingoldfry.com/"], :root div[id^="div-gpt-"], :root a[href^="https://gml-grp.com/"], :root .ob_dual_right > .ob_ads_header ~ .odb_div, :root div[data-ad-targeting], :root a[style="width:100%;height:100%;z-index:10000000000000000;position:absolute;top:0;left:0;"], :root [href^="https://www.avantlink.com/click.php"] img, :root [data-testid="commercial-label-taboola"], :root [class^="div-gpt-ad"], :root a[href^="https://traffdaq.com/"], :root #teaser3[style^="width:autopx;"], :root a[href^="https://go.hpyjmp.com"], :root iframe[scrolling="no"][sandbox*="allow-popups allow-modals"][style^="width: 100%; height: 100%; border: none;"], :root [href^="https://mystore.com/"] > img, :root [class^="amp-ad-"], :root a[href^="https://clixtrac.com/"], :root a[href^="https://wittered-mainging.com/"], :root #teaser3[style="width: 100%;text-align: center;display: scroll;position:fixed;bottom: 0;margin: 0 auto;z-index: 103;"] { display: none !important; }</style></head>
 
-<body>
-
-<div class="slider" id="slider"><div class="slide"><canvas width="1620" height="2880"></canvas><a href="https://wa.me/5516991128533" class="link wpp" style="left: 1142px; top: 735px; transform: none;"><div class="handle"></div></a><a href="tel:+5516991128533" class="link tel" style="left: 1274px; top: 757px; transform: none; width: 488px; height: 81px;"><div class="handle"></div></a></div><div class="slide"><canvas width="1620" height="2880"></canvas></div><div class="slide"><canvas width="1626" height="2883"></canvas></div><div class="slide"><canvas width="1620" height="2880"></canvas></div><div class="slide"><canvas width="1620" height="2880"></canvas></div><div class="slide"><canvas width="1620" height="2880"></canvas><a href="https://wa.me/5516991128533" class="link wpp" style="left: 1158px; top: 918px; transform: none;"><div class="handle"></div></a><a href="tel:+5516991128533" class="link tel" style="left: 1284px; top: 929px; transform: none; width: 458px; height: 94px;"><div class="handle"></div></a></div><div class="slide"><canvas width="1620" height="2880"></canvas></div><div class="slide active"><canvas width="1620" height="2880"></canvas><a href="https://wa.me/5516991128533" class="link wpp" style="left: 1383px; top: 825px; transform: none; width: 127px; height: 97px;"><div class="handle"></div></a><a href="tel:+5516991128533" class="link tel" style="left: 1157px; top: 666px; transform: none; width: 592px; height: 151px;"><div class="handle"></div></a></div></div>
-
-<button class="nav prev" onclick="prev()">←</button>
-<button class="nav next" onclick="next()">→</button>
-
-<!-- 🔥 BOTÃO SALVAR -->
-<button class="save-btn" onclick="exportHTML()">SALVAR</button>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-
-<script>
-const url = 'portfolio.pdf';
-const slider = document.getElementById('slider');
-
-let current = 0;
-let slides = [];
-
-pdfjsLib.getDocument(url).promise.then(pdf => {
-
-  for (let i = 1; i <= pdf.numPages; i++) {
-
-    pdf.getPage(i).then(page => {
-
-      const viewport = page.getViewport({ scale: 2 });
-
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
-
-      const slide = document.createElement('div');
-      slide.className = 'slide';
-
-      slide.appendChild(canvas);
-      slider.appendChild(slide);
-
-      slides.push(slide);
-      if (slides.length === 1) slide.classList.add("active");
-
-      page.render({ canvasContext: ctx, viewport });
-
-      const pageIndex = i;
-
-      if (pageIndex === 1 || pageIndex === 6 || pageIndex === pdf.numPages) {
-        createLink(slide, "wpp", "https://wa.me/5516991128533");
-        createLink(slide, "tel", "tel:+5516991128533");
-      }
-
-    });
-
-  }
-
-});
-
-/* CRIAR LINK */
-function createLink(slide, type, href) {
-
-  const link = document.createElement('a');
-  link.href = href;
-  link.className = 'link ' + type;
-
-  const handle = document.createElement('div');
-  handle.className = 'handle';
-  link.appendChild(handle);
-
-  slide.appendChild(link);
-
-  makeDraggable(link);
-  makeResizable(link, handle);
-}
-
-/* DRAG */
-function makeDraggable(el) {
-  let isDown = false, offsetX, offsetY;
-
-  el.addEventListener('mousedown', e => {
-    if (e.target.classList.contains("handle")) return;
-
-    isDown = true;
-    offsetX = e.clientX - el.offsetLeft;
-    offsetY = e.clientY - el.offsetTop;
-  });
-
-  document.addEventListener('mousemove', e => {
-    if (!isDown) return;
-
-    el.style.left = (e.clientX - offsetX) + 'px';
-    el.style.top = (e.clientY - offsetY) + 'px';
-    el.style.transform = "none";
-  });
-
-  document.addEventListener('mouseup', () => {
-    isDown = false;
-  });
-}
-
-/* RESIZE */
-function makeResizable(el, handle) {
-  let isResizing = false;
-
-  handle.addEventListener('mousedown', e => {
-    e.stopPropagation();
-    isResizing = true;
-  });
-
-  document.addEventListener('mousemove', e => {
-    if (!isResizing) return;
-
-    el.style.width = (e.clientX - el.offsetLeft) + 'px';
-    el.style.height = (e.clientY - el.offsetTop) + 'px';
-  });
-
-  document.addEventListener('mouseup', () => {
-    isResizing = false;
-  });
-}
-
-/* SALVAR */
-function exportHTML() {
-  const html = document.documentElement.outerHTML;
-
-  const blob = new Blob([html], { type: "text/html" });
-  const a = document.createElement("a");
-
-  a.href = URL.createObjectURL(blob);
-  a.download = "index.html";
-  a.click();
-}
-
-/* NAV */
-function showPage(index) {
-  slides[current].classList.remove("active");
-  current = index;
-  slides[current].classList.add("active");
-}
-
-function next() {
-  current >= slides.length - 1 ? showPage(0) : showPage(current + 1);
-}
-
-function prev() {
-  current <= 0 ? showPage(slides.length - 1) : showPage(current - 1);
+<!-- DADOS ESTRUTURADOS (SEO FORTE) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Architect",
+  "name": "Z1N Arquitetura",
+  "image": "https://z1n-arq.com.br/og-image.jpg",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Ribeirão Preto",
+    "addressRegion": "SP",
+    "addressCountry": "BR"
+  },
+  "telephone": "+55 16 99112-8533",
+  "url": "https://z1n-arq.com.br/"
 }
 </script>
 
+</head>
 
+<body>
 
-</body></html>
+<h1>Arquiteto em Ribeirão Preto | Projetos Arquitetônicos Modernos</h1>
+
+<div class="swiper">
+<div class="swiper-wrapper">
+
+<div class="swiper-slide">
+<div class="canvas">
+<img src="p1.png" alt="Arquiteto em Ribeirão Preto - contato e apresentação">
+
+<a href="tel:+5516991128533" class="link-final"
+style="width:50%; height:6%; top:65%; left:30%;"></a>
+
+<a href="https://wa.me/5516991128533" target="_blank" class="link-final"
+style="width:18%; height:11%; top:64%; left:6%;"></a>
+</div>
+</div>
+
+<div class="swiper-slide">
+<div class="canvas">
+<img src="p2.png" alt="Projetos arquitetônicos modernos">
+</div>
+</div>
+
+<div class="swiper-slide">
+<div class="canvas">
+<div class="swiper-zoom-container">
+<img src="p3.png" alt="Projeto residencial contemporâneo">
+</div>
+</div>
+</div>
+
+<div class="swiper-slide">
+<div class="canvas">
+<div class="swiper-zoom-container">
+<img src="p4.png" alt="Design de interiores personalizado">
+</div>
+</div>
+</div>
+
+<div class="swiper-slide">
+<div class="canvas">
+<div class="swiper-zoom-container">
+<img src="p5.png" alt="Arquitetura moderna residencial">
+</div>
+</div>
+</div>
+
+<div class="swiper-slide">
+<div class="canvas">
+<img src="p6.png" alt="Contato arquiteto Ribeirão Preto">
+
+<a href="tel:+5516991128533" class="link-final"
+style="width:52%; height:6%; top:80%; left:28%;"></a>
+
+<a href="https://wa.me/5516991128533" target="_blank" class="link-final"
+style="width:18%; height:11%; top:78%; left:6%;"></a>
+</div>
+</div>
+
+<div class="swiper-slide">
+<div class="canvas">
+<img src="p7.png" alt="Portfólio arquitetura Z1N">
+</div>
+</div>
+
+<div class="swiper-slide">
+<div class="canvas">
+<img src="p8.png" alt="Solicite seu projeto arquitetônico">
+
+<a href="tel:+5516991128533" class="link-final"
+style="width:55%; height:7%; top:56%; left:27%;"></a>
+
+<a href="https://wa.me/5516991128533" target="_blank" class="link-final"
+style="width:20%; height:12%; top:67%; left:40%;"></a>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="seta" id="prev">&#10094;</div>
+<div class="seta" id="next">&#10095;</div>
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+<script>
+new Swiper('.swiper', {
+    loop: false,
+    zoom: {
+        maxRatio: 3
+    },
+    navigation: {
+        nextEl: '#next',
+        prevEl: '#prev'
+    }
+});
+</script>
+
+</body>
+</html>
