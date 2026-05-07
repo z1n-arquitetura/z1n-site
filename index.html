@@ -32,12 +32,20 @@
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-body, html {
+html {
+    width: 100%;
+    height: 100%;
+}
+
+body {
     width: 100%;
     height: 100%;
     background: #000;
     overflow: hidden;
     font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 /* SEO invisível */
@@ -70,20 +78,29 @@ h1 {
     object-fit: cover;
 }
 
-/* DESKTOP */
+/* DESKTOP - TELA INTEIRA */
 @media (min-width: 768px) {
-    body, html {
+    html {
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+        padding: 0;
+    }
+    
+    body {
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .swiper {
         width: 100vw;
         height: 100vh;
     }
     
     .canvas {
-        width: auto;
-        height: 100vh;
-        aspect-ratio: 9 / 16;
-    }
-    
-    .swiper {
+        width: 100vw;
         height: 100vh;
     }
 }
@@ -113,16 +130,6 @@ h1 {
 
 #prev { left: 5px; }
 #next { right: 5px; }
-
-/* Esconder scrollbar */
-::-webkit-scrollbar {
-    display: none;
-}
-
-html {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-}
 </style>
 
 <!-- DADOS ESTRUTURADOS (SEO FORTE) -->
@@ -233,39 +240,6 @@ style="width:20%; height:12%; top:67%; left:40%;"></a>
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
 <script>
-// Ativar tela inteira automaticamente em desktop
-document.addEventListener('DOMContentLoaded', function() {
-    // Detectar se é desktop (largura > 768px)
-    if (window.innerWidth > 768) {
-        const elem = document.documentElement;
-        
-        // Tentar ativar fullscreen
-        if (elem.requestFullscreen) {
-            elem.requestFullscreen().catch(err => {
-                console.log('Fullscreen não disponível:', err);
-            });
-        } else if (elem.webkitRequestFullscreen) {
-            elem.webkitRequestFullscreen();
-        } else if (elem.mozRequestFullScreen) {
-            elem.mozRequestFullScreen();
-        } else if (elem.msRequestFullscreen) {
-            elem.msRequestFullscreen();
-        }
-    }
-});
-
-// Reintentar fullscreen ao mudança de orientação
-window.addEventListener('orientationchange', function() {
-    if (window.innerWidth > 768) {
-        const elem = document.documentElement;
-        if (elem.requestFullscreen) {
-            elem.requestFullscreen().catch(err => {
-                console.log('Fullscreen não disponível:', err);
-            });
-        }
-    }
-});
-
 new Swiper('.swiper', {
     loop: false,
     zoom: {
